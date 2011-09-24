@@ -18,7 +18,7 @@
 
 name: DynamicMarket
 main: me.smickles.DynamicMarket.DynamicMarket
-version: 0.0.1.0
+version: 0.0.1.1
 author: smickles
 
 commands:
@@ -28,3 +28,6 @@ commands:
   sell:
     description: sells some X in the amount of Y to the DynamicMarket
     usage: /sell stone 64
+  price:
+    description: returns the price of a given item
+    usage: /price stone
