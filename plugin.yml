@@ -31,3 +31,6 @@ commands:
   price:
     description: returns the price of a given item
     usage: /price stone
+  market:
+    description: used to view market conditions
+    usage: /market [top or bottom]
