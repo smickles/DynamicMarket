@@ -1,32 +1,32 @@
-#  * DynamicMarket a plugin for Bukkit
+#  * DynaMark a plugin for Bukkit
 #  * 
 #  * Copyright 2011 Michael Carver (a.k.a. smickles)
 #  * 
-#  * This file is part of DynamicMarket.
+#  * This file is part of DynaMark.
 #  *
-#  *  DynamicMarket is free software: you can redistribute it and/or modify
+#  *  DynaMark is free software: you can redistribute it and/or modify
 #  *  it under the terms of the GNU General Public License as published by
 #  *  the Free Software Foundation, version 3 of the License.
 #  *
-#  *  DynamicMarket is distributed in the hope that it will be useful,
+#  *  DynaMark is distributed in the hope that it will be useful,
 #  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  *  GNU General Public License for more details.
 #  *
 #  *  You should have received a copy of the GNU General Public License
-#  *  along with DynamicMarket.  If not, see <http://www.gnu.org/licenses/>.
+#  *  along with DynaMark.  If not, see <http://www.gnu.org/licenses/>.
 
-name: DynamicMarket
+name: DynaMark
 main: me.smickles.DynamicMarket.DynamicMarket
 version: 0.0.2.0
 author: smickles
 
 commands:
   buy:
-    description: buys some X in the amount of Y from the DynamicMarket
+    description: buys some X in the amount of Y from the market
     usage: /buy stone 64
   sell:
-    description: sells some X in the amount of Y to the DynamicMarket
+    description: sells some X in the amount of Y to the market
     usage: /sell stone 64
   price:
     description: returns the price of a given item
