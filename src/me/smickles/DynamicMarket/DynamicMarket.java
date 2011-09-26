@@ -63,15 +63,11 @@ public class DynamicMarket extends JavaPlugin {
 		if(command.equalsIgnoreCase("buy")) {
 			if(args.length == 2 && Integer.parseInt(args[1]) > 0) {
 				//player.sendMessage(ChatColor.RED + "[Server]" + ChatColor.WHITE + "Tell smickles to write the buy code already.");
-				logger.info("args0 " + args[0]);
 				items.load();
 				int id = items.getInt(args[0] + ".number", 0);
-				logger.info("id " + id);
 				if(id != 0) {
 					int amt = Integer.parseInt(args[1]);
-					logger.info("amt " + amt);
 					double value = items.getDouble(args[0] + ".value", 0);
-					logger.info("value before " + value);
 					double invoice = 0;
 					for(int x = 1; x <= amt; x++) {
 						if(value >= .01) {
@@ -84,13 +80,9 @@ public class DynamicMarket extends JavaPlugin {
 						value = value + .01;
 						value = round2(value);
 					}
-					logger.info("value after " + value);					
-					logger.info("invoice " + invoice);
 					Holdings holdings = iConomy.getAccount(player.getName()).getHoldings();
 					double cash = holdings.balance();
-					logger.info("cash " + cash);
 					double newBal = cash - invoice;
-					logger.info("newBal " + newBal);
 					if(cash >= invoice) {
 						ItemStack its = new ItemStack(id,amt);
 						holdings.subtract(invoice);
@@ -119,15 +111,11 @@ public class DynamicMarket extends JavaPlugin {
 		}else if(command.equalsIgnoreCase("sell")) {
 			if(args.length == 2 && Integer.parseInt(args[1]) > 0) {
 				//player.sendMessage(ChatColor.RED + "[Server]" + ChatColor.WHITE + "Tell smickles to write the buy code already.");
-				logger.info("args0 " + args[0]);
 				items.load();
 				int id = items.getInt(args[0] + ".number", 0);
-				logger.info("id " + id);
 				if(id != 0) {
 					int amt = Integer.parseInt(args[1]);
-					logger.info("amt " + amt);
 					double value = items.getDouble(args[0] + ".value", 0);
-					logger.info("value before " + value);
 					double invoice = 0;
 					for(int x = 1; x <= amt; x++) {
 						if(value >= .01) {
@@ -140,14 +128,9 @@ public class DynamicMarket extends JavaPlugin {
 						value = value - .01;
 						value = round2(value);
 					}
-					logger.info("value after " + value);					
-					logger.info("invoice " + invoice);
 					Holdings holdings = iConomy.getAccount(player.getName()).getHoldings();
 					double cash = holdings.balance();
-					logger.info("cash " + cash);
 					double newBal = cash + invoice;
-					logger.info("newBal " + newBal);
-					// TODO remove logger spam
 					int inInventory = 0;
 					for(ItemStack is : player.getInventory().getContents()) {
 						if(is == null) {
