@@ -244,11 +244,40 @@ public class DynamicMarket extends JavaPlugin {
 						
 					});
 					// Send them to the player
-					for(int x = 0; x < 5; x++) {
+					for(int x = 0; x < 10; x++) {
 						player.sendMessage(board[x][0] + " " + board[x][1]);
 					}
 					return true;
-				}//TODO start elseif bottom here
+				}else if(args[0].equalsIgnoreCase("bottom")) {
+					// load the item list
+					items.load();
+					// make  'arrays', a name, a price 
+					List<String> names = items.getKeys();
+					String board[][] = new String[names.size()][2];
+					for(int x = 0; x < names.size(); x++) {
+						// names
+						board[x][1] = names.get(x);
+						// prices
+						board[x][0] = String.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+					}
+					//sort 'em
+					Arrays.sort(board, new Comparator<String[]>() {
+
+						@Override
+						public int compare(String[] entry1, String[] entry2) {
+							final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0]));
+							final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0]));
+							return value1.compareTo(value2);
+						}
+
+						
+					});
+					// Send them to the player
+					for(int x = 0; x < 10; x++) {
+						player.sendMessage(board[x][0] + " " + board[x][1]);
+					}
+					return true;					
+				}
 			}
 			player.sendMessage("Invalid number of arguments");
 		}
