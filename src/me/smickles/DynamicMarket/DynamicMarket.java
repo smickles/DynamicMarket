@@ -15,8 +15,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-import com.iConomy.iConomy;
-import com.iConomy.system.Holdings;
+import com.nijikokun.register.payment.Methods;
+import com.nijikokun.register.payment.Method.MethodAccount;
 
 public class DynamicMarket extends JavaPlugin {
 
@@ -80,7 +80,7 @@ public class DynamicMarket extends JavaPlugin {
 						value = value + .01;
 						value = round2(value);
 					}
-					Holdings holdings = iConomy.getAccount(player.getName()).getHoldings();
+					MethodAccount holdings = Methods.getMethod().getAccount(player.getName());
 					double cash = holdings.balance();
 					double newBal = cash - invoice;
 					if(cash >= invoice) {
@@ -128,7 +128,7 @@ public class DynamicMarket extends JavaPlugin {
 						value = value - .01;
 						value = round2(value);
 					}
-					Holdings holdings = iConomy.getAccount(player.getName()).getHoldings();
+					MethodAccount holdings = Methods.getMethod().getAccount(player.getName());
 					double cash = holdings.balance();
 					double newBal = cash + invoice;
 					int inInventory = 0;
