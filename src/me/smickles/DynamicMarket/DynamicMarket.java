@@ -1,6 +1,7 @@
 package me.smickles.DynamicMarket;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -17,6 +18,8 @@ import org.bukkit.util.config.Configuration;
 
 import com.nijikokun.register.payment.Methods;
 import com.nijikokun.register.payment.Method.MethodAccount;
+
+import me.smickles.DynamicMarket.Invoice;
 
 public class DynamicMarket extends JavaPlugin {
 
@@ -55,6 +58,42 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		items.save();
 	}
+	
+
+	
+	/**
+	 * Determine the cost of a given number of an item and calculate a new value for the item accordingly.
+	 * @param oper 1 for buying, 0 for selling.
+	 * @param item the item in question
+	 * @param amount the desired amount of the item in question
+	 * @return the total cost and the calculated new value as an Invoice
+	 */
+	public Invoice generateInvoice(int oper, String item, int amount) {
+		items.load();
+		// get the initial value of the item, 0 for not found
+		
+		Invoice inv = new Invoice(BigDecimal.valueOf(0),BigDecimal.valueOf(0));
+		inv.value = BigDecimal.valueOf(items.getDouble(item + ".value", 0));
+		// determine the total cost
+		inv.total = BigDecimal.valueOf(0);
+		for(int x = 1; x <= amount; x++) {
+			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
+				inv.total = inv.getTotal().add(inv.getValue());
+			} else {
+				inv.total = inv.getTotal().add(minValue);
+			}
+			if (oper == 1) {
+				inv.value = inv.getValue().add(minValue);
+			} else if (oper == 0) {
+				inv.value = inv.getValue().subtract(minValue);
+			} else {
+				return null;
+			}
+		}
+		return inv;
+	}
+	
+
 	/**
 	 * Buy a specified amount of an item for the player.
 	 * 
@@ -69,37 +108,29 @@ public class DynamicMarket extends JavaPlugin {
 		// a value of 0 would indicate that we did not find an item with that name
 		if(id != 0) {
 			// determine what it will cost 
-			BigDecimal value = BigDecimal.valueOf(items.getDouble(item + ".value", 0));
-			BigDecimal invoice = BigDecimal.valueOf(0);
-			for(int x = 1; x <= amount; x++) {
-				if(value.compareTo(minValue) == 1 | value.compareTo(minValue) == 0) {
-					invoice = invoice.add(value);
-				} else {
-					invoice = invoice.add(minValue);
-				}
-				value = value.add(minValue);
-			}
+			// TODO call generateInvoice
+			Invoice invoice = generateInvoice(1, item, amount);
 			// If the player has enough money, perform the transaction.
 			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-			if(cash.hasEnough(invoice.doubleValue())) {
+			if(cash.hasEnough(invoice.getTotal().doubleValue())) {
 				ItemStack its = new ItemStack(id,amount);
 				player.getInventory().addItem(its);
-				items.setProperty(item + ".value", value);
+				items.setProperty(item + ".value", invoice.getValue());
 				items.save();
 				// Give some nice output.
-				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + cash.balance());
+				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				// Subtract the invoice (this is an efficient place to do this)
-				cash.subtract(invoice.doubleValue());
-				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice);
-				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + cash.balance());
+				cash.subtract(invoice.getTotal().doubleValue());
+				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				return true;
 			}else{
 				// Otherwise, give nice output anyway ;)
 				// The idea here is to show how much more money is needed.
-				BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.doubleValue());
+				BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
 				player.sendMessage(ChatColor.RED + "You don't have enough money");
-				player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + cash.balance());
-				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice);
+				player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
 				player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
 				return false;
 			}
