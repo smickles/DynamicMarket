@@ -23,6 +23,7 @@ public class DynamicMarket extends JavaPlugin {
 	public static DynamicMarket plugin;
 	public final Logger logger = Logger.getLogger("Minecraft");
 	public Configuration items;
+	public static BigDecimal minValue = BigDecimal.valueOf(.01);
 	
 	
 	@Override
@@ -54,6 +55,60 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		items.save();
 	}
+	/**
+	 * Buy a specified amount of an item for the player.
+	 * 
+	 * @param player The player on behalf of which these actions will be carried out. 
+	 * @param item The desired item in the form of the item name. 
+	 * @param amount The desired amount of the item to purchase.
+	 * @return true on success, false on failure. 
+	 */
+	public boolean buy (Player player, String item, int amount) {
+		items.load();
+		int id = items.getInt(item + ".number", 0);
+		// a value of 0 would indicate that we did not find an item with that name
+		if(id != 0) {
+			// determine what it will cost 
+			BigDecimal value = BigDecimal.valueOf(items.getDouble(item + ".value", 0));
+			BigDecimal invoice = BigDecimal.valueOf(0);
+			for(int x = 1; x <= amount; x++) {
+				if(value.compareTo(minValue) == 1 | value.compareTo(minValue) == 0) {
+					invoice = invoice.add(value);
+				} else {
+					invoice = invoice.add(minValue);
+				}
+				value = value.add(minValue);
+			}
+			// If the player has enough money, perform the transaction.
+			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+			if(cash.hasEnough(invoice.doubleValue())) {
+				ItemStack its = new ItemStack(id,amount);
+				player.getInventory().addItem(its);
+				items.setProperty(item + ".value", value);
+				items.save();
+				// Give some nice output.
+				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + cash.balance());
+				// Subtract the invoice (this is an efficient place to do this)
+				cash.subtract(invoice.doubleValue());
+				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice);
+				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + cash.balance());
+				return true;
+			}else{
+				// Otherwise, give nice output anyway ;)
+				// The idea here is to show how much more money is needed.
+				BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.doubleValue());
+				player.sendMessage(ChatColor.RED + "You don't have enough money");
+				player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + cash.balance());
+				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice);
+				player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
+				return false;
+			}
+		}else{
+			player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
+			player.sendMessage("Be sure you typed the correct name");
+			return false;
+		}
+	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		return readCommand((Player) sender, commandLabel, args);
@@ -62,50 +117,16 @@ public class DynamicMarket extends JavaPlugin {
 	public boolean readCommand(Player player, String command, String[] args) {
 		if(command.equalsIgnoreCase("buy")) {
 			if(args.length == 2 && Integer.parseInt(args[1]) > 0) {
-				//player.sendMessage(ChatColor.RED + "[Server]" + ChatColor.WHITE + "Tell smickles to write the buy code already.");
-				items.load();
-				int id = items.getInt(args[0] + ".number", 0);
-				if(id != 0) {
-					int amt = Integer.parseInt(args[1]);
-					double value = items.getDouble(args[0] + ".value", 0);
-					double invoice = 0;
-					for(int x = 1; x <= amt; x++) {
-						if(value >= .01) {
-							invoice = invoice + value;
-							invoice = round2(invoice);
-						}else{
-							invoice = invoice + .01;
-							invoice = round2(invoice);
-						}
-						value = value + .01;
-						value = round2(value);
-					}
-					MethodAccount holdings = Methods.getMethod().getAccount(player.getName());
-					double cash = holdings.balance();
-					double newBal = cash - invoice;
-					if(cash >= invoice) {
-						ItemStack its = new ItemStack(id,amt);
-						holdings.subtract(invoice);
-						player.getInventory().addItem(its);
-						items.setProperty(args[0] + ".value", value);
-						items.save();
-						player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + cash);
-						player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice);
-						player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + newBal);
-					}else{
-						player.sendMessage(ChatColor.RED + "You don't have enough money");
-						player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + cash);
-						player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice);
-						player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + newBal);
-					}
-				}else{
-					player.sendMessage("Be sure you typed the correct name");
+				String item = args[0];
+				int amount = 0;
+				try {
+					amount = Integer.parseInt(args[1]);
+				} catch(NumberFormatException e) {
+					player.sendMessage(ChatColor.RED + "Invalid amount.");
+					player.sendMessage("Be sure you typed a number.");
 					return false;
 				}
-				return true;
-			}else{
-				player.sendMessage("Invalid arguments");
-				return false;
+				return buy(player, item, amount);
 			}
 
 		}else if(command.equalsIgnoreCase("sell")) {
@@ -163,6 +184,8 @@ public class DynamicMarket extends JavaPlugin {
 					return false;
 				}
 				return true;
+			}else if(args.length == 2 && args[1].equalsIgnoreCase("all")) {
+				
 			}else{
 				player.sendMessage("Invalid number of arguments");
 				return false;
