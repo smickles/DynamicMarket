@@ -241,7 +241,11 @@ public class DynamicMarket extends JavaPlugin {
 			}
 
 		} else if (command.equalsIgnoreCase("sell")) {
-			if(args.length == 2) {
+			if (args.length == 1) {
+				if (args[0].equalsIgnoreCase("all")) {
+					return sellAll(player);
+				}
+			} else if (args.length == 2) {
 				String item = args[0];
 				int amount = 0;
 				try {
@@ -356,6 +360,55 @@ public class DynamicMarket extends JavaPlugin {
 		return false;
 	}
 	
+	private boolean sellAll(Player player) {
+		// TODO Auto-generated method stub
+		items.load();
+		List<String> names = items.getKeys();
+		int[] id = new int[names.size()];
+		BigDecimal[] value = new BigDecimal[names.size()];
+		BigDecimal sale = BigDecimal.ZERO.setScale(2);
+		
+		// make a 'list' of all sellable items with their id's and values
+		for (int x = 0; x < names.size(); x++) {
+			id[x] = items.getInt(names.get(x) + ".number", 0);
+			value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);	
+		}
+		
+		// run thru each slot and sell any sellable items
+		for (int index = 0; index < 35; index++) {
+			ItemStack slot = player.getInventory().getItem(index);
+			int slotId = slot.getTypeId();
+			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
+			
+			for (int x = 0; x < names.size(); x++) {
+				if (id[x] == slotId) {
+					// perform sale of this slot
+					Invoice thisSale = generateInvoice(0, names.get(x), slotAmount.intValue());
+					// rack up our total
+					sale = sale.add(thisSale.getTotal());
+					// save the new value
+					items.setProperty(names.get(x) + ".value", thisSale.getValue());
+					items.save();
+					// remove the item(s)
+					player.getInventory().removeItem(slot);
+					// "pay the man"
+					MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+					cash.add(thisSale.getTotal().doubleValue());
+					// give nice output
+					player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
+				}
+			}
+			
+		}
+		
+		// give a nice total collumn
+		if (sale == BigDecimal.ZERO.setScale(2))
+			player.sendMessage("Nothing to Sell");
+		player.sendMessage(ChatColor.GREEN + "--------------------------------");
+		player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale);
+		return true;
+	}
+
 	public static double round2(double num) {
 		double result = num * 100;
 		result = Math.round(result);
