@@ -103,12 +103,18 @@ public class DynamicMarket extends JavaPlugin {
 	 * @return true on success, false on failure. 
 	 */
 	public boolean buy (Player player, String item, int amount) {
+		
+		// Be sure we have a positive amount
+		if (amount < 0) {
+			player.sendMessage(ChatColor.RED + "Invalid amount.");
+			player.sendMessage("No negative numbers, please.");
+			return false;
+		}
 		items.load();
 		int id = items.getInt(item + ".number", 0);
 		// a value of 0 would indicate that we did not find an item with that name
 		if(id != 0) {
 			// determine what it will cost 
-			// TODO call generateInvoice
 			Invoice invoice = generateInvoice(1, item, amount);
 			// If the player has enough money, perform the transaction.
 			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
@@ -147,20 +153,20 @@ public class DynamicMarket extends JavaPlugin {
 	
 	public boolean readCommand(Player player, String command, String[] args) {
 		if(command.equalsIgnoreCase("buy")) {
-			if(args.length == 2 && Integer.parseInt(args[1]) > 0) {
+			if(args.length == 2) {
 				String item = args[0];
 				int amount = 0;
 				try {
 					amount = Integer.parseInt(args[1]);
 				} catch(NumberFormatException e) {
 					player.sendMessage(ChatColor.RED + "Invalid amount.");
-					player.sendMessage("Be sure you typed a number.");
+					player.sendMessage("Be sure you typed a whole number.");
 					return false;
 				}
 				return buy(player, item, amount);
 			}
 
-		}else if(command.equalsIgnoreCase("sell")) {
+		} else if (command.equalsIgnoreCase("sell")) {
 			if(args.length == 2 && Integer.parseInt(args[1]) > 0) {
 				//player.sendMessage(ChatColor.RED + "[Server]" + ChatColor.WHITE + "Tell smickles to write the buy code already.");
 				items.load();
