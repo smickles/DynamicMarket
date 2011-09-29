@@ -147,6 +147,77 @@ public class DynamicMarket extends JavaPlugin {
 		}
 	}
 	
+	/**
+	 * Figure out how much of a given item is in the player's inventory
+	 * @param player The player entity in question.
+	 * @param id The Data Value of the item in question.
+	 * @return The amount of the item in the player's inventory as an integer.
+	 */
+	public int getAmountInInventory(Player player, int id) {
+		int inInventory = 0;
+		for (ItemStack slot : player.getInventory().all(id).values()) {
+			inInventory += slot.getAmount();
+		}
+		return inInventory;
+	}
+	
+	/**
+	 * Sell a specified amount of an item for the player.
+	 * 
+	 * @param player The player on behalf of which these actions will be carried out. 
+	 * @param item The desired item in the form of the item name. 
+	 * @param amount The desired amount of the item to sell.
+	 * @return true on success, false on failure. 
+	 */
+	public boolean sell (Player player, String item, int amount) {
+		
+		// Be sure we have a positive amount
+		if (amount < 0) {
+			player.sendMessage(ChatColor.RED + "Invalid amount.");
+			player.sendMessage("No negative numbers, please.");
+			return false;
+		}
+		items.load();
+		int id = items.getInt(item + ".number", 0);
+		// a value of 0 would indicate that we did not find an item with that name
+		if(id != 0) {
+			// determine what it will pay 
+			Invoice invoice = generateInvoice(0, item, amount);
+			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+			// If the player has enough of the item, perform the transaction.	
+			if (player.getInventory().contains(id, amount)) {
+				// Figure out how much is left over.
+				int left = getAmountInInventory(player,id) - amount;
+				// Take out all of the item
+				player.getInventory().remove(id);
+				// put back what was left over
+				if(left > 0) {
+					ItemStack its = new ItemStack(id,left);
+					player.getInventory().addItem(its);
+				}
+				items.setProperty(item + ".value", invoice.getValue());
+				// record the change in value
+				items.save();
+				// give some nice output
+				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				cash.add(invoice.getTotal().doubleValue());
+				player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
+				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				return true;
+			}else{
+				// give nice output even if they gave a bad number.
+				player.sendMessage(ChatColor.RED + "You don't have enough " + item);
+				player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, id));
+				player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
+				return false;
+			}
+		}else{
+			player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
+			player.sendMessage("Be sure you typed the correct name");
+			return false;
+		}
+	}
+	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		return readCommand((Player) sender, commandLabel, args);
 	}
@@ -158,72 +229,30 @@ public class DynamicMarket extends JavaPlugin {
 				int amount = 0;
 				try {
 					amount = Integer.parseInt(args[1]);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					player.sendMessage(ChatColor.RED + "Invalid amount.");
 					player.sendMessage("Be sure you typed a whole number.");
 					return false;
 				}
 				return buy(player, item, amount);
+			} else {
+				player.sendMessage("Invalid number of arguments");
+				return false;
 			}
 
 		} else if (command.equalsIgnoreCase("sell")) {
-			if(args.length == 2 && Integer.parseInt(args[1]) > 0) {
-				//player.sendMessage(ChatColor.RED + "[Server]" + ChatColor.WHITE + "Tell smickles to write the buy code already.");
-				items.load();
-				int id = items.getInt(args[0] + ".number", 0);
-				if(id != 0) {
-					int amt = Integer.parseInt(args[1]);
-					double value = items.getDouble(args[0] + ".value", 0);
-					double invoice = 0;
-					for(int x = 1; x <= amt; x++) {
-						if(value >= .01) {
-							invoice = invoice + value;
-							invoice = round2(invoice);
-						}else{
-							invoice = invoice + .01;
-							invoice = round2(invoice);
-						}
-						value = value - .01;
-						value = round2(value);
-					}
-					MethodAccount holdings = Methods.getMethod().getAccount(player.getName());
-					double cash = holdings.balance();
-					double newBal = cash + invoice;
-					int inInventory = 0;
-					for(ItemStack is : player.getInventory().getContents()) {
-						if(is == null) {
-							continue;
-						}
-						if(is.getTypeId() == id) {
-							inInventory += is.getAmount();
-						}
-					}
-					if(inInventory >= amt) {						
-						holdings.add(invoice);
-						int left = inInventory - amt;						
-						player.getInventory().remove(id);
-						if(left > 0) {
-							ItemStack its = new ItemStack(id,left);
-							player.getInventory().addItem(its);
-						}
-						items.setProperty(args[0] + ".value", value);
-						items.save();
-						player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + cash);
-						player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice);
-						player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + newBal);
-					}else{
-						player.sendMessage(ChatColor.RED + "You don't have enough " + args[0]);
-						player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + inInventory);
-						player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amt);
-					}
-				}else{
-					player.sendMessage("Be sure you typed the correct name");
+			if(args.length == 2) {
+				String item = args[0];
+				int amount = 0;
+				try {
+					amount = Integer.parseInt(args[1]);
+				} catch (NumberFormatException e) {
+					player.sendMessage(ChatColor.RED + "Invalid amount.");
+					player.sendMessage("Be sure you typed a whole number.");
 					return false;
 				}
-				return true;
-			}else if(args.length == 2 && args[1].equalsIgnoreCase("all")) {
-				
-			}else{
+				return sell(player, item, amount);
+			} else {
 				player.sendMessage("Invalid number of arguments");
 				return false;
 			}
