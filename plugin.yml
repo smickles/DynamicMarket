@@ -24,13 +24,13 @@ author: smickles
 commands:
   buy:
     description: buys some X in the amount of Y from the market
-    usage: Example /buy cobblestone 64
+    usage: Example - /buy cobblestone 64
   sell:
     description: sells some X in the amount of Y to the market
-    usage: Example: /sell cobblestone 64
+    usage: Example - /sell cobblestone 64
   price:
     description: returns the price of a given item
-    usage: Example: /price stone
+    usage: Example - /price stone
   market:
     description: used to view market conditions
-    usage: Example: /market <top | bottom>
+    usage: Example - /market <top | bottom>
