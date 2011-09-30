@@ -116,7 +116,6 @@ public class DynamicMarket extends JavaPlugin {
 		if(id != 0) {
 			// determine what it will cost 
 			Invoice invoice = generateInvoice(1, item, amount);
-			// If the player has enough money, perform the transaction.
 			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
 			if(cash.hasEnough(invoice.getTotal().doubleValue())) {
 				ItemStack its = new ItemStack(id,amount);

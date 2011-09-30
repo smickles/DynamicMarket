@@ -8,6 +8,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/michael/minecraft/bukkit/craftbukkit-0.0.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="/home/michael/minecraft/bukkit/plugins/Register.jar"/>
+	<classpathentry kind="lib" path="/home/michael/minecraft/bukkit/plugins/Register.jar" sourcepath="/home/michael/minecraft/bukkit/plugins/Register.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
