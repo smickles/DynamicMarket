@@ -370,7 +370,6 @@ public class DynamicMarket extends JavaPlugin {
 	}
 	
 	private boolean sellAll(Player player) {
-		// TODO Auto-generated method stub
 		items.load();
 		List<String> names = items.getKeys();
 		int[] id = new int[names.size()];
