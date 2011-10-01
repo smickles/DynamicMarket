@@ -332,18 +332,31 @@ public class DynamicMarket extends JavaPlugin {
 					List<String> names = items.getKeys();
 					String board[][] = new String[names.size()][2];
 					for(int x = 0; x < names.size(); x++) {
+						BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".maxValue", MAXVALUE.doubleValue()));
+						BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+						
 						// names
 						board[x][1] = names.get(x);
-						// prices
-						board[x][0] = String.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+						// prices, but we want max prices if the value is above maxValue
+						if (value.compareTo(maxValue) == 1) {
+							BigDecimal elasticity;
+							BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
+							
+							// determine how many changeRate above the max it is
+							elasticity = value.subtract(maxValue).divide(changeRate).setScale(0, RoundingMode.UP);
+							
+							board[x][0] = maxValue.toString() + " [" + elasticity + "]";
+						} else {
+							board[x][0] = value.toString() + " [0]";							
+						}
 					}
 					//sort 'em
 					Arrays.sort(board, new Comparator<String[]>() {
 
 						@Override
 						public int compare(String[] entry1, String[] entry2) {
-							final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0]));
-							final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0]));
+							final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
+							final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
 							return value2.compareTo(value1);
 						}
 
@@ -351,7 +364,11 @@ public class DynamicMarket extends JavaPlugin {
 					});
 					// Send them to the player
 					for(int x = 0; x < 10; x++) {
-						player.sendMessage(board[x][0] + " " + board[x][1]);
+						int rank = x + 1;
+						BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
+						String elasticity = board[x][0].split(" ")[1];
+						
+						player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
 					}
 					return true;
 				}else if(args[0].equalsIgnoreCase("bottom")) {
@@ -361,18 +378,31 @@ public class DynamicMarket extends JavaPlugin {
 					List<String> names = items.getKeys();
 					String board[][] = new String[names.size()][2];
 					for(int x = 0; x < names.size(); x++) {
+						BigDecimal minValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".minValue", MINVALUE.doubleValue()));
+						BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+						
 						// names
 						board[x][1] = names.get(x);
-						// prices
-						board[x][0] = String.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+						// prices, but we want min prices if the value is above maxValue
+						if (value.compareTo(minValue) == -1) {
+							BigDecimal elasticity;
+							BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
+							
+							// determine how many changeRate below the min it is
+							elasticity = value.subtract(minValue).abs().divide(changeRate).setScale(0, RoundingMode.DOWN);
+							
+							board[x][0] = minValue.toString() + " [" + elasticity + "]";
+						} else {
+							board[x][0] = value.toString() + " [0]";							
+						}
 					}
 					//sort 'em
 					Arrays.sort(board, new Comparator<String[]>() {
 
 						@Override
 						public int compare(String[] entry1, String[] entry2) {
-							final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0]));
-							final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0]));
+							final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
+							final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
 							return value1.compareTo(value2);
 						}
 
@@ -380,7 +410,11 @@ public class DynamicMarket extends JavaPlugin {
 					});
 					// Send them to the player
 					for(int x = 0; x < 10; x++) {
-						player.sendMessage(board[x][0] + " " + board[x][1]);
+						int rank = x + 1;
+						BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
+						String elasticity = board[x][0].split(" ")[1];
+																		
+						player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
 					}
 					return true;					
 				}
