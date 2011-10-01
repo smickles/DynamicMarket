@@ -277,13 +277,14 @@ public class DynamicMarket extends JavaPlugin {
 				// Load the item list
 				items.load();
 				// get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
-				double price = items.getDouble(args[0] + ".value", -2000000000);
-				if(price != -2000000000) {
+				BigDecimal price = BigDecimal.valueOf(items.getDouble(args[0] + ".value", -2000000000));
+				BigDecimal minValue = BigDecimal.valueOf(items.getDouble(args[0] + ".minValue", MINVALUE.doubleValue()));
+				if(price.intValue() != -2000000000) {
 					// We received an argument which resolved to an item on our list.
 					// The price could register as a negative or below .01
 					// in this case we should return .01 as the price.
-					if(price < .01) {
-						price = .01;
+					if(price.compareTo(minValue) == -1) {
+						price = minValue;
 					}
 					player.sendMessage(ChatColor.GREEN + args[0] + ": " + ChatColor.WHITE + price);
 					return true;
