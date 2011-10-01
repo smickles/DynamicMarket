@@ -2,12 +2,16 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="/home/michael/minecraft/bukkit/bukkit-0.0.1-SNAPSHOT.jar" sourcepath="/home/michael/minecraft/bukkit/bukkit-0.0.1-SNAPSHOT.jar">
+	<classpathentry kind="lib" path="C:/Users/norm.smickles-PC/minecraft/bukkit-0.0.1-SNAPSHOT.jar" sourcepath="/home/michael/minecraft/bukkit/bukkit-0.0.1-SNAPSHOT.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="http://jd.bukkit.org/apidocs/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/michael/minecraft/bukkit/craftbukkit-0.0.1-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="/home/michael/minecraft/bukkit/plugins/Register.jar" sourcepath="/home/michael/minecraft/bukkit/plugins/Register.jar"/>
+	<classpathentry kind="lib" path="C:/Users/norm.smickles-PC/minecraft/craftbukkit-0.0.1-SNAPSHOT.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="http://jd.bukkit.org/apidocs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/norm.smickles-PC/minecraft/Register.jar" sourcepath="/home/michael/minecraft/bukkit/plugins/Register.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

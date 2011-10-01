@@ -87,14 +87,31 @@ public class DynamicMarket extends JavaPlugin {
 		// determine the total cost
 		inv.total = BigDecimal.valueOf(0);
 		for(int x = 1; x <= amount; x++) {
-			BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", .01));
-			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", .01));
-			
+			BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
+			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", CHANGERATE.doubleValue()));
+			BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
+
+			// check the current value
 			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
-				inv.total = inv.getTotal().add(inv.getValue());
+				// current value is @ or above minValue
+				// be sure value is not above maxValue
+				if (inv.getValue().compareTo(maxValue) == -1) {
+					// current value is "just right"
+					// add current value to total
+					inv.total = inv.getTotal().add(inv.getValue());
+				} else {
+					// current value is above the max
+					// add maxValue to total
+					inv.total = inv.getTotal().add(maxValue);
+				}
 			} else {
+				// current value is below the minimum
+				// add the minimum to total
 				inv.total = inv.getTotal().add(minValue);
 			}
+			
+			// Change our stored value for the item
+			// we don't care about min/maxValue here because we don't want the value to 'bounce' off of them.
 			if (oper == 1) {
 				inv.value = inv.getValue().add(changeRate);
 			} else if (oper == 0) {
