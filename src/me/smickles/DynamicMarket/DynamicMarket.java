@@ -28,6 +28,7 @@ public class DynamicMarket extends JavaPlugin {
 	public Configuration items;
 	public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2);
 	public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
+	public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
 	
 	@Override
 	public void onDisable(){
@@ -62,6 +63,7 @@ public class DynamicMarket extends JavaPlugin {
 		
 		for (int x =0; x < itemNames.length; x = x + 2) {
 			items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
+			items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
 		}
 		
 		items.save();
@@ -86,6 +88,7 @@ public class DynamicMarket extends JavaPlugin {
 		inv.total = BigDecimal.valueOf(0);
 		for(int x = 1; x <= amount; x++) {
 			BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", .01));
+			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", .01));
 			
 			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
 				inv.total = inv.getTotal().add(inv.getValue());
@@ -93,9 +96,9 @@ public class DynamicMarket extends JavaPlugin {
 				inv.total = inv.getTotal().add(minValue);
 			}
 			if (oper == 1) {
-				inv.value = inv.getValue().add(minValue);
+				inv.value = inv.getValue().add(changeRate);
 			} else if (oper == 0) {
-				inv.value = inv.getValue().subtract(minValue);
+				inv.value = inv.getValue().subtract(changeRate);
 			} else {
 				return null;
 			}
