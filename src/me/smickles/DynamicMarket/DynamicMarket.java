@@ -26,8 +26,9 @@ public class DynamicMarket extends JavaPlugin {
 	public static DynamicMarket plugin;
 	public final Logger logger = Logger.getLogger("Minecraft");
 	public Configuration items;
-	public static BigDecimal minValue = BigDecimal.valueOf(.01);
-	
+	public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2);
+	public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
+	public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
 	
 	@Override
 	public void onDisable(){
@@ -46,16 +47,25 @@ public class DynamicMarket extends JavaPlugin {
 		String[] itemNames = new String[]{"stone","01","dirt","03","cobblestone","04","sapling","06","sand","12","gravel","13","wood","17","lapis","22","sandstone","24","grass","31","wool","35","dandelion","37","rose","38","brownmushroom","39","redmushroom","40","mossstone","48","obsidian","49","cactus","81","netherrack","87","soulsand","88","vine","106","apple","260","coal","263","diamond","264","iron","265","gold","266","string","287","feather","288","gunpowder","289","seeds","295","flint","318","pork","319","redstone","331","snow","332","leather","334","clay","337","sugarcane","338","slime","341","egg","344","glowstone","348","fish","349","bone","352","pumpkinseeds","361","melonseeds","362","beef","363","chicken","365","rottenflesh","367","enderpearl","368"};
 		for(int x = 0; x < itemNames.length; x = x + 2) {
 			items.getString(itemNames[x], " ");
-			//items.getString(itemNames[x] + ".number", itemNames[x]);
 			
 		}
-		for(int x = 1; x < itemNames.length; x = x + 2) {
+		for (int x = 1; x < itemNames.length; x = x + 2) {
 			items.getInt(itemNames[x-1] + ".number", Integer.parseInt(itemNames[x]));
 			
 		}
-		for(int x = 0; x < itemNames.length; x = x + 2) {
+		for (int x = 0; x < itemNames.length; x = x + 2) {
 			items.getDouble(itemNames[x] + ".value", 10);
 		}
+		
+		for (int x =0; x < itemNames.length; x = x + 2) {
+			items.getDouble(itemNames[x] + ".minValue", MINVALUE.doubleValue());
+		}
+		
+		for (int x =0; x < itemNames.length; x = x + 2) {
+			items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
+			items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
+		}
+		
 		items.save();
 	}
 	
@@ -77,15 +87,35 @@ public class DynamicMarket extends JavaPlugin {
 		// determine the total cost
 		inv.total = BigDecimal.valueOf(0);
 		for(int x = 1; x <= amount; x++) {
+			BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
+			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", CHANGERATE.doubleValue()));
+			BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
+
+			// check the current value
 			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
-				inv.total = inv.getTotal().add(inv.getValue());
+				// current value is @ or above minValue
+				// be sure value is not above maxValue
+				if (inv.getValue().compareTo(maxValue) == -1) {
+					// current value is "just right"
+					// add current value to total
+					inv.total = inv.getTotal().add(inv.getValue());
+				} else {
+					// current value is above the max
+					// add maxValue to total
+					inv.total = inv.getTotal().add(maxValue);
+				}
 			} else {
+				// current value is below the minimum
+				// add the minimum to total
 				inv.total = inv.getTotal().add(minValue);
 			}
+			
+			// Change our stored value for the item
+			// we don't care about min/maxValue here because we don't want the value to 'bounce' off of them.
 			if (oper == 1) {
-				inv.value = inv.getValue().add(minValue);
+				inv.value = inv.getValue().add(changeRate);
 			} else if (oper == 0) {
-				inv.value = inv.getValue().subtract(minValue);
+				inv.value = inv.getValue().subtract(changeRate);
 			} else {
 				return null;
 			}
@@ -267,13 +297,14 @@ public class DynamicMarket extends JavaPlugin {
 				// Load the item list
 				items.load();
 				// get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
-				double price = items.getDouble(args[0] + ".value", -2000000000);
-				if(price != -2000000000) {
+				BigDecimal price = BigDecimal.valueOf(items.getDouble(args[0] + ".value", -2000000000));
+				BigDecimal minValue = BigDecimal.valueOf(items.getDouble(args[0] + ".minValue", MINVALUE.doubleValue()));
+				if(price.intValue() != -2000000000) {
 					// We received an argument which resolved to an item on our list.
 					// The price could register as a negative or below .01
 					// in this case we should return .01 as the price.
-					if(price < .01) {
-						price = .01;
+					if(price.compareTo(minValue) == -1) {
+						price = minValue;
 					}
 					player.sendMessage(ChatColor.GREEN + args[0] + ": " + ChatColor.WHITE + price);
 					return true;
@@ -360,7 +391,6 @@ public class DynamicMarket extends JavaPlugin {
 	}
 	
 	private boolean sellAll(Player player) {
-		// TODO Auto-generated method stub
 		items.load();
 		List<String> names = items.getKeys();
 		int[] id = new int[names.size()];
