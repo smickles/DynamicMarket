@@ -41,7 +41,6 @@ public class DynamicMarket extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
-
 		
 		//item 'config'
 		items = getConfiguration();

@@ -12,6 +12,6 @@
 			<attribute name="javadoc_location" value="http://jd.bukkit.org/apidocs/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/norm.smickles-PC/minecraft/Register.jar" sourcepath="/home/michael/minecraft/bukkit/plugins/Register.jar"/>
+	<classpathentry kind="lib" path="C:/Users/norm.smickles-PC/minecraft/Register.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
