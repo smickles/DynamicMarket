@@ -1,5 +1,6 @@
 package me.smickles.DynamicMarket;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ public class DynamicMarket extends JavaPlugin {
 	public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
 	public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
 	public Method method;
+	public static File directory;
 	
 	@Override
 	public void onDisable(){
@@ -41,33 +43,54 @@ public class DynamicMarket extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
-		
-		//item 'config'
+		directory = getDataFolder();
+		boolean configIsThere = false;
 		items = getConfiguration();
-		items.load();
-		String[] itemNames = new String[]{"stone","01","dirt","03","cobblestone","04","sapling","06","sand","12","gravel","13","wood","17","lapis","22","sandstone","24","grass","31","wool","35","dandelion","37","rose","38","brownmushroom","39","redmushroom","40","mossstone","48","obsidian","49","cactus","81","netherrack","87","soulsand","88","vine","106","apple","260","coal","263","diamond","264","iron","265","gold","266","string","287","feather","288","gunpowder","289","seeds","295","flint","318","pork","319","redstone","331","snow","332","leather","334","clay","337","sugarcane","338","slime","341","egg","344","glowstone","348","fish","349","bone","352","pumpkinseeds","361","melonseeds","362","beef","363","chicken","365","rottenflesh","367","enderpearl","368"};
-		for(int x = 0; x < itemNames.length; x = x + 2) {
-			items.getString(itemNames[x], " ");
+		
+		for (String f : directory.list()) {
+			if (f.equalsIgnoreCase("config.yml")) {
+				configIsThere = true;
+				break;
+			}
+		}
+		
+		if (!configIsThere) {
+			logger.info("[" + pdfFile.getName() +"] Could not find config, building default");			
 			
-		}
-		for (int x = 1; x < itemNames.length; x = x + 2) {
-			items.getInt(itemNames[x-1] + ".number", Integer.parseInt(itemNames[x]));
+			// default item 'config'
+			items.load();
 			
-		}
-		for (int x = 0; x < itemNames.length; x = x + 2) {
-			items.getDouble(itemNames[x] + ".value", 10);
+			String[] itemNames = new String[]{"stone","01","dirt","03","cobblestone","04","sapling","06","sand","12","gravel","13","wood","17","lapis","22","sandstone","24","grass","31","wool","35","dandelion","37","rose","38","brownmushroom","39","redmushroom","40","mossstone","48","obsidian","49","cactus","81","netherrack","87","soulsand","88","vine","106","apple","260","coal","263","diamond","264","iron","265","gold","266","string","287","feather","288","gunpowder","289","seeds","295","flint","318","pork","319","redstone","331","snow","332","leather","334","clay","337","sugarcane","338","slime","341","egg","344","glowstone","348","fish","349","bone","352","pumpkinseeds","361","melonseeds","362","beef","363","chicken","365","rottenflesh","367","enderpearl","368"};
+			
+			for(int x = 0; x < itemNames.length; x = x + 2) {
+				items.getString(itemNames[x], " ");
+				items.getDouble(itemNames[x] + ".value", 10);
+				items.getDouble(itemNames[x] + ".minValue", MINVALUE.doubleValue());
+				items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
+				items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
+			}
+
+			for (int x = 1; x < itemNames.length; x = x + 2) {
+				items.getInt(itemNames[x-1] + ".number", Integer.parseInt(itemNames[x]));
+			}
+			
+					
+			items.save();
+		} else {
+			logger.info("[" + pdfFile.getName() +"] Found config, making sure it's up to date.");
+			
+			items.load();
+			for (String n : items.getKeys()) {
+				items.getDouble(n + ".value", 10);
+				items.getDouble(n + ".minValue", MINVALUE.doubleValue());
+				items.getDouble(n + ".maxValue", MAXVALUE.doubleValue());
+				items.getDouble(n + ".changeRate", CHANGERATE.doubleValue());
+			}
+			
+			items.save();
 		}
 		
-		for (int x =0; x < itemNames.length; x = x + 2) {
-			items.getDouble(itemNames[x] + ".minValue", MINVALUE.doubleValue());
-		}
 		
-		for (int x =0; x < itemNames.length; x = x + 2) {
-			items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
-			items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
-		}
-		
-		items.save();
 		
 		PluginManager pm = this.getServer().getPluginManager();
 		
