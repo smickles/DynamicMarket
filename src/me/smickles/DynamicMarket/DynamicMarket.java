@@ -230,7 +230,7 @@ public class DynamicMarket extends JavaPlugin {
 				inInventory += slot.getAmount();
 			}
 			
-		}// TODO /sell x y  takes proper amount out of inventory, but gives the wrong amt of money
+		}
 		return inInventory;
 	}
 	
