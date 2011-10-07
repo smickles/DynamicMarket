@@ -32,6 +32,7 @@ public class DynamicMarket extends JavaPlugin {
 	public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2);
 	public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
 	public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
+	public static BigDecimal SPREAD = CHANGERATE;
 	public Method method;
 	public static File directory;
 	
@@ -72,6 +73,7 @@ public class DynamicMarket extends JavaPlugin {
 				items.getDouble(itemNames[x] + ".minValue", MINVALUE.doubleValue());
 				items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
 				items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
+				items.getDouble(itemNames[x] + ".spread", SPREAD.doubleValue());
 			}
 
 			for (int x = 1; x < itemNames.length; x = x + 2) {
@@ -93,6 +95,7 @@ public class DynamicMarket extends JavaPlugin {
 				items.getDouble(n + ".changeRate", CHANGERATE.doubleValue());
 				MaterialData mat = new MaterialData(items.getInt(n + ".number", 0));
 				items.getString(n + ".data", Byte.toString(mat.getData()));
+				items.getDouble(n + ".spread", SPREAD.doubleValue());
 			}
 			
 			items.save();
@@ -119,16 +122,25 @@ public class DynamicMarket extends JavaPlugin {
 	 */
 	public Invoice generateInvoice(int oper, String item, int amount) {
 		items.load();
-		// get the initial value of the item, 0 for not found
 		
+		// get the initial value of the item, 0 for not found
 		Invoice inv = new Invoice(BigDecimal.valueOf(0),BigDecimal.valueOf(0));
 		inv.value = BigDecimal.valueOf(items.getDouble(item + ".value", 0));
+		
+		// if the we are selling, do one initial decrement of the value
+		BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", SPREAD.doubleValue()));
+
+		if (oper == 0)
+			inv.value = inv.getValue().subtract(spread);
+		
 		// determine the total cost
 		inv.total = BigDecimal.valueOf(0);
+		
 		for(int x = 1; x <= amount; x++) {
 			BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
-			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", CHANGERATE.doubleValue()));
 			BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
+			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", CHANGERATE.doubleValue()));
+
 
 			// check the current value
 			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
@@ -256,10 +268,11 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		items.load();
 		int id = items.getInt(item + ".number", 0);
-		Byte byteData = Byte.valueOf(items.getString(item + ".data"));
 		
 		// a value of 0 would indicate that we did not find an item with that name
 		if(id != 0) {
+			Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+			
 			// determine what it will pay 
 			Invoice invoice = generateInvoice(0, item, amount);
 			MethodAccount cash = method.getAccount(player.getName());
