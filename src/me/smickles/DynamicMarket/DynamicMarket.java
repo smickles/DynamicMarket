@@ -509,15 +509,11 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		
 		// run thru each slot and sell any sellable items
-		for (int index = 0; index < 35; index++) {
+		for (int index = 0; index <= 35; index++) {
 			ItemStack slot = player.getInventory().getItem(index);
 			int slotId = slot.getTypeId();
 			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
 			Byte slotByteData = slot.getData().getData();
-			
-			// no reason to continue if there's nothing there
-			if (String.valueOf(slotId).compareTo("0") == 0)
-				break;
 			
 			for (int x = 0; x < names.size(); x++) {
 				if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
