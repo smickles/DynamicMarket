@@ -482,7 +482,6 @@ public class DynamicMarket extends JavaPlugin {
 		BigDecimal[] value = new BigDecimal[names.size()];
 		Byte[] byteData = new Byte[names.size()];
 		BigDecimal sale = BigDecimal.ZERO.setScale(2);
-		ItemStack its;
 		
 		// make a 'list' of all sellable items with their id's and values
 		for (int x = 0; x < names.size(); x++) {
