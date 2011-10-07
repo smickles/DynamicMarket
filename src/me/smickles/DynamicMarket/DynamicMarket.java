@@ -48,12 +48,15 @@ public class DynamicMarket extends JavaPlugin {
 		boolean configIsThere = false;
 		items = getConfiguration();
 		
-		for (String f : directory.list()) {
-			if (f.equalsIgnoreCase("config.yml")) {
-				configIsThere = true;
-				break;
+		if (directory.exists()) {
+			for (String f : directory.list()) {
+				if (f.equalsIgnoreCase("config.yml")) {
+					configIsThere = true;
+					break;
+				}
 			}
 		}
+		
 		
 		if (!configIsThere) {
 			logger.info("[" + pdfFile.getName() +"] Could not find config, building default");			
