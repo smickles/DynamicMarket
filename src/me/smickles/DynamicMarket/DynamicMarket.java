@@ -269,7 +269,7 @@ public class DynamicMarket extends JavaPlugin {
 				
 				// Figure out how much is left over.
 				int left = getAmountInInventory(player, its) - amount;
-				if (left < 1) { // this indicates the correct id, but wrong bytedata value
+				if (left < 0) { // this indicates the correct id, but wrong bytedata value
 					// give nice output even if they gave a bad number.
 					player.sendMessage(ChatColor.RED + "You don't have enough " + item);
 					player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
@@ -277,8 +277,6 @@ public class DynamicMarket extends JavaPlugin {
 					return false;
 				}
 					
-				logger.info(String.valueOf(left));
-				
 				// Take out all of the item
 				for (int x = 0; x <= 35; x++) {
 					ItemStack slot = player.getInventory().getItem(x);
@@ -511,15 +509,11 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		
 		// run thru each slot and sell any sellable items
-		for (int index = 0; index < 35; index++) {
+		for (int index = 0; index <= 35; index++) {
 			ItemStack slot = player.getInventory().getItem(index);
 			int slotId = slot.getTypeId();
 			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
 			Byte slotByteData = slot.getData().getData();
-			
-			// no reason to continue if there's nothing there
-			if (String.valueOf(slotId).compareTo("0") == 0)
-				break;
 			
 			for (int x = 0; x < names.size(); x++) {
 				if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
