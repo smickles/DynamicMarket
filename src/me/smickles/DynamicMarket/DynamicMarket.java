@@ -550,11 +550,4 @@ public class DynamicMarket extends JavaPlugin {
 		player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale);
 		return true;
 	}
-
-	public static double round2(double num) {
-		double result = num * 100;
-		result = Math.round(result);
-		result = result / 100;
-		return result;		
-	}
 }
