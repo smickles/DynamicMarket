@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,12 +48,15 @@ public class DynamicMarket extends JavaPlugin {
 		boolean configIsThere = false;
 		items = getConfiguration();
 		
-		for (String f : directory.list()) {
-			if (f.equalsIgnoreCase("config.yml")) {
-				configIsThere = true;
-				break;
+		if (directory.exists()) {
+			for (String f : directory.list()) {
+				if (f.equalsIgnoreCase("config.yml")) {
+					configIsThere = true;
+					break;
+				}
 			}
 		}
+		
 		
 		if (!configIsThere) {
 			logger.info("[" + pdfFile.getName() +"] Could not find config, building default");			
@@ -72,6 +76,8 @@ public class DynamicMarket extends JavaPlugin {
 
 			for (int x = 1; x < itemNames.length; x = x + 2) {
 				items.getInt(itemNames[x-1] + ".number", Integer.parseInt(itemNames[x]));
+				MaterialData mat = new MaterialData(Integer.parseInt(itemNames[x]));
+				items.getString(itemNames[x-1] + ".data", Byte.toString(mat.getData()));
 			}
 			
 					
@@ -85,6 +91,8 @@ public class DynamicMarket extends JavaPlugin {
 				items.getDouble(n + ".minValue", MINVALUE.doubleValue());
 				items.getDouble(n + ".maxValue", MAXVALUE.doubleValue());
 				items.getDouble(n + ".changeRate", CHANGERATE.doubleValue());
+				MaterialData mat = new MaterialData(items.getInt(n + ".number", 0));
+				items.getString(n + ".data", Byte.toString(mat.getData()));
 			}
 			
 			items.save();
@@ -178,9 +186,10 @@ public class DynamicMarket extends JavaPlugin {
 			// determine what it will cost 
 			Invoice invoice = generateInvoice(1, item, amount);
 			MethodAccount cash = method.getAccount(player.getName());
-			if(cash.hasEnough(invoice.getTotal().doubleValue())) {
-				ItemStack its = new ItemStack(id,amount);
-				player.getInventory().addItem(its);
+			if (cash.hasEnough(invoice.getTotal().doubleValue())) {
+				Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+				
+				player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
 				items.setProperty(item + ".value", invoice.getValue());
 				items.save();
 				// Give some nice output.
@@ -190,7 +199,7 @@ public class DynamicMarket extends JavaPlugin {
 				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
 				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				return true;
-			}else{
+			} else {
 				// Otherwise, give nice output anyway ;)
 				// The idea here is to show how much more money is needed.
 				BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
@@ -213,10 +222,18 @@ public class DynamicMarket extends JavaPlugin {
 	 * @param id The Data Value of the item in question.
 	 * @return The amount of the item in the player's inventory as an integer.
 	 */
-	public int getAmountInInventory(Player player, int id) {
+	public int getAmountInInventory(Player player, ItemStack it) {
 		int inInventory = 0;
-		for (ItemStack slot : player.getInventory().all(id).values()) {
-			inInventory += slot.getAmount();
+
+		
+		for (int x = 0; x <= 35; x++) {
+			ItemStack slot = player.getInventory().getItem(x);
+			Byte slotData = slot.getData().getData();
+			
+			if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(it.getData().getData()) == 0)) {
+				inInventory += slot.getAmount();
+			}
+			
 		}
 		return inInventory;
 	}
@@ -239,21 +256,44 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		items.load();
 		int id = items.getInt(item + ".number", 0);
+		Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+		
 		// a value of 0 would indicate that we did not find an item with that name
 		if(id != 0) {
 			// determine what it will pay 
 			Invoice invoice = generateInvoice(0, item, amount);
 			MethodAccount cash = method.getAccount(player.getName());
-			// If the player has enough of the item, perform the transaction.	
-			if (player.getInventory().contains(id, amount)) {
+			// If the player has enough of the item, perform the transaction.
+			ItemStack its = new ItemStack(id, amount, (short) 0, byteData);
+			if (player.getInventory().contains(id)) {
+				
 				// Figure out how much is left over.
-				int left = getAmountInInventory(player,id) - amount;
+				int left = getAmountInInventory(player, its) - amount;
+				if (left < 1) { // this indicates the correct id, but wrong bytedata value
+					// give nice output even if they gave a bad number.
+					player.sendMessage(ChatColor.RED + "You don't have enough " + item);
+					player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
+					player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
+					return false;
+				}
+					
+				logger.info(String.valueOf(left));
+				
 				// Take out all of the item
-				player.getInventory().remove(id);
+				for (int x = 0; x <= 35; x++) {
+					ItemStack slot = player.getInventory().getItem(x);
+					Byte slotData = slot.getData().getData();
+					
+					if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
+						player.getInventory().clear(x);
+					}
+				}
+
 				// put back what was left over
 				if(left > 0) {
-					ItemStack its = new ItemStack(id,left);
-					player.getInventory().addItem(its);
+					ItemStack itsLeft = its;
+					itsLeft.setAmount(left);
+					player.getInventory().addItem(itsLeft);
 				}
 				items.setProperty(item + ".value", invoice.getValue());
 				// record the change in value
@@ -267,7 +307,7 @@ public class DynamicMarket extends JavaPlugin {
 			}else{
 				// give nice output even if they gave a bad number.
 				player.sendMessage(ChatColor.RED + "You don't have enough " + item);
-				player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, id));
+				player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
 				player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
 				return false;
 			}
@@ -460,12 +500,14 @@ public class DynamicMarket extends JavaPlugin {
 		List<String> names = items.getKeys();
 		int[] id = new int[names.size()];
 		BigDecimal[] value = new BigDecimal[names.size()];
+		Byte[] byteData = new Byte[names.size()];
 		BigDecimal sale = BigDecimal.ZERO.setScale(2);
 		
 		// make a 'list' of all sellable items with their id's and values
 		for (int x = 0; x < names.size(); x++) {
 			id[x] = items.getInt(names.get(x) + ".number", 0);
-			value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);	
+			value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);
+			byteData[x] = Byte.valueOf(items.getString(names.get(x) + ".data"));
 		}
 		
 		// run thru each slot and sell any sellable items
@@ -473,9 +515,14 @@ public class DynamicMarket extends JavaPlugin {
 			ItemStack slot = player.getInventory().getItem(index);
 			int slotId = slot.getTypeId();
 			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
+			Byte slotByteData = slot.getData().getData();
+			
+			// no reason to continue if there's nothing there
+			if (String.valueOf(slotId).compareTo("0") == 0)
+				break;
 			
 			for (int x = 0; x < names.size(); x++) {
-				if (id[x] == slotId) {
+				if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
 					// perform sale of this slot
 					Invoice thisSale = generateInvoice(0, names.get(x), slotAmount.intValue());
 					// rack up our total
@@ -484,12 +531,13 @@ public class DynamicMarket extends JavaPlugin {
 					items.setProperty(names.get(x) + ".value", thisSale.getValue());
 					items.save();
 					// remove the item(s)
-					player.getInventory().removeItem(slot);
+					player.getInventory().clear(index);
 					// "pay the man"
 					MethodAccount cash = method.getAccount(player.getName());
 					cash.add(thisSale.getTotal().doubleValue());
 					// give nice output
 					player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
+					break;
 				}
 			}
 			
@@ -501,12 +549,5 @@ public class DynamicMarket extends JavaPlugin {
 		player.sendMessage(ChatColor.GREEN + "--------------------------------");
 		player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale);
 		return true;
-	}
-
-	public static double round2(double num) {
-		double result = num * 100;
-		result = Math.round(result);
-		result = result / 100;
-		return result;		
 	}
 }
