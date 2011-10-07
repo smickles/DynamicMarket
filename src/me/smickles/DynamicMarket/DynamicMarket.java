@@ -224,9 +224,13 @@ public class DynamicMarket extends JavaPlugin {
 	 */
 	public int getAmountInInventory(Player player, ItemStack it) {
 		int inInventory = 0;
-		for (int x = 1; x <= 64; x++) {
-			it.setAmount(x);
-			for (ItemStack slot : player.getInventory().all(it).values()) {
+
+		
+		for (int x = 0; x <= 35; x++) {
+			ItemStack slot = player.getInventory().getItem(x);
+			Byte slotData = slot.getData().getData();
+			
+			if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(it.getData().getData()) == 0)) {
 				inInventory += slot.getAmount();
 			}
 			
@@ -265,13 +269,26 @@ public class DynamicMarket extends JavaPlugin {
 				
 				// Figure out how much is left over.
 				int left = getAmountInInventory(player, its) - amount;
+				if (left < 1) { // this indicates the correct id, but wrong bytedata value
+					// give nice output even if they gave a bad number.
+					player.sendMessage(ChatColor.RED + "You don't have enough " + item);
+					player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
+					player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
+					return false;
+				}
+					
+				logger.info(String.valueOf(left));
 				
 				// Take out all of the item
-				for (int x = 1; x <= 64; x++) {
-					its.setAmount(x);
-					player.getInventory().remove(its);
+				for (int x = 0; x <= 35; x++) {
+					ItemStack slot = player.getInventory().getItem(x);
+					Byte slotData = slot.getData().getData();
+					
+					if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
+						player.getInventory().clear(x);
+					}
 				}
-				
+
 				// put back what was left over
 				if(left > 0) {
 					ItemStack itsLeft = its;
@@ -514,7 +531,7 @@ public class DynamicMarket extends JavaPlugin {
 					items.setProperty(names.get(x) + ".value", thisSale.getValue());
 					items.save();
 					// remove the item(s)
-					player.getInventory().removeItem(slot);
+					player.getInventory().clear(index);
 					// "pay the man"
 					MethodAccount cash = method.getAccount(player.getName());
 					cash.add(thisSale.getTotal().doubleValue());
