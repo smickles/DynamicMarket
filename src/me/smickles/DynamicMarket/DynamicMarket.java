@@ -12,16 +12,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
 import com.nijikokun.register.payment.Method;
+import com.nijikokun.register.payment.Methods;
 import com.nijikokun.register.payment.Method.MethodAccount;
 
 public class DynamicMarket extends JavaPlugin {
@@ -102,11 +102,21 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		
 		
-		
+		// setup economy
 		PluginManager pm = this.getServer().getPluginManager();
+		Plugin register = pm.getPlugin("Register");
 		
-		pm.registerEvent(Type.PLUGIN_ENABLE, new DMRegister(this), Priority.Monitor, this);
-		pm.registerEvent(Type.PLUGIN_DISABLE, new DMRegister(this), Priority.Monitor, this);
+		if (register != null && register.isEnabled()) {
+			Methods.setMethod(pm);
+			if (Methods.getMethod() != null) {
+				method = Methods.getMethod();
+				logger.info("[" + pdfFile.getName() + "] Economy plugin found.");
+			} else {
+				logger.severe("[" + pdfFile.getName() + "] Economy plugin not found. " + pdfFile.getName() + " will be disabled.");
+				pm.disablePlugin(this);
+				return;
+			}
+		}
 		
 		this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
 	}
