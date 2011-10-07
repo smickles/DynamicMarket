@@ -269,7 +269,7 @@ public class DynamicMarket extends JavaPlugin {
 				
 				// Figure out how much is left over.
 				int left = getAmountInInventory(player, its) - amount;
-				if (left < 1) { // this indicates the correct id, but wrong bytedata value
+				if (left < 0) { // this indicates the correct id, but wrong bytedata value
 					// give nice output even if they gave a bad number.
 					player.sendMessage(ChatColor.RED + "You don't have enough " + item);
 					player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
