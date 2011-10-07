@@ -277,8 +277,6 @@ public class DynamicMarket extends JavaPlugin {
 					return false;
 				}
 					
-				logger.info(String.valueOf(left));
-				
 				// Take out all of the item
 				for (int x = 0; x <= 35; x++) {
 					ItemStack slot = player.getInventory().getItem(x);
