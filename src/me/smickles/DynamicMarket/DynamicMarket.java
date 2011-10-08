@@ -145,9 +145,6 @@ public class DynamicMarket extends JavaPlugin {
 		
 		// if the we are selling, do one initial decrement of the value
 		BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", SPREAD.doubleValue()));
-
-		if (oper == 0)
-			inv.value = inv.getValue().subtract(spread);
 		
 		// determine the total cost
 		inv.total = BigDecimal.valueOf(0);
@@ -157,7 +154,14 @@ public class DynamicMarket extends JavaPlugin {
 			BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
 			BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", CHANGERATE.doubleValue()));
 
-
+			// work the spread on the first one.
+			if ((oper == 0) && (x == 1)) {
+				inv.value = inv.getValue().subtract(spread);
+			// otherwise, do the usual decriment.
+			} else if ((oper == 0) && (x > 1)) {
+				inv.value = inv.getValue().subtract(changeRate);
+			}
+			
 			// check the current value
 			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
 				// current value is @ or above minValue
@@ -181,10 +185,6 @@ public class DynamicMarket extends JavaPlugin {
 			// we don't care about min/maxValue here because we don't want the value to 'bounce' off of them.
 			if (oper == 1) {
 				inv.value = inv.getValue().add(changeRate);
-			} else if (oper == 0) {
-				inv.value = inv.getValue().subtract(changeRate);
-			} else {
-				return null;
 			}
 		}
 		return inv;
