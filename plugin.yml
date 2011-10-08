@@ -18,8 +18,9 @@
 
 name: DynaMark
 main: me.smickles.DynamicMarket.DynamicMarket
-version: 0.0.2.9
+version: 0.0.2.10
 author: smickles
+softdepend: [Register]
 
 commands:
   buy:
