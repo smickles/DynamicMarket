@@ -33,7 +33,6 @@ public class DynamicMarket extends JavaPlugin {
 	public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
 	public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
 	public static BigDecimal SPREAD = CHANGERATE;
-	public Method method;
 	public static File directory;
 	
 	@Override
@@ -109,7 +108,6 @@ public class DynamicMarket extends JavaPlugin {
 		if (register != null && register.isEnabled()) {
 			Methods.setMethod(pm);
 			if (Methods.getMethod() != null) {
-				method = Methods.getMethod();
 				logger.info("[" + pdfFile.getName() + "] Economy plugin found.");
 			} else {
 				logger.severe("[" + pdfFile.getName() + "] Could not find Economy plugin. " + pdfFile.getName() + " will be disabled.");
@@ -213,7 +211,7 @@ public class DynamicMarket extends JavaPlugin {
 		if(id != 0) {
 			// determine what it will cost 
 			Invoice invoice = generateInvoice(1, item, amount);
-			MethodAccount cash = method.getAccount(player.getName());
+			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
 			if (cash.hasEnough(invoice.getTotal().doubleValue())) {
 				Byte byteData = Byte.valueOf(items.getString(item + ".data"));
 				
@@ -291,7 +289,7 @@ public class DynamicMarket extends JavaPlugin {
 			
 			// determine what it will pay 
 			Invoice invoice = generateInvoice(0, item, amount);
-			MethodAccount cash = method.getAccount(player.getName());
+			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
 			// If the player has enough of the item, perform the transaction.
 			ItemStack its = new ItemStack(id, amount, (short) 0, byteData);
 			if (player.getInventory().contains(id)) {
@@ -556,7 +554,7 @@ public class DynamicMarket extends JavaPlugin {
 					// remove the item(s)
 					player.getInventory().clear(index);
 					// "pay the man"
-					MethodAccount cash = method.getAccount(player.getName());
+					MethodAccount cash = Methods.getMethod().getAccount(player.getName());
 					cash.add(thisSale.getTotal().doubleValue());
 					// give nice output
 					player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
