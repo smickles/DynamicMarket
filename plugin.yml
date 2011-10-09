@@ -20,7 +20,7 @@ name: DynaMark
 main: me.smickles.DynamicMarket.DynamicMarket
 version: 0.0.2.11
 author: smickles
-softdepend: [Register]
+softdepend: [Register, Spout]
 
 commands:
   buy:
@@ -35,3 +35,6 @@ commands:
   market:
     description: used to view market conditions
     usage: Example - /market <top | bottom>
+  gui:
+    description: starts the gui
+    usage: Example - /gui

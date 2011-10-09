@@ -12,6 +12,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.Event.Priority;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
@@ -19,6 +21,11 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
+import org.getspout.spoutapi.gui.Color;
+import org.getspout.spoutapi.gui.GenericButton;
+import org.getspout.spoutapi.gui.GenericLabel;
+import org.getspout.spoutapi.gui.GenericPopup;
+import org.getspout.spoutapi.player.SpoutPlayer;
 
 import com.nijikokun.register.payment.Method;
 import com.nijikokun.register.payment.Methods;
@@ -123,6 +130,9 @@ public class DynamicMarket extends JavaPlugin {
 			pm.enablePlugin(this);
 			return;
 		}
+		
+		// start up listeners
+		pm.registerEvent(Event.Type.CUSTOM_EVENT, new DMScreenListener(), Priority.Lowest, this);		
 		
 		this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
 	}
@@ -350,6 +360,10 @@ public class DynamicMarket extends JavaPlugin {
 	}
 	
 	public boolean readCommand(Player player, String command, String[] args) {
+		if (command.equalsIgnoreCase("gui")) {
+			SpoutPlayer sPlayer = (SpoutPlayer) player;
+			return gui(sPlayer);
+		}
 		if(command.equalsIgnoreCase("buy")) {
 			if(args.length == 2) {
 				String item = args[0];
@@ -522,6 +536,28 @@ public class DynamicMarket extends JavaPlugin {
 		return false;
 	}
 	
+	private boolean gui(SpoutPlayer sPlayer) {
+		sPlayer.sendMessage("starting gui");
+		
+		// Make mouseable backdrop
+		GenericPopup somepopup = new GenericPopup();
+		GenericLabel label = new GenericLabel("This is a label");
+		somepopup.attachWidget(plugin, label);
+		sPlayer.getMainScreen().attachPopupScreen(somepopup);
+		
+		// Make a button
+		GenericButton buyButton = new GenericButton("Buy");
+		buyButton.setColor(new Color(1.0F, 1.0F, 0, 1.0F)); //This makes the button text yellow.
+		buyButton.setHoverColor(new Color(1.0F, 0, 0, 1.0F)); //When you hover over with a mouse this makes the text red.
+		buyButton.setX(100).setY(100); //Puts the button at 100*100 on the screen
+		buyButton.setWidth(200).setHeight(20); //Makes the button 200 wide and 20 high
+		somepopup.attachWidget(plugin, buyButton); //This is necessary because you need a mouse to interact with a button.
+		
+		
+		
+		return false;
+	}
+
 	private boolean sellAll(Player player) {
 		items.load();
 		List<String> names = items.getKeys();
