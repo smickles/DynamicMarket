@@ -218,14 +218,14 @@ public class DynamicMarket extends JavaPlugin {
 				items.setProperty(item + ".value", invoice.getValue());
 				items.save();
 				// Give some nice output.
-				logger.info(String.valueOf(cash.balance()));
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
 				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				// Subtract the invoice (this is an efficient place to do this)
-				logger.info(String.valueOf(invoice.getTotal().doubleValue()));
 				cash.subtract(invoice.getTotal().doubleValue());
-				logger.info(String.valueOf(cash.balance()));
+
 				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
 				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
 				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + invoice.getValue());
 				return true;
 			} else {
