@@ -20,7 +20,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-import com.nijikokun.register.payment.Method;
 import com.nijikokun.register.payment.Methods;
 import com.nijikokun.register.payment.Method.MethodAccount;
 
