@@ -10,7 +10,7 @@ public class Invoice {
 	/**
 	 * Create an Invoice for the purchase or sale of an item
 	 * @param initValue the beginning value of the item 
-	 * @param initTotal the beginning total of of the Invoice
+	 * @param initTotal the beginning total of of the Invoice, typically 0
 	 */
 	public Invoice(BigDecimal initValue, BigDecimal initTotal) {
 		value = initValue;
