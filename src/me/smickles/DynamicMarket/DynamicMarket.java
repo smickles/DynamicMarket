@@ -257,12 +257,15 @@ public class DynamicMarket extends JavaPlugin {
 		
 		for (int x = 0; x <= 35; x++) {
 			ItemStack slot = player.getInventory().getItem(x);
-			Byte slotData = slot.getData().getData();
+			if (slot != null) {
+				Byte slotData = slot.getData().getData();
 			
-			if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(it.getData().getData()) == 0)) {
-				inInventory += slot.getAmount();
+				if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(it.getData().getData()) == 0)) {
+					inInventory += slot.getAmount();
+				}
+			} else {
+				return 0;
 			}
-			
 		}
 		return inInventory;
 	}
