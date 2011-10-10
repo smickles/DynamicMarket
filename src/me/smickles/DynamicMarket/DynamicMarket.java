@@ -327,10 +327,13 @@ public class DynamicMarket extends JavaPlugin {
 				// record the change in value
 				items.save();
 				// give some nice output
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
 				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				cash.add(invoice.getTotal().doubleValue());
 				player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
 				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
+				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + invoice.getValue());
 				return true;
 			}else{
 				// give nice output even if they gave a bad number.
