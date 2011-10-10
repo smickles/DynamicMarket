@@ -154,35 +154,35 @@ public class DynamicMarket extends JavaPlugin {
 
 			// work the spread on the first one.
 			if ((oper == 0) && (x == 1)) {
-				inv.value = inv.getValue().subtract(spread);
+				inv.subtractValue(spread);
 			// otherwise, do the usual decriment.
 			} else if ((oper == 0) && (x > 1)) {
-				inv.value = inv.getValue().subtract(changeRate);
+				inv.subtractValue(changeRate);
 			}
 			
 			// check the current value
-			if(inv.getValue().compareTo(minValue) == 1 | inv.getValue().compareTo(minValue) == 0) {
+			if((inv.getValue().compareTo(minValue) == 1) | (inv.getValue().compareTo(minValue) == 0)) {
 				// current value is @ or above minValue
 				// be sure value is not above maxValue
 				if (inv.getValue().compareTo(maxValue) == -1) {
 					// current value is "just right"
 					// add current value to total
-					inv.total = inv.getTotal().add(inv.getValue());
+					inv.addTotal(inv.getValue());
 				} else {
 					// current value is above the max
 					// add maxValue to total
-					inv.total = inv.getTotal().add(maxValue);
+					inv.addTotal(maxValue);
 				}
 			} else {
 				// current value is below the minimum
 				// add the minimum to total
-				inv.total = inv.getTotal().add(minValue);
+				inv.addTotal(minValue);
 			}
 			
 			// Change our stored value for the item
 			// we don't care about min/maxValue here because we don't want the value to 'bounce' off of them.
 			if (oper == 1) {
-				inv.value = inv.getValue().add(changeRate);
+				inv.addValue(changeRate);
 			}
 		}
 		return inv;
@@ -219,11 +219,15 @@ public class DynamicMarket extends JavaPlugin {
 				items.setProperty(item + ".value", invoice.getValue());
 				items.save();
 				// Give some nice output.
+				logger.info(String.valueOf(cash.balance()));
 				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				// Subtract the invoice (this is an efficient place to do this)
+				logger.info(String.valueOf(invoice.getTotal().doubleValue()));
 				cash.subtract(invoice.getTotal().doubleValue());
+				logger.info(String.valueOf(cash.balance()));
 				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
 				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + invoice.getValue());
 				return true;
 			} else {
 				// Otherwise, give nice output anyway ;)
