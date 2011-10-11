@@ -109,12 +109,10 @@ public class DynamicMarket extends JavaPlugin {
 			if (Methods.getMethod() != null) {
 				logger.info("[" + pdfFile.getName() + "] Economy plugin found.");
 			} else {
-				logger.severe("[" + pdfFile.getName() + "] Could not find Economy plugin. " + pdfFile.getName() + " will be disabled.");
 				pm.disablePlugin(this);
 				return;
 			}
 		} else {
-			logger.severe("[" + pdfFile.getName() + "] Could not find Register. " + pdfFile.getName() + " will be retry.");
 			pm.enablePlugin(register);
 			pm.disablePlugin(this);
 			pm.enablePlugin(this);
