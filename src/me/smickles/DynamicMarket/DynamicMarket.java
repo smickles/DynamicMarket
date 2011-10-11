@@ -251,10 +251,12 @@ public class DynamicMarket extends JavaPlugin {
 	 */
 	public int getAmountInInventory(Player player, ItemStack it) {
 		int inInventory = 0;
-
+		int x = 0;
+		ItemStack slot;
+		// we do it this way incase a user has an expanded inventory via another plugin
+		for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
+			slot = player.getInventory().getItem(x);
 		
-		for (int x = 0; x <= 35; x++) {
-			ItemStack slot = player.getInventory().getItem(x);
 			if (slot != null) {
 				Byte slotData = slot.getData().getData();
 			
@@ -264,6 +266,7 @@ public class DynamicMarket extends JavaPlugin {
 			} else {
 				return 0;
 			}
+			x++;
 		}
 		return inInventory;
 	}
@@ -310,13 +313,16 @@ public class DynamicMarket extends JavaPlugin {
 				}
 					
 				// Take out all of the item
-				for (int x = 0; x <= 35; x++) {
+				int x = 0;
+				// we do it this way incase a user has an expanded inventory via another plugin
+				for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
 					ItemStack slot = player.getInventory().getItem(x);
 					Byte slotData = slot.getData().getData();
 					
 					if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
 						player.getInventory().clear(x);
 					}
+					x++;
 				}
 
 				// put back what was left over
@@ -545,7 +551,9 @@ public class DynamicMarket extends JavaPlugin {
 		}
 		
 		// run thru each slot and sell any sellable items
-		for (int index = 0; index <= 35; index++) {
+		int index = 0;
+		// we do it this way incase a user has an expanded inventory via another plugin
+		for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
 			ItemStack slot = player.getInventory().getItem(index);
 			int slotId = slot.getTypeId();
 			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
@@ -570,7 +578,7 @@ public class DynamicMarket extends JavaPlugin {
 					break;
 				}
 			}
-			
+			index++;
 		}
 		
 		// give a nice total collumn
