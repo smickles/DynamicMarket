@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -212,7 +213,12 @@ public class DynamicMarket extends JavaPlugin {
 			if (cash.hasEnough(invoice.getTotal().doubleValue())) {
 				Byte byteData = Byte.valueOf(items.getString(item + ".data"));
 				
-				player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
+				// give 'em the items and drop any extra
+				HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
+				for (int a : overflow.keySet()) {
+					player.getWorld().dropItem(player.getLocation(), overflow.get(a));
+				}
+				
 				items.setProperty(item + ".value", invoice.getValue());
 				items.save();
 				// Give some nice output.
