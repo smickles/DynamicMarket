@@ -153,7 +153,7 @@ public class DynamicMarket extends JavaPlugin {
             Invoice invoice = generateInvoice(1, item, amount);
             MethodAccount cash = Methods.getMethod().getAccount(player.getName());
             if (cash.hasEnough(invoice.getTotal().doubleValue())) {
-                Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+                Byte byteData = Byte.valueOf(items.getString(item + ".data", "0"));
                 
                 // give 'em the items and drop any extra
                 HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
@@ -216,7 +216,7 @@ public class DynamicMarket extends JavaPlugin {
         
         // a value of 0 would indicate that we did not find an item with that name
         if(id != 0) {
-            Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+            Byte byteData = Byte.valueOf(items.getString(item + ".data", "0"));
             
             // determine what it will pay 
             Invoice invoice = generateInvoice(0, item, amount);
@@ -241,7 +241,12 @@ public class DynamicMarket extends JavaPlugin {
                 // we do it this way incase a user has an expanded inventory via another plugin
                 for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
                     ItemStack slot = player.getInventory().getItem(x);
-                    Byte slotData = slot.getData().getData();
+                    Byte slotData = Byte.valueOf("0");
+                    try {
+                        slotData = slot.getData().getData();
+                    } catch (NullPointerException e) {
+                        
+                    }
                     
                     if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
                         player.getInventory().clear(x);
@@ -298,7 +303,7 @@ public class DynamicMarket extends JavaPlugin {
         for (int x = 0; x < names.size(); x++) {
             id[x] = items.getInt(names.get(x) + ".number", 0);
             value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);
-            byteData[x] = Byte.valueOf(items.getString(names.get(x) + ".data"));
+            byteData[x] = Byte.valueOf(items.getString(names.get(x) + ".data", "0"));
         }
         
         // run thru each slot and sell any sellable items
@@ -445,7 +450,12 @@ public class DynamicMarket extends JavaPlugin {
             slot = player.getInventory().getItem(x);
         
             if (slot != null) {
-                Byte slotData = slot.getData().getData();
+                Byte slotData = Byte.valueOf("0");
+                try {
+                    slotData = slot.getData().getData();
+                } catch (NullPointerException e) {
+                    
+                }
             
                 if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(it.getData().getData()) == 0)) {
                     inInventory += slot.getAmount();
