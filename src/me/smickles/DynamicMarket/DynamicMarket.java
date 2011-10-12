@@ -221,6 +221,10 @@ public class DynamicMarket extends JavaPlugin {
 				
 				items.setProperty(item + ".value", invoice.getValue());
 				items.save();
+				
+				// get the new price of the item
+				BigDecimal value = price(item);
+				
 				// Give some nice output.
 				player.sendMessage(ChatColor.GREEN + "--------------------------------");
 				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
@@ -230,7 +234,7 @@ public class DynamicMarket extends JavaPlugin {
 				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
 				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				player.sendMessage(ChatColor.GREEN + "--------------------------------");
-				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + invoice.getValue());
+				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
 				return true;
 			} else {
 				// Otherwise, give nice output anyway ;)
@@ -340,6 +344,10 @@ public class DynamicMarket extends JavaPlugin {
 				items.setProperty(item + ".value", invoice.getValue());
 				// record the change in value
 				items.save();
+				
+				// get the new price of the item
+				BigDecimal value = price(item);
+				
 				// give some nice output
 				player.sendMessage(ChatColor.GREEN + "--------------------------------");
 				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
@@ -348,7 +356,7 @@ public class DynamicMarket extends JavaPlugin {
 				player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
 				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
 				player.sendMessage(ChatColor.GREEN + "--------------------------------");
-				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + invoice.getValue());
+				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
 				return true;
 			}else{
 				// give nice output even if they gave a bad number.
