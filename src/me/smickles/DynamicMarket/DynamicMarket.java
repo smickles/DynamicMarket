@@ -125,6 +125,244 @@ public class DynamicMarket extends JavaPlugin {
 	
 
 	
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		return readCommand((Player) sender, commandLabel, args);
+	}
+
+	/**
+	 * Buy a specified amount of an item for the player.
+	 * 
+	 * @param player The player on behalf of which these actions will be carried out. 
+	 * @param item The desired item in the form of the item name. 
+	 * @param amount The desired amount of the item to purchase.
+	 * @return true on success, false on failure. 
+	 */
+	public boolean buy (Player player, String item, int amount) {
+		
+		// Be sure we have a positive amount
+		if (amount < 0) {
+			player.sendMessage(ChatColor.RED + "Invalid amount.");
+			player.sendMessage("No negative numbers, please.");
+			return false;
+		}
+		items.load();
+		int id = items.getInt(item + ".number", 0);
+		// a value of 0 would indicate that we did not find an item with that name
+		if(id != 0) {
+			// determine what it will cost 
+			Invoice invoice = generateInvoice(1, item, amount);
+			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+			if (cash.hasEnough(invoice.getTotal().doubleValue())) {
+				Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+				
+				// give 'em the items and drop any extra
+				HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
+				for (int a : overflow.keySet()) {
+					player.getWorld().dropItem(player.getLocation(), overflow.get(a));
+				}
+				
+				items.setProperty(item + ".value", invoice.getValue());
+				items.save();
+				
+				// get the new price of the item
+				BigDecimal value = price(item);
+				
+				// Give some nice output.
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
+				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				// Subtract the invoice (this is an efficient place to do this)
+				cash.subtract(invoice.getTotal().doubleValue());
+	
+				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
+				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
+				return true;
+			} else {
+				// Otherwise, give nice output anyway ;)
+				// The idea here is to show how much more money is needed.
+				BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
+				player.sendMessage(ChatColor.RED + "You don't have enough money");
+				player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+				player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
+				return false;
+			}
+		}else{
+			player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
+			player.sendMessage("Be sure you typed the correct name");
+			return false;
+		}
+	}
+
+	/**
+	 * Sell a specified amount of an item for the player.
+	 * 
+	 * @param player The player on behalf of which these actions will be carried out. 
+	 * @param item The desired item in the form of the item name. 
+	 * @param amount The desired amount of the item to sell.
+	 * @return true on success, false on failure. 
+	 */
+	public boolean sell (Player player, String item, int amount) {
+		
+		// Be sure we have a positive amount
+		if (amount < 0) {
+			player.sendMessage(ChatColor.RED + "Invalid amount.");
+			player.sendMessage("No negative numbers, please.");
+			return false;
+		}
+		items.load();
+		int id = items.getInt(item + ".number", 0);
+		
+		// a value of 0 would indicate that we did not find an item with that name
+		if(id != 0) {
+			Byte byteData = Byte.valueOf(items.getString(item + ".data"));
+			
+			// determine what it will pay 
+			Invoice invoice = generateInvoice(0, item, amount);
+			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+			// If the player has enough of the item, perform the transaction.
+			ItemStack its = new ItemStack(id, amount, (short) 0, byteData);
+			if (player.getInventory().contains(id)) {
+				BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", 0));
+				
+				// Figure out how much is left over.
+				int left = getAmountInInventory(player, its) - amount;
+				if (left < 0) { // this indicates the correct id, but wrong bytedata value
+					// give nice output even if they gave a bad number.
+					player.sendMessage(ChatColor.RED + "You don't have enough " + item);
+					player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
+					player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
+					return false;
+				}
+					
+				// Take out all of the item
+				int x = 0;
+				// we do it this way incase a user has an expanded inventory via another plugin
+				for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
+					ItemStack slot = player.getInventory().getItem(x);
+					Byte slotData = slot.getData().getData();
+					
+					if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
+						player.getInventory().clear(x);
+					}
+					x++;
+				}
+	
+				// put back what was left over
+				if(left > 0) {
+					ItemStack itsLeft = its;
+					itsLeft.setAmount(left);
+					player.getInventory().addItem(itsLeft);
+				}
+				items.setProperty(item + ".value", invoice.getValue());
+				// record the change in value
+				items.save();
+				
+				// get the new price of the item
+				BigDecimal value = price(item);
+				
+				// give some nice output
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
+				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				cash.add(invoice.getTotal().doubleValue());
+				player.sendMessage(ChatColor.GREEN + "The Banksters took: " + ChatColor.WHITE + spread);
+				player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
+				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+				player.sendMessage(ChatColor.GREEN + "--------------------------------");
+				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
+				return true;
+			}else{
+				// give nice output even if they gave a bad number.
+				player.sendMessage(ChatColor.RED + "You don't have enough " + item);
+				player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
+				player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
+				return false;
+			}
+		}else{
+			player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
+			player.sendMessage("Be sure you typed the correct name");
+			return false;
+		}
+	}
+
+	private boolean sellAll(Player player) {
+		items.load();
+		List<String> names = items.getKeys();
+		int[] id = new int[names.size()];
+		BigDecimal[] value = new BigDecimal[names.size()];
+		Byte[] byteData = new Byte[names.size()];
+		BigDecimal sale = BigDecimal.ZERO.setScale(2);
+		
+		// make a 'list' of all sellable items with their id's and values
+		for (int x = 0; x < names.size(); x++) {
+			id[x] = items.getInt(names.get(x) + ".number", 0);
+			value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);
+			byteData[x] = Byte.valueOf(items.getString(names.get(x) + ".data"));
+		}
+		
+		// run thru each slot and sell any sellable items
+		int index = 0;
+		// we do it this way incase a user has an expanded inventory via another plugin
+		for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
+			ItemStack slot = player.getInventory().getItem(index);
+			int slotId = slot.getTypeId();
+			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
+			Byte slotByteData = slot.getData().getData();
+			
+			for (int x = 0; x < names.size(); x++) {
+				if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
+					// perform sale of this slot
+					Invoice thisSale = generateInvoice(0, names.get(x), slotAmount.intValue());
+					// rack up our total
+					sale = sale.add(thisSale.getTotal());
+					// save the new value
+					items.setProperty(names.get(x) + ".value", thisSale.getValue());
+					items.save();
+					// remove the item(s)
+					player.getInventory().clear(index);
+					// "pay the man"
+					MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+					cash.add(thisSale.getTotal().doubleValue());
+					// give nice output
+					player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
+					break;
+				}
+			}
+			index++;
+		}
+		
+		// give a nice total collumn
+		if (sale == BigDecimal.ZERO.setScale(2))
+			player.sendMessage("Nothing to Sell");
+		player.sendMessage(ChatColor.GREEN + "--------------------------------");
+		player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale);
+		return true;
+	}
+
+	private BigDecimal price(String item) {
+		// Load the item list
+		items.load();
+		// get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
+		BigDecimal price = BigDecimal.valueOf(items.getDouble(item + ".value", -2000000000));
+		BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
+		BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
+		
+		if(price.intValue() != -2000000000) {
+			// We received an argument which resolved to an item on our list.
+			// The price could register as a negative or below .01
+			// in this case we should return .01 as the price.
+			if(price.compareTo(minValue) == -1) {
+				price = minValue;
+			} else if (price.compareTo(maxValue) == 1) {
+				price = maxValue;
+			}
+			
+			return price;
+		}
+		return BigDecimal.ZERO;
+	}
+
 	/**
 	 * Determine the cost of a given number of an item and calculate a new value for the item accordingly.
 	 * @param oper 1 for buying, 0 for selling.
@@ -188,72 +426,6 @@ public class DynamicMarket extends JavaPlugin {
 	
 
 	/**
-	 * Buy a specified amount of an item for the player.
-	 * 
-	 * @param player The player on behalf of which these actions will be carried out. 
-	 * @param item The desired item in the form of the item name. 
-	 * @param amount The desired amount of the item to purchase.
-	 * @return true on success, false on failure. 
-	 */
-	public boolean buy (Player player, String item, int amount) {
-		
-		// Be sure we have a positive amount
-		if (amount < 0) {
-			player.sendMessage(ChatColor.RED + "Invalid amount.");
-			player.sendMessage("No negative numbers, please.");
-			return false;
-		}
-		items.load();
-		int id = items.getInt(item + ".number", 0);
-		// a value of 0 would indicate that we did not find an item with that name
-		if(id != 0) {
-			// determine what it will cost 
-			Invoice invoice = generateInvoice(1, item, amount);
-			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-			if (cash.hasEnough(invoice.getTotal().doubleValue())) {
-				Byte byteData = Byte.valueOf(items.getString(item + ".data"));
-				
-				// give 'em the items and drop any extra
-				HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
-				for (int a : overflow.keySet()) {
-					player.getWorld().dropItem(player.getLocation(), overflow.get(a));
-				}
-				
-				items.setProperty(item + ".value", invoice.getValue());
-				items.save();
-				
-				// get the new price of the item
-				BigDecimal value = price(item);
-				
-				// Give some nice output.
-				player.sendMessage(ChatColor.GREEN + "--------------------------------");
-				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
-				// Subtract the invoice (this is an efficient place to do this)
-				cash.subtract(invoice.getTotal().doubleValue());
-
-				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
-				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
-				player.sendMessage(ChatColor.GREEN + "--------------------------------");
-				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
-				return true;
-			} else {
-				// Otherwise, give nice output anyway ;)
-				// The idea here is to show how much more money is needed.
-				BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
-				player.sendMessage(ChatColor.RED + "You don't have enough money");
-				player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
-				player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
-				player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
-				return false;
-			}
-		}else{
-			player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
-			player.sendMessage("Be sure you typed the correct name");
-			return false;
-		}
-	}
-	
-	/**
 	 * Figure out how much of a given item is in the player's inventory
 	 * @param player The player entity in question.
 	 * @param id The Data Value of the item in question.
@@ -279,101 +451,6 @@ public class DynamicMarket extends JavaPlugin {
 			x++;
 		}
 		return inInventory;
-	}
-	
-	/**
-	 * Sell a specified amount of an item for the player.
-	 * 
-	 * @param player The player on behalf of which these actions will be carried out. 
-	 * @param item The desired item in the form of the item name. 
-	 * @param amount The desired amount of the item to sell.
-	 * @return true on success, false on failure. 
-	 */
-	public boolean sell (Player player, String item, int amount) {
-		
-		// Be sure we have a positive amount
-		if (amount < 0) {
-			player.sendMessage(ChatColor.RED + "Invalid amount.");
-			player.sendMessage("No negative numbers, please.");
-			return false;
-		}
-		items.load();
-		int id = items.getInt(item + ".number", 0);
-		
-		// a value of 0 would indicate that we did not find an item with that name
-		if(id != 0) {
-			Byte byteData = Byte.valueOf(items.getString(item + ".data"));
-			
-			// determine what it will pay 
-			Invoice invoice = generateInvoice(0, item, amount);
-			MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-			// If the player has enough of the item, perform the transaction.
-			ItemStack its = new ItemStack(id, amount, (short) 0, byteData);
-			if (player.getInventory().contains(id)) {
-				BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", 0));
-				
-				// Figure out how much is left over.
-				int left = getAmountInInventory(player, its) - amount;
-				if (left < 0) { // this indicates the correct id, but wrong bytedata value
-					// give nice output even if they gave a bad number.
-					player.sendMessage(ChatColor.RED + "You don't have enough " + item);
-					player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
-					player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
-					return false;
-				}
-					
-				// Take out all of the item
-				int x = 0;
-				// we do it this way incase a user has an expanded inventory via another plugin
-				for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
-					ItemStack slot = player.getInventory().getItem(x);
-					Byte slotData = slot.getData().getData();
-					
-					if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
-						player.getInventory().clear(x);
-					}
-					x++;
-				}
-
-				// put back what was left over
-				if(left > 0) {
-					ItemStack itsLeft = its;
-					itsLeft.setAmount(left);
-					player.getInventory().addItem(itsLeft);
-				}
-				items.setProperty(item + ".value", invoice.getValue());
-				// record the change in value
-				items.save();
-				
-				// get the new price of the item
-				BigDecimal value = price(item);
-				
-				// give some nice output
-				player.sendMessage(ChatColor.GREEN + "--------------------------------");
-				player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
-				cash.add(invoice.getTotal().doubleValue());
-				player.sendMessage(ChatColor.GREEN + "The Banksters took: " + ChatColor.WHITE + spread);
-				player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
-				player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
-				player.sendMessage(ChatColor.GREEN + "--------------------------------");
-				player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
-				return true;
-			}else{
-				// give nice output even if they gave a bad number.
-				player.sendMessage(ChatColor.RED + "You don't have enough " + item);
-				player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
-				player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
-				return false;
-			}
-		}else{
-			player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
-			player.sendMessage("Be sure you typed the correct name");
-			return false;
-		}
-	}
-	
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		return readCommand((Player) sender, commandLabel, args);
 	}
 	
 	public boolean readCommand(Player player, String command, String[] args) {
@@ -534,82 +611,5 @@ public class DynamicMarket extends JavaPlugin {
 			player.sendMessage("Invalid number of arguments");
 		}
 		return false;
-	}
-	
-	private BigDecimal price(String item) {
-		// Load the item list
-		items.load();
-		// get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
-		BigDecimal price = BigDecimal.valueOf(items.getDouble(item + ".value", -2000000000));
-		BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
-		BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
-		
-		if(price.intValue() != -2000000000) {
-			// We received an argument which resolved to an item on our list.
-			// The price could register as a negative or below .01
-			// in this case we should return .01 as the price.
-			if(price.compareTo(minValue) == -1) {
-				price = minValue;
-			} else if (price.compareTo(maxValue) == 1) {
-				price = maxValue;
-			}
-			
-			return price;
-		}
-		return BigDecimal.ZERO;
-	}
-
-	private boolean sellAll(Player player) {
-		items.load();
-		List<String> names = items.getKeys();
-		int[] id = new int[names.size()];
-		BigDecimal[] value = new BigDecimal[names.size()];
-		Byte[] byteData = new Byte[names.size()];
-		BigDecimal sale = BigDecimal.ZERO.setScale(2);
-		
-		// make a 'list' of all sellable items with their id's and values
-		for (int x = 0; x < names.size(); x++) {
-			id[x] = items.getInt(names.get(x) + ".number", 0);
-			value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);
-			byteData[x] = Byte.valueOf(items.getString(names.get(x) + ".data"));
-		}
-		
-		// run thru each slot and sell any sellable items
-		int index = 0;
-		// we do it this way incase a user has an expanded inventory via another plugin
-		for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
-			ItemStack slot = player.getInventory().getItem(index);
-			int slotId = slot.getTypeId();
-			BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
-			Byte slotByteData = slot.getData().getData();
-			
-			for (int x = 0; x < names.size(); x++) {
-				if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
-					// perform sale of this slot
-					Invoice thisSale = generateInvoice(0, names.get(x), slotAmount.intValue());
-					// rack up our total
-					sale = sale.add(thisSale.getTotal());
-					// save the new value
-					items.setProperty(names.get(x) + ".value", thisSale.getValue());
-					items.save();
-					// remove the item(s)
-					player.getInventory().clear(index);
-					// "pay the man"
-					MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-					cash.add(thisSale.getTotal().doubleValue());
-					// give nice output
-					player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
-					break;
-				}
-			}
-			index++;
-		}
-		
-		// give a nice total collumn
-		if (sale == BigDecimal.ZERO.setScale(2))
-			player.sendMessage("Nothing to Sell");
-		player.sendMessage(ChatColor.GREEN + "--------------------------------");
-		player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale);
-		return true;
 	}
 }
