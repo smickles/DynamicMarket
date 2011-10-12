@@ -308,7 +308,13 @@ public class DynamicMarket extends JavaPlugin {
             ItemStack slot = player.getInventory().getItem(index);
             int slotId = slot.getTypeId();
             BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
-            Byte slotByteData = slot.getData().getData();
+            
+            Byte slotByteData = Byte.valueOf("0");
+            try {
+                slotByteData = slot.getData().getData();
+            } catch (NullPointerException e) {
+                slotByteData = Byte.valueOf("0");
+            }
             
             for (int x = 0; x < names.size(); x++) {
                 if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
