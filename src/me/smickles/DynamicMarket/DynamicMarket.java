@@ -408,37 +408,24 @@ public class DynamicMarket extends JavaPlugin {
 			}
 		// Command Example: /price cobblestone
 		// should return: cobblestone: .01
-		}else if(command.equalsIgnoreCase("price")){
+		} else if(command.equalsIgnoreCase("price")){
 			// We expect one argument
 			if(args.length == 1){
-				// Load the item list
-				items.load();
-				// get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
-				BigDecimal price = BigDecimal.valueOf(items.getDouble(args[0] + ".value", -2000000000));
-				BigDecimal minValue = BigDecimal.valueOf(items.getDouble(args[0] + ".minValue", MINVALUE.doubleValue()));
-				if(price.intValue() != -2000000000) {
-					// We received an argument which resolved to an item on our list.
-					// The price could register as a negative or below .01
-					// in this case we should return .01 as the price.
-					if(price.compareTo(minValue) == -1) {
-						price = minValue;
-					}
-					player.sendMessage(ChatColor.GREEN + args[0] + ": " + ChatColor.WHITE + price);
-					return true;
-				}else{
-					// We received an argument which did not resolve to a known item.
-					player.sendMessage(ChatColor.RED + "Be sure you typed the correct name");
-					player.sendMessage(args[0] + ChatColor.RED + " is invalid");
-					return false;
-				}
-			}else{
+				String item = args[0];
+				
+				BigDecimal price = price(item);	
+
+				player.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
+				return true;
+
+			} else {
 				// We received too many or too few arguments.
 				player.sendMessage("Invalid Arguments");
 				return false;
 			}
 		// Example: '/market top' should return the top 5 most expensive items on the market
 		// '/market bottom' should do the dame for the least expensive items.
-		}else if(command.equalsIgnoreCase("market")) {
+		} else if(command.equalsIgnoreCase("market")) {
 			// we expect one argument
 			if(args.length == 1) {
 				// We received '/market top'
@@ -541,6 +528,29 @@ public class DynamicMarket extends JavaPlugin {
 		return false;
 	}
 	
+	private BigDecimal price(String item) {
+		// Load the item list
+		items.load();
+		// get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
+		BigDecimal price = BigDecimal.valueOf(items.getDouble(item + ".value", -2000000000));
+		BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
+		BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
+		
+		if(price.intValue() != -2000000000) {
+			// We received an argument which resolved to an item on our list.
+			// The price could register as a negative or below .01
+			// in this case we should return .01 as the price.
+			if(price.compareTo(minValue) == -1) {
+				price = minValue;
+			} else if (price.compareTo(maxValue) == 1) {
+				price = maxValue;
+			}
+			
+			return price;
+		}
+		return BigDecimal.ZERO;
+	}
+
 	private boolean sellAll(Player player) {
 		items.load();
 		List<String> names = items.getKeys();
