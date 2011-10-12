@@ -46,7 +46,7 @@ public class Invoice {
 	 * @param addend the amount to be added
 	 */
 	public void addValue(BigDecimal addend) {
-		value = value.subtract(addend);
+		value = value.add(addend);
 	}
 	
 	/**

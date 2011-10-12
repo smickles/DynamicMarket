@@ -377,7 +377,7 @@ public class DynamicMarket extends JavaPlugin {
 		Invoice inv = new Invoice(BigDecimal.valueOf(0),BigDecimal.valueOf(0));
 		inv.value = BigDecimal.valueOf(items.getDouble(item + ".value", 0));
 		
-		// if the we are selling, do one initial decrement of the value
+		// get the spread so we can do one initial decrement of the value if we are selling
 		BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", SPREAD.doubleValue()));
 		
 		// determine the total cost
@@ -391,8 +391,7 @@ public class DynamicMarket extends JavaPlugin {
 			// work the spread on the first one.
 			if ((oper == 0) && (x == 1)) {
 				inv.subtractValue(spread);
-			// otherwise, do the usual decriment.
-			} else if ((oper == 0) && (x > 1)) {
+			} else if ((oper == 0) && (x > 1)) { // otherwise, do the usual decriment.
 				inv.subtractValue(changeRate);
 			}
 			
