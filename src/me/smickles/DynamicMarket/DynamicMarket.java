@@ -129,6 +129,168 @@ public class DynamicMarket extends JavaPlugin {
         return readCommand((Player) sender, commandLabel, args);
     }
 
+    public boolean readCommand(Player player, String command, String[] args) {
+        if(command.equalsIgnoreCase("buy")) {
+            if(args.length == 2) {
+                String item = args[0];
+                int amount = 0;
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    player.sendMessage(ChatColor.RED + "Invalid amount.");
+                    player.sendMessage("Be sure you typed a whole number.");
+                    return false;
+                }
+                return buy(player, item, amount);
+            } else {
+                player.sendMessage("Invalid number of arguments");
+                return false;
+            }
+    
+        } else if (command.equalsIgnoreCase("sell")) {
+            if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("all")) {
+                    return sellAll(player);
+                }
+            } else if (args.length == 2) {
+                String item = args[0];
+                int amount = 0;
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    player.sendMessage(ChatColor.RED + "Invalid amount.");
+                    player.sendMessage("Be sure you typed a whole number.");
+                    return false;
+                }
+                return sell(player, item, amount);
+            } else {
+                player.sendMessage("Invalid number of arguments");
+                return false;
+            }
+        // Command Example: /price cobblestone
+        // should return: cobblestone: .01
+        } else if(command.equalsIgnoreCase("price")){
+            // We expect one argument
+            if(args.length == 1){
+                String item = args[0];
+                
+                BigDecimal price = price(item);    
+    
+                player.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
+                return true;
+    
+            } else {
+                // We received too many or too few arguments.
+                player.sendMessage("Invalid Arguments");
+                return false;
+            }
+        // Example: '/market top' should return the top 5 most expensive items on the market
+        // '/market bottom' should do the dame for the least expensive items.
+        } else if(command.equalsIgnoreCase("market")) {
+            // we expect one argument
+            if(args.length == 1) {
+                // We received '/market top'
+                if(args[0].equalsIgnoreCase("top")) {
+                    // load the item list
+                    items.load();
+                    // make  'arrays', a name, a price 
+                    List<String> names = items.getKeys();
+                    String board[][] = new String[names.size()][2];
+                    for(int x = 0; x < names.size(); x++) {
+                        BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".maxValue", MAXVALUE.doubleValue()));
+                        BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+                        
+                        // names
+                        board[x][1] = names.get(x);
+                        // prices, but we want max prices if the value is above maxValue
+                        if (value.compareTo(maxValue) == 1) {
+                            BigDecimal elasticity;
+                            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
+                            
+                            // determine how many changeRate above the max it is
+                            elasticity = value.subtract(maxValue).divide(changeRate).setScale(0, RoundingMode.UP);
+                            
+                            board[x][0] = maxValue.toString() + " [" + elasticity + "]";
+                        } else {
+                            board[x][0] = value.toString() + " [0]";                            
+                        }
+                    }
+                    //sort 'em
+                    Arrays.sort(board, new Comparator<String[]>() {
+    
+                        @Override
+                        public int compare(String[] entry1, String[] entry2) {
+                            final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
+                            final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
+                            return value2.compareTo(value1);
+                        }
+    
+                        
+                    });
+                    // Send them to the player
+                    for(int x = 0; x < 10; x++) {
+                        int rank = x + 1;
+                        BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
+                        String elasticity = board[x][0].split(" ")[1];
+                        
+                        player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
+                    }
+                    return true;
+                } else if (args[0].equalsIgnoreCase("bottom")) {
+                    // load the item list
+                    items.load();
+                    // make  'arrays', a name, a price 
+                    List<String> names = items.getKeys();
+                    String board[][] = new String[names.size()][2];
+                    for(int x = 0; x < names.size(); x++) {
+                        BigDecimal minValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".minValue", MINVALUE.doubleValue()));
+                        BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+                        
+                        // names
+                        board[x][1] = names.get(x);
+                        // prices, but we want min prices if the value is above maxValue
+                        if (value.compareTo(minValue) == -1) {
+                            BigDecimal elasticity;
+                            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
+                            
+                            // determine how many changeRate below the min it is
+                            elasticity = value.subtract(minValue).abs().divide(changeRate).setScale(0, RoundingMode.DOWN);
+                            
+                            board[x][0] = minValue.toString() + " [" + elasticity + "]";
+                        } else {
+                            board[x][0] = value.toString() + " [0]";                            
+                        }
+                    }
+                    //sort 'em
+                    Arrays.sort(board, new Comparator<String[]>() {
+    
+                        @Override
+                        public int compare(String[] entry1, String[] entry2) {
+                            final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
+                            final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
+                            return value1.compareTo(value2);
+                        }
+    
+                        
+                    });
+                    // Send them to the player
+                    for(int x = 0; x < 10; x++) {
+                        int rank = x + 1;
+                        BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
+                        String elasticity = board[x][0].split(" ")[1];
+                                                                        
+                        player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
+                    }
+                    return true;                    
+                } else if (args[0].equalsIgnoreCase("list")) {
+                    return list(player);
+                }
+            }
+            player.sendMessage("Invalid number of arguments");
+        }
+        return false;
+    }
+
     /**
      * Buy a specified amount of an item for the player.
      * 
@@ -374,6 +536,34 @@ public class DynamicMarket extends JavaPlugin {
         return BigDecimal.ZERO;
     }
 
+    private boolean list(Player player) {
+        items.load();
+        String list[] = new String[20];
+        list[0] = "";
+        int row = 0;
+        
+        for (String index : items.getKeys()) {
+            // console is 55 characters wide, 20 tall
+            
+            list[row] = list[row] + index + ",  ";
+            
+            if (list[row].length() > 55) {
+                int split = list[row].lastIndexOf(" ", 55);
+                
+                list[row] = list[row].substring(0, split);
+                row++;
+                list[row] = index + ",  ";
+            }
+        }
+        list[row] = list[row].substring(0, list[row].lastIndexOf(","));
+        
+        player.sendMessage(ChatColor.GREEN + "All items on the market");
+        for (int x = 0; x <= row; x++) {
+            player.sendMessage(ChatColor.WHITE + list[x]);
+        }
+        return true;
+    }
+
     /**
      * Determine the cost of a given number of an item and calculate a new value for the item accordingly.
      * @param oper 1 for buying, 0 for selling.
@@ -466,165 +656,5 @@ public class DynamicMarket extends JavaPlugin {
             x++;
         }
         return inInventory;
-    }
-    
-    public boolean readCommand(Player player, String command, String[] args) {
-        if(command.equalsIgnoreCase("buy")) {
-            if(args.length == 2) {
-                String item = args[0];
-                int amount = 0;
-                try {
-                    amount = Integer.parseInt(args[1]);
-                } catch (NumberFormatException e) {
-                    player.sendMessage(ChatColor.RED + "Invalid amount.");
-                    player.sendMessage("Be sure you typed a whole number.");
-                    return false;
-                }
-                return buy(player, item, amount);
-            } else {
-                player.sendMessage("Invalid number of arguments");
-                return false;
-            }
-
-        } else if (command.equalsIgnoreCase("sell")) {
-            if (args.length == 1) {
-                if (args[0].equalsIgnoreCase("all")) {
-                    return sellAll(player);
-                }
-            } else if (args.length == 2) {
-                String item = args[0];
-                int amount = 0;
-                try {
-                    amount = Integer.parseInt(args[1]);
-                } catch (NumberFormatException e) {
-                    player.sendMessage(ChatColor.RED + "Invalid amount.");
-                    player.sendMessage("Be sure you typed a whole number.");
-                    return false;
-                }
-                return sell(player, item, amount);
-            } else {
-                player.sendMessage("Invalid number of arguments");
-                return false;
-            }
-        // Command Example: /price cobblestone
-        // should return: cobblestone: .01
-        } else if(command.equalsIgnoreCase("price")){
-            // We expect one argument
-            if(args.length == 1){
-                String item = args[0];
-                
-                BigDecimal price = price(item);    
-
-                player.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
-                return true;
-
-            } else {
-                // We received too many or too few arguments.
-                player.sendMessage("Invalid Arguments");
-                return false;
-            }
-        // Example: '/market top' should return the top 5 most expensive items on the market
-        // '/market bottom' should do the dame for the least expensive items.
-        } else if(command.equalsIgnoreCase("market")) {
-            // we expect one argument
-            if(args.length == 1) {
-                // We received '/market top'
-                if(args[0].equalsIgnoreCase("top")) {
-                    // load the item list
-                    items.load();
-                    // make  'arrays', a name, a price 
-                    List<String> names = items.getKeys();
-                    String board[][] = new String[names.size()][2];
-                    for(int x = 0; x < names.size(); x++) {
-                        BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".maxValue", MAXVALUE.doubleValue()));
-                        BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
-                        
-                        // names
-                        board[x][1] = names.get(x);
-                        // prices, but we want max prices if the value is above maxValue
-                        if (value.compareTo(maxValue) == 1) {
-                            BigDecimal elasticity;
-                            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
-                            
-                            // determine how many changeRate above the max it is
-                            elasticity = value.subtract(maxValue).divide(changeRate).setScale(0, RoundingMode.UP);
-                            
-                            board[x][0] = maxValue.toString() + " [" + elasticity + "]";
-                        } else {
-                            board[x][0] = value.toString() + " [0]";                            
-                        }
-                    }
-                    //sort 'em
-                    Arrays.sort(board, new Comparator<String[]>() {
-
-                        @Override
-                        public int compare(String[] entry1, String[] entry2) {
-                            final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
-                            final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
-                            return value2.compareTo(value1);
-                        }
-
-                        
-                    });
-                    // Send them to the player
-                    for(int x = 0; x < 10; x++) {
-                        int rank = x + 1;
-                        BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
-                        String elasticity = board[x][0].split(" ")[1];
-                        
-                        player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
-                    }
-                    return true;
-                }else if(args[0].equalsIgnoreCase("bottom")) {
-                    // load the item list
-                    items.load();
-                    // make  'arrays', a name, a price 
-                    List<String> names = items.getKeys();
-                    String board[][] = new String[names.size()][2];
-                    for(int x = 0; x < names.size(); x++) {
-                        BigDecimal minValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".minValue", MINVALUE.doubleValue()));
-                        BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
-                        
-                        // names
-                        board[x][1] = names.get(x);
-                        // prices, but we want min prices if the value is above maxValue
-                        if (value.compareTo(minValue) == -1) {
-                            BigDecimal elasticity;
-                            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
-                            
-                            // determine how many changeRate below the min it is
-                            elasticity = value.subtract(minValue).abs().divide(changeRate).setScale(0, RoundingMode.DOWN);
-                            
-                            board[x][0] = minValue.toString() + " [" + elasticity + "]";
-                        } else {
-                            board[x][0] = value.toString() + " [0]";                            
-                        }
-                    }
-                    //sort 'em
-                    Arrays.sort(board, new Comparator<String[]>() {
-
-                        @Override
-                        public int compare(String[] entry1, String[] entry2) {
-                            final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
-                            final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
-                            return value1.compareTo(value2);
-                        }
-
-                        
-                    });
-                    // Send them to the player
-                    for(int x = 0; x < 10; x++) {
-                        int rank = x + 1;
-                        BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
-                        String elasticity = board[x][0].split(" ")[1];
-                                                                        
-                        player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
-                    }
-                    return true;                    
-                }
-            }
-            player.sendMessage("Invalid number of arguments");
-        }
-        return false;
     }
 }
