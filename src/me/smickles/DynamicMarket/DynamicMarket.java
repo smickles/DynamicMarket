@@ -236,7 +236,7 @@ public class DynamicMarket extends JavaPlugin {
                         player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
                     }
                     return true;
-                }else if(args[0].equalsIgnoreCase("bottom")) {
+                } else if (args[0].equalsIgnoreCase("bottom")) {
                     // load the item list
                     items.load();
                     // make  'arrays', a name, a price 
@@ -282,6 +282,8 @@ public class DynamicMarket extends JavaPlugin {
                         player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
                     }
                     return true;                    
+                } else if (args[0].equalsIgnoreCase("list")) {
+                    return list(player);
                 }
             }
             player.sendMessage("Invalid number of arguments");
@@ -532,6 +534,34 @@ public class DynamicMarket extends JavaPlugin {
             return price;
         }
         return BigDecimal.ZERO;
+    }
+
+    private boolean list(Player player) {
+        items.load();
+        String list[] = new String[20];
+        list[0] = "";
+        int row = 0;
+        
+        for (String index : items.getKeys()) {
+            // console is 55 characters wide, 20 tall
+            
+            list[row] = list[row] + index + ",  ";
+            
+            if (list[row].length() > 55) {
+                int split = list[row].lastIndexOf(" ", 55);
+                
+                list[row] = list[row].substring(0, split);
+                row++;
+                list[row] = index + ",  ";
+            }
+        }
+        list[row] = list[row].substring(0, list[row].lastIndexOf(","));
+        
+        player.sendMessage(ChatColor.GREEN + "All items on the market");
+        for (int x = 0; x <= row; x++) {
+            player.sendMessage(ChatColor.WHITE + list[x]);
+        }
+        return true;
     }
 
     /**
