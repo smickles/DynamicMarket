@@ -523,8 +523,8 @@ public class DynamicMarket extends JavaPlugin {
         
         if(price.intValue() != -2000000000) {
             // We received an argument which resolved to an item on our list.
-            // The price could register as a negative or below .01
-            // in this case we should return .01 as the price.
+            // The price could register as a negative or below minValue
+            // in this case we should return minValue as the price.
             if(price.compareTo(minValue) == -1) {
                 price = minValue;
             } else if (price.compareTo(maxValue) == 1) {
