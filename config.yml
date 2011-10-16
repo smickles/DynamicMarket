@@ -1,13 +1,23 @@
-wood:                    # The name of the item. Used in commands, ex. /buy wood 64
-    value: -0.65         # The current value of wood. (don't worry if this is negative)
-    number: 17           # The 'regular' data value of wood
-    minValue: 0.01       # The minimum amount you want one wood to sell/buy for
-    maxValue: 10000.0    # The maximum amount you want one wood to sell/buy for
-    changeRate: 0.01     # The amount you want added/subtracted to wood's value when bought/sold
-    data: '0'            # The 'second' data value. 0 is the byte data for regular wood
-    spread: 0.01         # The transaction fee for selling. Keep this equal to changeRate for
-                         #     normal use. Set it larger than changeRate for a 'money sink'
-                         #     Don't set it less than changeRate unless you know what you're doing
+## Example: ##
+# wood:                    # The name of the item. Used in commands, ex. /buy wood 64
+#     value: -0.65         # The current value of wood. (don't worry if this is negative)
+#     number: 17           # The 'regular' data value of wood
+#     minValue: 0.01       # The minimum amount you want one wood to sell/buy for
+#     maxValue: 10000.0    # The maximum amount you want one wood to sell/buy for
+#     changeRate: 0.01     # The amount you want added/subtracted to wood's value when bought/sold
+#     data: '0'            # The 'second' data value. 0 is the byte data for regular wood
+#     spread: 0.01         # The transaction fee for selling. Keep this equal to changeRate for
+#                          #     normal use. Set it larger than changeRate for a 'money sink'
+#                          #     Don't set it less than changeRate unless you know what you're doing
+
+ wood:
+     value: -0.65
+     number: 17
+     minValue: 0.01
+     maxValue: 10000.0
+     changeRate: 0.01
+     data: '0'
+     spread: 0.01
 ink:
     value: 9.08
     number: 351
