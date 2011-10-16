@@ -484,11 +484,16 @@ public class DynamicMarket extends JavaPlugin {
                 BigDecimal value = price(item);
                 
                 // give some nice output
+                BigDecimal sale = invoice.getTotal().add(spread);
+                
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
                 cash.add(invoice.getTotal().doubleValue());
+                player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
                 player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
-                player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
+                player.sendMessage(ChatColor.GREEN + "--------------------------------");
+                player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + invoice.getTotal());
+
                 player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
