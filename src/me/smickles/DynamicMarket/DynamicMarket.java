@@ -1,7 +1,24 @@
+/**DynaMark
+ * Copyright 2011 Michael Carver
+ * 
+ * This file is part of DynaMark.
+ *
+ *  DynaMark is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  DynaMark is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with DynaMark.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 package me.smickles.DynamicMarket;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +47,7 @@ import org.bukkit.util.config.Configuration;
 import com.nijikokun.register.payment.Methods;
 import com.nijikokun.register.payment.Method.MethodAccount;
 
+@SuppressWarnings("deprecation")
 public class DynamicMarket extends JavaPlugin {
 
     public static DynamicMarket plugin;
@@ -633,22 +651,20 @@ public class DynamicMarket extends JavaPlugin {
             }
             
             // check the current value
-            if((inv.getValue().compareTo(minValue) == 1) | (inv.getValue().compareTo(minValue) == 0)) {
-                // current value is @ or above minValue
+            if((inv.getValue().compareTo(minValue) == 1) | (inv.getValue().compareTo(minValue) == 0)) {// current value is @ or above minValue
                 // be sure value is not above maxValue
-                if (inv.getValue().compareTo(maxValue) == -1) {
-                    // current value is "just right"
-                    // add current value to total
-                    inv.addTotal(inv.getValue());
-                } else {
-                    // current value is above the max
-                    // add maxValue to total
-                    inv.addTotal(maxValue);
+                if (inv.getValue().compareTo(maxValue) == -1) {// current value is "just right"
+                    inv.addTotal(inv.getValue());// add current value to total
+                } else {// current value is above the max
+                    inv.addTotal(maxValue); // add maxValue to total
                 }
-            } else {
-                // current value is below the minimum
-                // add the minimum to total
-                inv.addTotal(minValue);
+            } else {// current value is below the minimum
+                
+                inv.addTotal(minValue);// add the minimum to total
+                
+                if ((oper == 0) && (x == 1)) {
+                    inv.subtractTotal(spread);// subtract the spread if we're selling and this is the first run
+                }   
             }
             
             // Change our stored value for the item
