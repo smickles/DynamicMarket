@@ -68,39 +68,56 @@ public class DynamicMarket extends JavaPlugin {
             logger.info("[" + pdfFile.getName() +"] Could not find config, copying default");            
             
             // copy default over
-            try { 
-                InputStream defaultStream = this.getClass().getResourceAsStream("/config.yml");
-                File conf = new File(directory + File.separator +"config.yml");
+            // plus, distrubute the license and readme
+            for (int x = 0; x <= 2; x++) {
+                try {
+                    InputStream defaultStream = null;
+                    File conf = null;
+                    
+                    switch (x) {
+                    case 0:
+                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
+                        conf = new File(directory + File.separator +"config.yml");
+                        break;
+                    case 1:
+                        defaultStream = this.getClass().getResourceAsStream("/LICENSE");
+                        conf = new File(directory + File.separator +"LICENSE");
+                        break;
+                    case 2:
+                        defaultStream = this.getClass().getResourceAsStream("/README");
+                        conf = new File(directory + File.separator +"README");
+                        break;
+                    }
+
                 
-                directory.mkdir();
-                conf.createNewFile();
+                    directory.mkdir();
+                    conf.createNewFile();
                 
-                OutputStream confStream = new FileOutputStream(conf);
+                    OutputStream confStream = new FileOutputStream(conf);
                 
-                byte buf[] = new byte[1024];
-                int len;
+                    byte buf[] = new byte[1024];
+                    int len;
                 
-                while ((len = defaultStream.read(buf)) > 0) {
-                    confStream.write(buf, 0, len);
-                }
+                    while ((len = defaultStream.read(buf)) > 0) {
+                        confStream.write(buf, 0, len);
+                    }
                 
-                defaultStream.close();
-                confStream.close();
+                    defaultStream.close();
+                    confStream.close();
                 
-                logger.info("[" + pdfFile.getName() +"] Default config copied."); 
+
                 
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }    
+
             }
-           
             
-            
-            
+            logger.info("[" + pdfFile.getName() +"] Default config copied.");
             
         } else {
             logger.info("[" + pdfFile.getName() +"] Found config, making sure it's up to date.");
