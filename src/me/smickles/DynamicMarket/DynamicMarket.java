@@ -469,7 +469,7 @@ public class DynamicMarket extends JavaPlugin {
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
                 cash.add(invoice.getTotal().doubleValue());
-                player.sendMessage(ChatColor.GREEN + "The Banksters took: " + ChatColor.WHITE + spread);
+                player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
                 player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
                 player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
