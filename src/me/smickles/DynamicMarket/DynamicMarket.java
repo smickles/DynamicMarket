@@ -87,7 +87,7 @@ public class DynamicMarket extends JavaPlugin {
             
             // copy default over
             // plus, distrubute the license and readme
-            for (int x = 0; x <= 2; x++) {
+            for (int x = 0; x <= 3; x++) {
                 try {
                     InputStream defaultStream = null;
                     File conf = null;
@@ -104,6 +104,10 @@ public class DynamicMarket extends JavaPlugin {
                     case 2:
                         defaultStream = this.getClass().getResourceAsStream("/README");
                         conf = new File(directory + File.separator +"README");
+                        break;
+                    case 3:
+                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
+                        conf = new File(directory + File.separator +"config.yml.EXAMPLE");
                         break;
                     }
 
