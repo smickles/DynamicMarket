@@ -1,6 +1,12 @@
 package me.smickles.DynamicMarket;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -59,30 +65,43 @@ public class DynamicMarket extends JavaPlugin {
         
         
         if (!configIsThere) {
-            logger.info("[" + pdfFile.getName() +"] Could not find config, building default");            
+            logger.info("[" + pdfFile.getName() +"] Could not find config, copying default");            
             
-            // default item 'config'
-            items.load();
-            
-            String[] itemNames = new String[]{"stone","01","dirt","03","cobblestone","04","sapling","06","sand","12","gravel","13","wood","17","lapis","22","sandstone","24","grass","31","wool","35","dandelion","37","rose","38","brownmushroom","39","redmushroom","40","mossstone","48","obsidian","49","cactus","81","netherrack","87","soulsand","88","vine","106","apple","260","coal","263","diamond","264","iron","265","gold","266","string","287","feather","288","gunpowder","289","seeds","295","flint","318","pork","319","redstone","331","snow","332","leather","334","clay","337","sugarcane","338","slime","341","egg","344","glowstone","348","fish","349","bone","352","pumpkinseeds","361","melonseeds","362","beef","363","chicken","365","rottenflesh","367","enderpearl","368"};
-            
-            for(int x = 0; x < itemNames.length; x = x + 2) {
-                items.getString(itemNames[x], " ");
-                items.getDouble(itemNames[x] + ".value", 10);
-                items.getDouble(itemNames[x] + ".minValue", MINVALUE.doubleValue());
-                items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
-                items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
-                items.getDouble(itemNames[x] + ".spread", SPREAD.doubleValue());
+            // copy default over
+            try { 
+                InputStream defaultStream = this.getClass().getResourceAsStream("/config.yml");
+                File conf = new File(directory + File.separator +"config.yml");
+                
+                directory.mkdir();
+                conf.createNewFile();
+                
+                OutputStream confStream = new FileOutputStream(conf);
+                
+                byte buf[] = new byte[1024];
+                int len;
+                
+                while ((len = defaultStream.read(buf)) > 0) {
+                    confStream.write(buf, 0, len);
+                }
+                
+                defaultStream.close();
+                confStream.close();
+                
+                logger.info("[" + pdfFile.getName() +"] Default config copied."); 
+                
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            for (int x = 1; x < itemNames.length; x = x + 2) {
-                items.getInt(itemNames[x-1] + ".number", Integer.parseInt(itemNames[x]));
-                MaterialData mat = new MaterialData(Integer.parseInt(itemNames[x]));
-                items.getString(itemNames[x-1] + ".data", Byte.toString(mat.getData()));
-            }
+           
             
-                    
-            items.save();
+            
+            
+            
         } else {
             logger.info("[" + pdfFile.getName() +"] Found config, making sure it's up to date.");
             
