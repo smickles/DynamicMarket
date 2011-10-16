@@ -126,31 +126,31 @@ public class DynamicMarket extends JavaPlugin {
 
     
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        return readCommand((Player) sender, commandLabel, args);
+        return readCommand(sender, commandLabel, args);
     }
 
-    public boolean readCommand(Player player, String command, String[] args) {
-        if(command.equalsIgnoreCase("buy")) {
+    public boolean readCommand(CommandSender sender, String command, String[] args) {
+        if((command.equalsIgnoreCase("buy")) && (sender instanceof Player)) {
             if(args.length == 2) {
                 String item = args[0];
                 int amount = 0;
                 try {
                     amount = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ChatColor.RED + "Invalid amount.");
-                    player.sendMessage("Be sure you typed a whole number.");
+                    sender.sendMessage(ChatColor.RED + "Invalid amount.");
+                    sender.sendMessage("Be sure you typed a whole number.");
                     return false;
                 }
-                return buy(player, item, amount);
+                return buy((Player) sender, item, amount);
             } else {
-                player.sendMessage("Invalid number of arguments");
+                sender.sendMessage("Invalid number of arguments");
                 return false;
             }
     
-        } else if (command.equalsIgnoreCase("sell")) {
+        } else if ((command.equalsIgnoreCase("sell")) && (sender instanceof Player)) {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("all")) {
-                    return sellAll(player);
+                    return sellAll((Player) sender);
                 }
             } else if (args.length == 2) {
                 String item = args[0];
@@ -158,13 +158,13 @@ public class DynamicMarket extends JavaPlugin {
                 try {
                     amount = Integer.parseInt(args[1]);
                 } catch (NumberFormatException e) {
-                    player.sendMessage(ChatColor.RED + "Invalid amount.");
-                    player.sendMessage("Be sure you typed a whole number.");
+                    sender.sendMessage(ChatColor.RED + "Invalid amount.");
+                    sender.sendMessage("Be sure you typed a whole number.");
                     return false;
                 }
-                return sell(player, item, amount);
+                return sell((Player) sender, item, amount);
             } else {
-                player.sendMessage("Invalid number of arguments");
+                sender.sendMessage("Invalid number of arguments");
                 return false;
             }
         // Command Example: /price cobblestone
@@ -176,12 +176,12 @@ public class DynamicMarket extends JavaPlugin {
                 
                 BigDecimal price = price(item);    
     
-                player.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
+                sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
                 return true;
     
             } else {
                 // We received too many or too few arguments.
-                player.sendMessage("Invalid Arguments");
+                sender.sendMessage("Invalid Arguments");
                 return false;
             }
         // Example: '/market top' should return the top 5 most expensive items on the market
@@ -233,7 +233,7 @@ public class DynamicMarket extends JavaPlugin {
                         BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
                         String elasticity = board[x][0].split(" ")[1];
                         
-                        player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
+                        sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
                     }
                     return true;
                 } else if (args[0].equalsIgnoreCase("bottom")) {
@@ -279,14 +279,14 @@ public class DynamicMarket extends JavaPlugin {
                         BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
                         String elasticity = board[x][0].split(" ")[1];
                                                                         
-                        player.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
+                        sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
                     }
                     return true;                    
                 } else if (args[0].equalsIgnoreCase("list")) {
-                    return list(player);
+                    return list(sender);
                 }
             }
-            player.sendMessage("Invalid number of arguments");
+            sender.sendMessage("Invalid number of arguments");
         }
         return false;
     }
@@ -460,7 +460,7 @@ public class DynamicMarket extends JavaPlugin {
         BigDecimal[] value = new BigDecimal[names.size()];
         Byte[] byteData = new Byte[names.size()];
         BigDecimal sale = BigDecimal.ZERO.setScale(2);
-        
+              
         // make a 'list' of all sellable items with their id's and values
         for (int x = 0; x < names.size(); x++) {
             id[x] = items.getInt(names.get(x) + ".number", 0);
@@ -536,7 +536,7 @@ public class DynamicMarket extends JavaPlugin {
         return BigDecimal.ZERO;
     }
 
-    private boolean list(Player player) {
+    private boolean list(CommandSender sender) {
         items.load();
         String list[] = new String[20];
         list[0] = "";
@@ -557,9 +557,9 @@ public class DynamicMarket extends JavaPlugin {
         }
         list[row] = list[row].substring(0, list[row].lastIndexOf(","));
         
-        player.sendMessage(ChatColor.GREEN + "All items on the market");
+        sender.sendMessage(ChatColor.GREEN + "All items on the market");
         for (int x = 0; x <= row; x++) {
-            player.sendMessage(ChatColor.WHITE + list[x]);
+            sender.sendMessage(ChatColor.WHITE + list[x]);
         }
         return true;
     }
