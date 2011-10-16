@@ -9,8 +9,7 @@
 #     spread: 0.01         # The transaction fee for selling. Keep this equal to changeRate for
 #                          #     normal use. Set it larger than changeRate for a 'money sink'
 #                          #     Don't set it less than changeRate unless you know what you're doing
-
- wood:
+wood:
      value: -0.65
      number: 17
      minValue: 0.01
