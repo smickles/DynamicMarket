@@ -1,3 +1,22 @@
+/**DynaMark
+ * Copyright 2011 Michael Carver
+ * 
+ * This file is part of DynaMark.
+ *
+ *  DynaMark is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  DynaMark is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with DynaMark.  If not, see <http://www.gnu.org/licenses/>.
+ **/
+
 package me.smickles.DynamicMarket;
 
 import java.math.BigDecimal;
@@ -42,6 +61,22 @@ public class Invoice {
     }
     
     /**
+     * subtract an amount from the total of the invoice
+     * @param subtrahend the amount to be subtracted from the total.
+     */
+    public void subtractTotal(BigDecimal subtrahend) {
+        total = total.subtract(subtrahend);
+    }   
+    
+    /**
+     * Set the total to a give value.
+     * @param newTotal the desired total
+     */
+    public void setTotal(BigDecimal newTotal) {
+        total = newTotal;        
+    }
+    
+    /**
      * Add an amount to the proposed value of the item
      * @param addend the amount to be added
      */
@@ -56,5 +91,7 @@ public class Invoice {
     public void subtractValue(BigDecimal subtrahend) {
         value = value.subtract(subtrahend);
     }
+    
+
 
 }
