@@ -1,6 +1,29 @@
+/**DynaMark
+ * Copyright 2011 Michael Carver
+ * 
+ * This file is part of DynaMark.
+ *
+ *  DynaMark is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  DynaMark is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with DynaMark.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 package me.smickles.DynamicMarket;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -24,6 +47,7 @@ import org.bukkit.util.config.Configuration;
 import com.nijikokun.register.payment.Methods;
 import com.nijikokun.register.payment.Method.MethodAccount;
 
+@SuppressWarnings("deprecation")
 public class DynamicMarket extends JavaPlugin {
 
     public static DynamicMarket plugin;
@@ -46,45 +70,90 @@ public class DynamicMarket extends JavaPlugin {
         PluginDescriptionFile pdfFile = this.getDescription();
         directory = getDataFolder();
         boolean configIsThere = false;
+        boolean exampleIsThere = false;
+        boolean licenseIsThere = false;
+        boolean readmeIsThere = false;
         items = getConfiguration();
         
         if (directory.exists()) {
             for (String f : directory.list()) {
-                if (f.equalsIgnoreCase("config.yml")) {
+                if (f.equalsIgnoreCase("config.yml"))
                     configIsThere = true;
-                    break;
-                }
+                if (f.equalsIgnoreCase("config.yml.example"))
+                    exampleIsThere = true;
+                if (f.equalsIgnoreCase("LICENSE"))
+                    licenseIsThere = true;
+                if (f.equalsIgnoreCase("README"))
+                    readmeIsThere = true;
             }
         }
         
         
-        if (!configIsThere) {
-            logger.info("[" + pdfFile.getName() +"] Could not find config, building default");            
-            
-            // default item 'config'
-            items.load();
-            
-            String[] itemNames = new String[]{"stone","01","dirt","03","cobblestone","04","sapling","06","sand","12","gravel","13","wood","17","lapis","22","sandstone","24","grass","31","wool","35","dandelion","37","rose","38","brownmushroom","39","redmushroom","40","mossstone","48","obsidian","49","cactus","81","netherrack","87","soulsand","88","vine","106","apple","260","coal","263","diamond","264","iron","265","gold","266","string","287","feather","288","gunpowder","289","seeds","295","flint","318","pork","319","redstone","331","snow","332","leather","334","clay","337","sugarcane","338","slime","341","egg","344","glowstone","348","fish","349","bone","352","pumpkinseeds","361","melonseeds","362","beef","363","chicken","365","rottenflesh","367","enderpearl","368"};
-            
-            for(int x = 0; x < itemNames.length; x = x + 2) {
-                items.getString(itemNames[x], " ");
-                items.getDouble(itemNames[x] + ".value", 10);
-                items.getDouble(itemNames[x] + ".minValue", MINVALUE.doubleValue());
-                items.getDouble(itemNames[x] + ".maxValue", MAXVALUE.doubleValue());
-                items.getDouble(itemNames[x] + ".changeRate", CHANGERATE.doubleValue());
-                items.getDouble(itemNames[x] + ".spread", SPREAD.doubleValue());
-            }
-
-            for (int x = 1; x < itemNames.length; x = x + 2) {
-                items.getInt(itemNames[x-1] + ".number", Integer.parseInt(itemNames[x]));
-                MaterialData mat = new MaterialData(Integer.parseInt(itemNames[x]));
-                items.getString(itemNames[x-1] + ".data", Byte.toString(mat.getData()));
-            }
-            
+        if (!configIsThere | !exampleIsThere | !licenseIsThere | !readmeIsThere) {
+            // copy default over
+            // plus, distribute the license and readme
+            for (int x = 0; x <= 3; x++) {
+                boolean writeFile = true;
+                
+                try {
+                    InputStream defaultStream = null;
+                    File conf = null;
                     
-            items.save();
+                    switch (x) {
+                    case 0:
+                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
+                        conf = new File(directory + File.separator +"config.yml");
+                        if (configIsThere)
+                            writeFile = false;
+                        break;
+                    case 1:
+                        defaultStream = this.getClass().getResourceAsStream("/LICENSE");
+                        conf = new File(directory + File.separator +"LICENSE");
+                        if (licenseIsThere)
+                            writeFile = false;
+                        break;
+                    case 2:
+                        defaultStream = this.getClass().getResourceAsStream("/README");
+                        conf = new File(directory + File.separator +"README");
+                        if (readmeIsThere)
+                            writeFile = false;
+                        break;
+                    case 3:
+                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
+                        conf = new File(directory + File.separator +"config.yml.EXAMPLE");
+                        if (exampleIsThere)
+                            writeFile = false;
+                        break;
+                    }
+                    
+                    if (writeFile) {
+                        directory.mkdir();
+                        conf.createNewFile();
+                        
+                        OutputStream confStream = new FileOutputStream(conf);
+                        
+                        byte buf[] = new byte[1024];
+                        int len;
+                        
+                        while ((len = defaultStream.read(buf)) > 0) {
+                            confStream.write(buf, 0, len);
+                        }
+                        
+                        defaultStream.close();
+                        confStream.close();
+                    }
+                    
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }    
+
+            }
+            
         } else {
-            logger.info("[" + pdfFile.getName() +"] Found config, making sure it's up to date.");
             
             items.load();
             for (String n : items.getKeys()) {
@@ -169,9 +238,9 @@ public class DynamicMarket extends JavaPlugin {
             }
         // Command Example: /price cobblestone
         // should return: cobblestone: .01
-        } else if(command.equalsIgnoreCase("price")){
+        } else if (command.equalsIgnoreCase("price")){
             // We expect one argument
-            if(args.length == 1){
+            if (args.length == 1){
                 String item = args[0];
                 
                 BigDecimal price = price(item);    
@@ -179,6 +248,11 @@ public class DynamicMarket extends JavaPlugin {
                 sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
                 return true;
     
+            } else if (args.length == 2) {
+                String item = args[0];
+                int amt = Integer.valueOf(args[1]);
+                
+                price(sender, item, amt);
             } else {
                 // We received too many or too few arguments.
                 sender.sendMessage("Invalid Arguments");
@@ -430,11 +504,16 @@ public class DynamicMarket extends JavaPlugin {
                 BigDecimal value = price(item);
                 
                 // give some nice output
+                BigDecimal sale = invoice.getTotal().add(spread);
+                
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
                 cash.add(invoice.getTotal().doubleValue());
-                player.sendMessage(ChatColor.GREEN + "The Banksters took: " + ChatColor.WHITE + spread);
-                player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + invoice.total);
+                player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
+                player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
+                player.sendMessage(ChatColor.GREEN + "--------------------------------");
+                player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + invoice.getTotal());
+
                 player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
@@ -521,11 +600,11 @@ public class DynamicMarket extends JavaPlugin {
         BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
         BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
         
-        if(price.intValue() != -2000000000) {
+        if (price.intValue() != -2000000000) {
             // We received an argument which resolved to an item on our list.
             // The price could register as a negative or below minValue
             // in this case we should return minValue as the price.
-            if(price.compareTo(minValue) == -1) {
+            if (price.compareTo(minValue) == -1) {
                 price = minValue;
             } else if (price.compareTo(maxValue) == 1) {
                 price = maxValue;
@@ -534,6 +613,16 @@ public class DynamicMarket extends JavaPlugin {
             return price;
         }
         return BigDecimal.ZERO;
+    }
+    
+    private void price (CommandSender sender, String item, int amt) {
+        
+        // get the buy and sell price of the item
+        Invoice sellPrice = generateInvoice(0, item, amt);
+        Invoice buyPrice = generateInvoice(1, item, amt);
+        
+        sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If sold: " + ChatColor.WHITE + sellPrice.getTotal());
+        sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If bought: " + ChatColor.WHITE + buyPrice.getTotal());
     }
 
     private boolean list(CommandSender sender) {
@@ -597,22 +686,20 @@ public class DynamicMarket extends JavaPlugin {
             }
             
             // check the current value
-            if((inv.getValue().compareTo(minValue) == 1) | (inv.getValue().compareTo(minValue) == 0)) {
-                // current value is @ or above minValue
+            if((inv.getValue().compareTo(minValue) == 1) | (inv.getValue().compareTo(minValue) == 0)) {// current value is @ or above minValue
                 // be sure value is not above maxValue
-                if (inv.getValue().compareTo(maxValue) == -1) {
-                    // current value is "just right"
-                    // add current value to total
-                    inv.addTotal(inv.getValue());
-                } else {
-                    // current value is above the max
-                    // add maxValue to total
-                    inv.addTotal(maxValue);
+                if (inv.getValue().compareTo(maxValue) == -1) {// current value is "just right"
+                    inv.addTotal(inv.getValue());// add current value to total
+                } else {// current value is above the max
+                    inv.addTotal(maxValue); // add maxValue to total
                 }
-            } else {
-                // current value is below the minimum
-                // add the minimum to total
-                inv.addTotal(minValue);
+            } else {// current value is below the minimum
+                
+                inv.addTotal(minValue);// add the minimum to total
+                
+                if ((oper == 0) && (x == 1)) {
+                    inv.subtractTotal(spread);// subtract the spread if we're selling and this is the first run
+                }   
             }
             
             // Change our stored value for the item
