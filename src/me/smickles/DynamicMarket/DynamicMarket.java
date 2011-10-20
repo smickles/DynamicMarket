@@ -238,9 +238,9 @@ public class DynamicMarket extends JavaPlugin {
             }
         // Command Example: /price cobblestone
         // should return: cobblestone: .01
-        } else if(command.equalsIgnoreCase("price")){
+        } else if (command.equalsIgnoreCase("price")){
             // We expect one argument
-            if(args.length == 1){
+            if (args.length == 1){
                 String item = args[0];
                 
                 BigDecimal price = price(item);    
@@ -248,6 +248,11 @@ public class DynamicMarket extends JavaPlugin {
                 sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
                 return true;
     
+            } else if (args.length == 2) {
+                String item = args[0];
+                int amt = Integer.valueOf(args[1]);
+                
+                price(sender, item, amt);
             } else {
                 // We received too many or too few arguments.
                 sender.sendMessage("Invalid Arguments");
@@ -595,11 +600,11 @@ public class DynamicMarket extends JavaPlugin {
         BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
         BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
         
-        if(price.intValue() != -2000000000) {
+        if (price.intValue() != -2000000000) {
             // We received an argument which resolved to an item on our list.
             // The price could register as a negative or below minValue
             // in this case we should return minValue as the price.
-            if(price.compareTo(minValue) == -1) {
+            if (price.compareTo(minValue) == -1) {
                 price = minValue;
             } else if (price.compareTo(maxValue) == 1) {
                 price = maxValue;
@@ -608,6 +613,16 @@ public class DynamicMarket extends JavaPlugin {
             return price;
         }
         return BigDecimal.ZERO;
+    }
+    
+    private void price (CommandSender sender, String item, int amt) {
+        
+        // get the buy and sell price of the item
+        Invoice sellPrice = generateInvoice(0, item, amt);
+        Invoice buyPrice = generateInvoice(1, item, amt);
+        
+        sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If sold: " + ChatColor.WHITE + sellPrice.getTotal());
+        sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If bought: " + ChatColor.WHITE + buyPrice.getTotal());
     }
 
     private boolean list(CommandSender sender) {
