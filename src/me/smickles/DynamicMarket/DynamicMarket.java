@@ -70,24 +70,31 @@ public class DynamicMarket extends JavaPlugin {
         PluginDescriptionFile pdfFile = this.getDescription();
         directory = getDataFolder();
         boolean configIsThere = false;
+        boolean exampleIsThere = false;
+        boolean licenseIsThere = false;
+        boolean readmeIsThere = false;
         items = getConfiguration();
         
         if (directory.exists()) {
             for (String f : directory.list()) {
-                if (f.equalsIgnoreCase("config.yml")) {
+                if (f.equalsIgnoreCase("config.yml"))
                     configIsThere = true;
-                    break;
-                }
+                if (f.equalsIgnoreCase("config.yml.example"))
+                    exampleIsThere = true;
+                if (f.equalsIgnoreCase("LICENSE"))
+                    licenseIsThere = true;
+                if (f.equalsIgnoreCase("README"))
+                    readmeIsThere = true;
             }
         }
         
         
-        if (!configIsThere) {
-            logger.info("[" + pdfFile.getName() +"] Could not find config, copying default");            
-            
+        if (!configIsThere | !exampleIsThere | !licenseIsThere | !readmeIsThere) {
             // copy default over
-            // plus, distrubute the license and readme
+            // plus, distribute the license and readme
             for (int x = 0; x <= 3; x++) {
+                boolean writeFile = true;
+                
                 try {
                     InputStream defaultStream = null;
                     File conf = null;
@@ -96,39 +103,46 @@ public class DynamicMarket extends JavaPlugin {
                     case 0:
                         defaultStream = this.getClass().getResourceAsStream("/config.yml");
                         conf = new File(directory + File.separator +"config.yml");
+                        if (configIsThere)
+                            writeFile = false;
                         break;
                     case 1:
                         defaultStream = this.getClass().getResourceAsStream("/LICENSE");
                         conf = new File(directory + File.separator +"LICENSE");
+                        if (licenseIsThere)
+                            writeFile = false;
                         break;
                     case 2:
                         defaultStream = this.getClass().getResourceAsStream("/README");
                         conf = new File(directory + File.separator +"README");
+                        if (readmeIsThere)
+                            writeFile = false;
                         break;
                     case 3:
                         defaultStream = this.getClass().getResourceAsStream("/config.yml");
                         conf = new File(directory + File.separator +"config.yml.EXAMPLE");
+                        if (exampleIsThere)
+                            writeFile = false;
                         break;
                     }
-
-                
-                    directory.mkdir();
-                    conf.createNewFile();
-                
-                    OutputStream confStream = new FileOutputStream(conf);
-                
-                    byte buf[] = new byte[1024];
-                    int len;
-                
-                    while ((len = defaultStream.read(buf)) > 0) {
-                        confStream.write(buf, 0, len);
+                    
+                    if (writeFile) {
+                        directory.mkdir();
+                        conf.createNewFile();
+                        
+                        OutputStream confStream = new FileOutputStream(conf);
+                        
+                        byte buf[] = new byte[1024];
+                        int len;
+                        
+                        while ((len = defaultStream.read(buf)) > 0) {
+                            confStream.write(buf, 0, len);
+                        }
+                        
+                        defaultStream.close();
+                        confStream.close();
                     }
-                
-                    defaultStream.close();
-                    confStream.close();
-                
-
-                
+                    
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (NullPointerException e) {
@@ -139,10 +153,7 @@ public class DynamicMarket extends JavaPlugin {
 
             }
             
-            logger.info("[" + pdfFile.getName() +"] Default config copied.");
-            
         } else {
-            logger.info("[" + pdfFile.getName() +"] Found config, making sure it's up to date.");
             
             items.load();
             for (String n : items.getKeys()) {
