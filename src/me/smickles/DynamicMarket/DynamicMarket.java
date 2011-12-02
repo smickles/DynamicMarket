@@ -286,7 +286,7 @@ public class DynamicMarket extends JavaPlugin {
             } else if (args[0].equalsIgnoreCase("list")) {
                 
                 return marketList(sender);
-            } else if (args[0].equalsIgnoreCase("help")) {
+            } else if (args[0].equalsIgnoreCase("help") | args[0].equalsIgnoreCase("?")) {
                 
                 return marketHelp(sender);
             }
@@ -295,9 +295,27 @@ public class DynamicMarket extends JavaPlugin {
         return false;
     }
 
+    /**
+     * This is the general player help. it should be used for when a player
+     * types "/market ?" 
+     * 
+     * this should give a brief explanation of DyanMark and each available 
+     * command. further information on any individual command should be give 
+     * in responce to a "/market ? <cmd>" from the player
+     * 
+     * @param sender
+     * @return
+     */
     private boolean marketHelp(CommandSender sender) {
         // TODO Auto-generated method stub
-        return false;
+        sender.sendMessage(ChatColor.GRAY + "-----------------------------------------------------");
+        sender.sendMessage(ChatColor.GREEN + "DyanaMark v " + this.getDescription().getVersion().toString());
+        sender.sendMessage("An easy way to buy and sell your stuff");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/buy" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to buy some stuff.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/sell" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to sell some stuff.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/price" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> (amount)" + ChatColor.WHITE + " to check the price of some stuff. (amount optional)");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/market" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <top | bottom | list>" + ChatColor.WHITE + " to get some market info.");
+        return true;
     }
 
     public boolean marketTop(CommandSender sender) {
