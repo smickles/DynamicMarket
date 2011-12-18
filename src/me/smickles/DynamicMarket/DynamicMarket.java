@@ -44,6 +44,7 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
@@ -175,8 +176,15 @@ public class DynamicMarket extends JavaPlugin {
             items.save();
         }
         
+        this.setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
+        this.setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
         
-        // setup economy
+        
+        /* Old Register stuff
+         *  keeping this here because we may want to do something similar to ensure that vault 
+         *  starts up properly since I suspect I had to do this b/c of bukkit, not register
+         *  // setup economy
+         
         PluginManager pm = this.getServer().getPluginManager();
         Plugin register = pm.getPlugin("Register");
         
@@ -193,12 +201,39 @@ public class DynamicMarket extends JavaPlugin {
             pm.disablePlugin(this);
             pm.enablePlugin(this);
             return;
-        }
+        }*/
         
         this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
     
+    /**
+     * Copy-pasted from http://dev.bukkit.org/server-mods/vault/
+     * I hope we're doing this right
+     * @return
+     */
+    private Boolean setupPermissions()
+    {
+        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+        if (permissionProvider != null) {
+            permission = permissionProvider.getProvider();
+        }
+        return (permission != null);
+    }
+    
+    /**
+     * Copy-pasted from http://dev.bukkit.org/server-mods/vault/
+     * I hope we're doing this right
+     * @return
+     */
+    private Boolean setupEconomy()
+    {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
 
+        return (economy != null);
+    }
     
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         return readCommand(sender, commandLabel, args);
@@ -443,8 +478,10 @@ public class DynamicMarket extends JavaPlugin {
         if(id != 0) {
             // determine what it will cost 
             Invoice invoice = generateInvoice(1, item, amount);
-            MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-            if (cash.hasEnough(invoice.getTotal().doubleValue())) {
+            //(to be deleted TBD) MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+          
+            //(TBD)if (cash.hasEnough(invoice.getTotal().doubleValue())) {
+            if (economy.has(player.getName(), invoice.getTotal().doubleValue())) {
                 Byte byteData = Byte.valueOf(items.getString(item + ".data", "0"));
                 
                 // give 'em the items and drop any extra
@@ -461,21 +498,22 @@ public class DynamicMarket extends JavaPlugin {
                 
                 // Give some nice output.
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+                player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
                 // Subtract the invoice (this is an efficient place to do this)
-                cash.subtract(invoice.getTotal().doubleValue());
+                //TBD cash.subtract(invoice.getTotal().doubleValue());
+                economy.withdrawPlayer(player.getName(), invoice.getTotal().doubleValue());
     
                 player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
-                player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+                player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
                 return true;
             } else {
                 // Otherwise, give nice output anyway ;)
                 // The idea here is to show how much more money is needed.
-                BigDecimal difference = BigDecimal.valueOf(cash.balance() - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal difference = BigDecimal.valueOf(economy.getBalance(player.getName()) - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
                 player.sendMessage(ChatColor.RED + "You don't have enough money");
-                player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+                player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
                 player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
                 player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
                 return false;
@@ -512,9 +550,10 @@ public class DynamicMarket extends JavaPlugin {
             
             // determine what it will pay 
             Invoice invoice = generateInvoice(0, item, amount);
-            MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+            //TBD MethodAccount cash = Methods.getMethod().getAccount(player.getName());
             // If the player has enough of the item, perform the transaction.
             ItemStack its = new ItemStack(id, amount, (short) 0, byteData);
+            
             if (player.getInventory().contains(id)) {
                 BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", 0));
                 
@@ -563,14 +602,15 @@ public class DynamicMarket extends JavaPlugin {
                 BigDecimal sale = invoice.getTotal().add(spread);
                 
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
-                cash.add(invoice.getTotal().doubleValue());
+                player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
+                //TBD cash.add(invoice.getTotal().doubleValue());
+                economy.depositPlayer(player.getName(), invoice.getTotal().doubleValue());
                 player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
                 player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + invoice.getTotal());
 
-                player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(cash.balance()).setScale(2, RoundingMode.HALF_UP));
+                player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
                 player.sendMessage(ChatColor.GREEN + "--------------------------------");
                 player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
                 return true;
@@ -630,8 +670,9 @@ public class DynamicMarket extends JavaPlugin {
                     // remove the item(s)
                     player.getInventory().clear(index);
                     // "pay the man"
-                    MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-                    cash.add(thisSale.getTotal().doubleValue());
+                    //TBD MethodAccount cash = Methods.getMethod().getAccount(player.getName());
+                    //TBD cash.add(thisSale.getTotal().doubleValue());
+                    economy.depositPlayer(player.getName(), thisSale.getTotal().doubleValue());
                     // give nice output
                     player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
                     break;
