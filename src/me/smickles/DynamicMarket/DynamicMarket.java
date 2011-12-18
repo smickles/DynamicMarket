@@ -32,6 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -44,9 +47,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
-import com.nijikokun.register.payment.Methods;
-import com.nijikokun.register.payment.Method.MethodAccount;
-
 @SuppressWarnings("deprecation")
 public class DynamicMarket extends JavaPlugin {
 
@@ -58,6 +58,12 @@ public class DynamicMarket extends JavaPlugin {
     public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
     public static BigDecimal SPREAD = CHANGERATE;
     public static File directory;
+    
+    /*
+     * Vault Method stuffs
+     */
+    public static Permission permission = null;
+    public static Economy economy = null;
     
     @Override
     public void onDisable(){
