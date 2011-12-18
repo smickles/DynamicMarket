@@ -570,10 +570,10 @@ public class DynamicMarket extends JavaPlugin {
         sender.sendMessage(ChatColor.GRAY + "-----------------------------------------------------");
         sender.sendMessage(ChatColor.GREEN + "DyanaMark v " + this.getDescription().getVersion().toString());
         sender.sendMessage("An easy way to buy and sell your stuff");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/buy" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to buy some stuff.");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/sell" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to sell some stuff.");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/price" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> (amount)" + ChatColor.WHITE + " to check the price of some stuff. (amount optional)");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/market" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <top | bottom | list>" + ChatColor.WHITE + " to get some market info.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/mbuy" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to buy some stuff.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/msell" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to sell some stuff.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/mprice" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> (amount)" + ChatColor.WHITE + " to check the price of some stuff. (amount optional)");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/mmarket" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <top | bottom | list>" + ChatColor.WHITE + " to get some market info.");
         return true;
     }
 
