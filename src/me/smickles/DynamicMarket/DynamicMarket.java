@@ -239,6 +239,12 @@ public class DynamicMarket extends JavaPlugin {
 
     public boolean readCommand(CommandSender sender, String command, String[] args) {
         if((command.equalsIgnoreCase("buy")) && (sender instanceof Player)) {
+            
+            if (!permission.has(sender, "dynamark.buy")) {
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return true;
+            }
+            
             if(args.length == 2) {
                 String item = args[0];
                 int amount = 0;
@@ -256,6 +262,12 @@ public class DynamicMarket extends JavaPlugin {
             }
     
         } else if ((command.equalsIgnoreCase("sell")) && (sender instanceof Player)) {
+            
+            if (!permission.has(sender, "dynamark.sell")) {
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return true;
+            }
+            
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("all")) {
                     return sellAll((Player) sender);
@@ -278,6 +290,11 @@ public class DynamicMarket extends JavaPlugin {
         // Command Example: /price cobblestone
         // should return: cobblestone: .01
         } else if (command.equalsIgnoreCase("price")){
+            
+            if (!permission.has(sender, "dynamark.price")) {
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return true;
+            }
             // We expect one argument
             if (args.length == 1){
                 String item = args[0];
@@ -301,7 +318,13 @@ public class DynamicMarket extends JavaPlugin {
         // '/market bottom' should do the dame for the least expensive items.
         } else if(command.equalsIgnoreCase("market")) {
             
-            return market(sender, args);
+            if (permission.has(sender, "dynamark.market")) {
+                return market(sender, args);
+            } else {
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return true;
+            }
+            
         }
         return false;
     }
