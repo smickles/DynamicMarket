@@ -18,7 +18,7 @@
 
 name: DynaMark
 main: me.smickles.DynamicMarket.DynamicMarket
-version: 0.0.3.3
+version: 0.1.0.0
 author: smickles
 softdepend: [Vault]
 
