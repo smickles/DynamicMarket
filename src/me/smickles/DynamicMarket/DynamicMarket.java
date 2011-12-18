@@ -89,9 +89,9 @@ public class DynamicMarket extends JavaPlugin {
         if (directory.exists()) {
             for (String f : directory.list()) {
                 if (f.equalsIgnoreCase("config.yml"))
-                    configIsThere = true;
+                    switchToDatabase();
                 if (f.equalsIgnoreCase("config.yml.example"))
-                    exampleIsThere = true;
+                    switchToDatabase();
                 if (f.equalsIgnoreCase("LICENSE"))
                     licenseIsThere = true;
                 if (f.equalsIgnoreCase("README"))
@@ -210,6 +210,17 @@ public class DynamicMarket extends JavaPlugin {
         this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
     
+    private void switchToDatabase() {
+        // TODO Auto-generated method stub
+        /*
+         * load old config file
+         * populate the database with existing values
+         * mv config.yml to config.yml.bak
+         * rm config.yml.example
+         */
+        
+    }
+
     /**
      * Basically taken from http://pastebin.com/8YrDUqcV
      */
