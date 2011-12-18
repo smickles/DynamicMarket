@@ -26,11 +26,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.persistence.PersistenceException;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
@@ -73,6 +76,9 @@ public class DynamicMarket extends JavaPlugin {
     @Override
     public void onEnable() {
         PluginDescriptionFile pdfFile = this.getDescription();
+        
+        setupDatabase();
+        
         directory = getDataFolder();
         boolean configIsThere = false;
         boolean exampleIsThere = false;
@@ -204,6 +210,29 @@ public class DynamicMarket extends JavaPlugin {
         this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
     
+    /**
+     * Basically taken from http://pastebin.com/8YrDUqcV
+     */
+    private void setupDatabase() {
+        
+        try {
+            getDatabase().find(Commodities.class).findRowCount();
+        } catch (PersistenceException ex) {
+            System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
+            installDDL();
+        }
+    }
+    
+    /**
+     * Basically taken from http://pastebin.com/8YrDUqcV
+     */
+    @Override
+    public List<Class<?>> getDatabaseClasses() {
+        List<Class<?>> list = new ArrayList<Class<?>>();
+        list.add(Commodities.class);
+        return list;
+    }
+
     /**
      * Copy-pasted from http://dev.bukkit.org/server-mods/vault/
      * I hope we're doing this right
