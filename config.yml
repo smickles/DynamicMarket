@@ -1,24 +1,45 @@
-## Example: ##
-# wood:                    # The name of the item. Used in commands, ex. /buy wood 64
-#     value: -0.65         # The current value of wood. (don't worry if this is negative)
-#     number: 17           # The 'regular' data value of wood
-#     minValue: 0.01       # The minimum amount you want one wood to sell/buy for
-#     maxValue: 10000.0    # The maximum amount you want one wood to sell/buy for
-#     changeRate: 0.01     # The amount you want added/subtracted to wood's value when bought/sold
-#     data: '0'            # The 'second' data value. 0 is the byte data for regular wood
-#     spread: 0.01         # The transaction fee for selling. Keep this equal to changeRate for
-#                          #     normal use. Set it larger than changeRate for a 'money sink'
-#                          #     Don't set it less than changeRate unless you know what you're doing
 wood:
-     value: -0.65
-     number: 17
-     minValue: 0.01
-     maxValue: 10000.0
-     changeRate: 0.01
-     data: '0'
-     spread: 0.01
+    value: -0.55
+    number: 17
+    minValue: 0.01
+    maxValue: 10000.0
+    changeRate: 0.01
+    data: '0'
+    spread: 0.01
+blazerod:
+    value: 12.64
+    number: 369
+    minValue: 0.01
+    maxValue: 10000.0
+    changeRate: 0.01
+    data: '0'
+    spread: 0.01
+spidereye:
+    value: 9.97
+    number: 375
+    minValue: 0.01
+    maxValue: 10000.0
+    changeRate: 0.01
+    data: '0'
+    spread: 0.01
+netherwart:
+    value: 9.66
+    number: 372
+    minValue: 0.01
+    maxValue: 10000.0
+    changeRate: 0.01
+    data: '0'
+    spread: 0.01
+ghasttear:
+    value: 10
+    number: 370
+    minValue: 0.01
+    maxValue: 10000.0
+    changeRate: 0.01
+    data: '0'
+    spread: 0.01
 ink:
-    value: 9.08
+    value: 9.33
     number: 351
     minValue: 0.01
     maxValue: 10000.0
@@ -34,7 +55,7 @@ lapis:
     data: '4'
     spread: 0.01
 cocoa:
-    value: 10.1
+    value: 10.09
     number: 351
     minValue: 0.01
     maxValue: 10000.0
@@ -42,7 +63,7 @@ cocoa:
     data: '3'
     spread: 0.01
 spruce:
-    value: -4.3
+    value: 0.02
     number: 17
     minValue: 0.01
     maxValue: 10000.0
@@ -50,7 +71,7 @@ spruce:
     data: '1'
     spread: 0.01
 birch:
-    value: -4.93
+    value: 0.02
     number: 17
     minValue: 0.01
     maxValue: 10000.0
@@ -66,7 +87,7 @@ fish:
     data: '0'
     spread: 0.01
 beef:
-    value: 8.01
+    value: 3.78
     number: 363
     minValue: 0.01
     maxValue: 10000.0
@@ -74,7 +95,7 @@ beef:
     data: '0'
     spread: 0.01
 stone:
-    value: -1.92
+    value: 1.29
     number: 1
     minValue: 0.01
     maxValue: 10000.0
@@ -82,7 +103,7 @@ stone:
     data: '0'
     spread: 0.01
 egg:
-    value: 9.96
+    value: 9.67
     number: 344
     minValue: 0.01
     maxValue: 10000.0
@@ -90,7 +111,7 @@ egg:
     data: '0'
     spread: 0.01
 feather:
-    value: 14.62
+    value: 15.13
     number: 288
     minValue: 0.01
     maxValue: 10000.0
@@ -98,7 +119,7 @@ feather:
     data: '0'
     spread: 0.01
 soulsand:
-    value: 9.65
+    value: 2.59
     number: 88
     minValue: 0.01
     maxValue: 10000.0
@@ -106,7 +127,7 @@ soulsand:
     data: '0'
     spread: 0.01
 rottenflesh:
-    value: 8.63
+    value: 6.93
     number: 367
     minValue: 0.01
     maxValue: 10000.0
@@ -114,7 +135,7 @@ rottenflesh:
     data: '0'
     spread: 0.01
 slime:
-    value: 12.82
+    value: 9.26
     number: 341
     minValue: 0.01
     maxValue: 10000.0
@@ -122,7 +143,7 @@ slime:
     data: '0'
     spread: 0.01
 obsidian:
-    value: 12.34
+    value: 15.57
     number: 49
     minValue: 0.01
     maxValue: 10000.0
@@ -130,7 +151,7 @@ obsidian:
     data: '0'
     spread: 0.01
 flint:
-    value: 9.23
+    value: 7.33
     number: 318
     minValue: 0.01
     maxValue: 10000.0
@@ -146,7 +167,7 @@ snow:
     data: '0'
     spread: 0.01
 brownmushroom:
-    value: 6.24
+    value: 5.28
     number: 39
     minValue: 0.01
     maxValue: 10000.0
@@ -154,7 +175,7 @@ brownmushroom:
     data: '0'
     spread: 0.01
 dirt:
-    value: -50.11
+    value: -97.87
     number: 3
     minValue: 0.01
     maxValue: 10000.0
@@ -162,7 +183,7 @@ dirt:
     data: '0'
     spread: 0.01
 wool:
-    value: 9.63
+    value: 8.99
     number: 35
     minValue: 0.01
     maxValue: 10000.0
@@ -170,7 +191,7 @@ wool:
     data: '0'
     spread: 0.01
 leather:
-    value: 9.3
+    value: 6.7
     number: 334
     minValue: 0.01
     maxValue: 10000.0
@@ -178,7 +199,7 @@ leather:
     data: '0'
     spread: 0.01
 cobblestone:
-    value: -20.82
+    value: -132.52
     number: 4
     minValue: 0.01
     maxValue: 10000.0
@@ -186,7 +207,7 @@ cobblestone:
     data: '0'
     spread: 0.01
 mossstone:
-    value: 9.96
+    value: 9.59
     number: 48
     minValue: 0.01
     maxValue: 10000.0
@@ -210,7 +231,7 @@ vine:
     data: '0'
     spread: 0.01
 rose:
-    value: 9.73
+    value: 10.53
     number: 38
     minValue: 0.01
     maxValue: 10000.0
@@ -226,7 +247,7 @@ apple:
     data: '0'
     spread: 0.01
 pork:
-    value: 9.91
+    value: 8.86
     number: 319
     minValue: 0.01
     maxValue: 10000.0
@@ -234,7 +255,7 @@ pork:
     data: '0'
     spread: 0.01
 pumpkin:
-    value: 9.57
+    value: 8.36
     number: 86
     minValue: 0.01
     maxValue: 10000.0
@@ -242,7 +263,7 @@ pumpkin:
     data: '0'
     spread: 0.01
 pumpkinseeds:
-    value: 10.1
+    value: 9.95
     number: 361
     minValue: 0.01
     maxValue: 10000.0
@@ -250,7 +271,7 @@ pumpkinseeds:
     data: '0'
     spread: 0.01
 clay:
-    value: -1.34
+    value: 0.02
     number: 337
     minValue: 0.01
     maxValue: 10000.0
@@ -258,7 +279,7 @@ clay:
     data: '0'
     spread: 0.01
 gunpowder:
-    value: 14.11
+    value: 11.94
     number: 289
     minValue: 0.01
     maxValue: 10000.0
@@ -266,7 +287,7 @@ gunpowder:
     data: '0'
     spread: 0.01
 sandstone:
-    value: 0.87
+    value: 0.02
     number: 24
     minValue: 0.01
     maxValue: 10000.0
@@ -274,7 +295,7 @@ sandstone:
     data: '0'
     spread: 0.01
 melonseeds:
-    value: 9.73
+    value: 0.02
     number: 362
     minValue: 0.01
     maxValue: 10000.0
@@ -282,7 +303,7 @@ melonseeds:
     data: '0'
     spread: 0.01
 melon:
-    value: 0.26
+    value: 0.29
     number: 360
     minValue: 0.01
     maxValue: 10000.0
@@ -290,7 +311,7 @@ melon:
     data: '0'
     spread: 0.01
 gravel:
-    value: -2.89
+    value: -8.94
     number: 13
     minValue: 0.01
     maxValue: 10000.0
@@ -306,7 +327,7 @@ sugarcane:
     data: '0'
     spread: 0.01
 iron:
-    value: 12.22
+    value: 9.6
     number: 265
     minValue: 0.01
     maxValue: 10000.0
@@ -314,7 +335,7 @@ iron:
     data: '0'
     spread: 0.01
 chicken:
-    value: 9.89
+    value: 9.0
     number: 365
     minValue: 0.01
     maxValue: 10000.0
@@ -322,7 +343,7 @@ chicken:
     data: '0'
     spread: 0.01
 coal:
-    value: -0.03
+    value: 0.29
     number: 263
     minValue: 0.01
     maxValue: 10000.0
@@ -330,7 +351,7 @@ coal:
     data: '0'
     spread: 0.01
 glowstone:
-    value: 16.82
+    value: 2.86
     number: 348
     minValue: 0.01
     maxValue: 10000.0
@@ -338,7 +359,7 @@ glowstone:
     data: '0'
     spread: 0.01
 diamond:
-    value: 21.75
+    value: 24.79
     number: 264
     minValue: 0.01
     maxValue: 10000.0
@@ -346,7 +367,7 @@ diamond:
     data: '0'
     spread: 0.01
 bone:
-    value: 9.48
+    value: 9.03
     number: 352
     minValue: 0.01
     maxValue: 10000.0
@@ -354,7 +375,7 @@ bone:
     data: '0'
     spread: 0.01
 netherrack:
-    value: -6.42
+    value: -10.5
     number: 87
     minValue: 0.01
     maxValue: 10000.0
@@ -362,7 +383,7 @@ netherrack:
     data: '0'
     spread: 0.01
 seeds:
-    value: -5.24
+    value: -6.98
     number: 295
     minValue: 0.01
     maxValue: 10000.0
@@ -370,7 +391,7 @@ seeds:
     data: '0'
     spread: 0.01
 gold:
-    value: 14.76
+    value: 15.09
     number: 266
     minValue: 0.01
     maxValue: 10000.0
@@ -378,7 +399,7 @@ gold:
     data: '0'
     spread: 0.01
 sand:
-    value: -0.11
+    value: -4.64
     number: 12
     minValue: 0.01
     maxValue: 10000.0
@@ -386,7 +407,7 @@ sand:
     data: '0'
     spread: 0.01
 sapling:
-    value: -3.23
+    value: -10.53
     number: 6
     minValue: 0.01
     maxValue: 10000.0
@@ -394,7 +415,7 @@ sapling:
     data: '0'
     spread: 0.01
 sprucesapling:
-    value: -2.86
+    value: -3.45
     number: 6
     minValue: 0.01
     maxValue: 10000.0
@@ -402,7 +423,7 @@ sprucesapling:
     data: '1'
     spread: 0.01
 birchsapling:
-    value: -3.0
+    value: -3.68
     number: 6
     minValue: 0.01
     maxValue: 10000.0
@@ -410,7 +431,7 @@ birchsapling:
     data: '2'
     spread: 0.01
 dandelion:
-    value: 8.64
+    value: 5.43
     number: 37
     minValue: 0.01
     maxValue: 10000.0
@@ -418,7 +439,7 @@ dandelion:
     data: '0'
     spread: 0.01
 redmushroom:
-    value: 8.69
+    value: 6.0
     number: 40
     minValue: 0.01
     maxValue: 10000.0
@@ -426,7 +447,7 @@ redmushroom:
     data: '0'
     spread: 0.01
 enderpearl:
-    value: 9.93
+    value: 9.87
     number: 368
     minValue: 0.01
     maxValue: 10000.0
@@ -434,7 +455,7 @@ enderpearl:
     data: '0'
     spread: 0.01
 string:
-    value: 6.15
+    value: 3.42
     number: 287
     minValue: 0.01
     maxValue: 10000.0
@@ -442,7 +463,7 @@ string:
     data: '0'
     spread: 0.01
 redstone:
-    value: 0.02
+    value: -2.63
     number: 331
     minValue: 0.01
     maxValue: 10000.0
@@ -450,7 +471,7 @@ redstone:
     data: '0'
     spread: 0.01
 cactus:
-    value: 4.76
+    value: 0.24
     number: 81
     minValue: 0.01
     maxValue: 10000.0
