@@ -358,7 +358,7 @@ public class DynamicMarket extends JavaPlugin {
     }
 
     public boolean marketTop(CommandSender sender) {
-     // We received '/market top'
+        // We received '/market top'
         items.load();// load the item list
         // make  'arrays', a name, a price 
         List<String> names = items.getKeys();
