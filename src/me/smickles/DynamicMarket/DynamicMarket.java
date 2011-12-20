@@ -189,8 +189,7 @@ public class DynamicMarket extends JavaPlugin {
      * use this in the case that we need to update from the old way of storing data in config.yml
      */
     private void switchToDatabase() {
-        // TODO Auto-generated method stub
-        
+
         logger.info("[" + plugin.getDescription().getName() + "] Converting flatfile to database...");
         
         //load old config file
@@ -226,7 +225,7 @@ public class DynamicMarket extends JavaPlugin {
                         commodity.setSpread(BigDecimal(value));
                 }
             } else {
-                logger.info("Duplicate commodity \"number\" found, that can't be good. You may want to restore the config.yml backup, then check the file for commodities with the same \"number\", correct the issue, and then restart your server to try again.");
+                logger.warning("[" + plugin.getDescription().getName() + "] Duplicate commodity \"number\" found, that can't be good. You may want to restore the config.yml backup, then check the file for commodities with the same \"number\", correct the issue, and then restart your server to try again.");
             }
             
             plugin.getDatabase().save(commodity);
@@ -246,7 +245,7 @@ public class DynamicMarket extends JavaPlugin {
             backupName = new File("config.yml." + Math.random() + ".bak");
         }
         
-        // rm config.yml.example
+        //  TODO rm config.yml.example
         
         logger.info("[" + plugin.getDescription().getName() + "] Successfully converter flatfile to database");
 
