@@ -246,6 +246,9 @@ public class DynamicMarket extends JavaPlugin {
         }
         
         //  TODO rm config.yml.example
+        File toDelete = new File("config.yml.EXAMPLE");
+        
+        toDelete.delete();
         
         logger.info("[" + plugin.getDescription().getName() + "] Successfully converter flatfile to database");
 
