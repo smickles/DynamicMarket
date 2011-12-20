@@ -59,7 +59,8 @@ public class DynamicMarket extends JavaPlugin {
     public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
     public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
     public static BigDecimal SPREAD = CHANGERATE;
-    public static File directory = plugin.getDataFolder();
+    public static File directory;
+    PluginDescriptionFile pdfFile;
     
     /*
      * Vault Method stuffs
@@ -68,14 +69,27 @@ public class DynamicMarket extends JavaPlugin {
     public static Economy economy = null;
     
     @Override
-    public void onDisable(){
-        PluginDescriptionFile pdfFile = this.getDescription();
+    public void onLoad() {
+        
+        File ep = new File(this.getDataFolder() + File.separator + ".." + File.separator + ".." + File.separator + "ebean.properties");
+        try {
+            ep.createNewFile();
+        } catch (IOException e) {
+            
+            logger.warning("failed to create ebean.properties");
+        }
+    }
+    
+    @Override
+    public void onDisable() {
+        
         this.logger.info(pdfFile.getName() + " disabled");
     }
 
     @Override
     public void onEnable() {
-        PluginDescriptionFile pdfFile = this.getDescription();
+        pdfFile = plugin.getDescription();
+        directory = plugin.getDataFolder();
         
         plugin.setupDatabase();
         plugin.setupFiles();
