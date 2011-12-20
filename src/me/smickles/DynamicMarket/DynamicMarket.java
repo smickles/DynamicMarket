@@ -43,11 +43,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
+
 
 @SuppressWarnings("deprecation")
 public class DynamicMarket extends JavaPlugin {
@@ -59,7 +59,7 @@ public class DynamicMarket extends JavaPlugin {
     public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
     public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
     public static BigDecimal SPREAD = CHANGERATE;
-    public static File directory;
+    public static File directory = plugin.getDataFolder();
     
     /*
      * Vault Method stuffs
@@ -77,111 +77,10 @@ public class DynamicMarket extends JavaPlugin {
     public void onEnable() {
         PluginDescriptionFile pdfFile = this.getDescription();
         
-        setupDatabase();
-        
-        directory = getDataFolder();
-        boolean configIsThere = false;
-        boolean exampleIsThere = false;
-        boolean licenseIsThere = false;
-        boolean readmeIsThere = false;
-        items = getConfiguration();
-        
-        if (directory.exists()) {
-            for (String f : directory.list()) {
-                if (f.equalsIgnoreCase("config.yml"))
-                    switchToDatabase();
-                if (f.equalsIgnoreCase("config.yml.example"))
-                    switchToDatabase();
-                if (f.equalsIgnoreCase("LICENSE"))
-                    licenseIsThere = true;
-                if (f.equalsIgnoreCase("README"))
-                    readmeIsThere = true;
-            }
-        }
-        
-        
-        if (!configIsThere | !exampleIsThere | !licenseIsThere | !readmeIsThere) {
-            // copy default over
-            // plus, distribute the license and readme
-            for (int x = 0; x <= 3; x++) {
-                boolean writeFile = true;
-                
-                try {
-                    InputStream defaultStream = null;
-                    File conf = null;
-                    
-                    switch (x) {
-                    case 0:
-                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
-                        conf = new File(directory + File.separator +"config.yml");
-                        if (configIsThere)
-                            writeFile = false;
-                        break;
-                    case 1:
-                        defaultStream = this.getClass().getResourceAsStream("/LICENSE");
-                        conf = new File(directory + File.separator +"LICENSE");
-                        if (licenseIsThere)
-                            writeFile = false;
-                        break;
-                    case 2:
-                        defaultStream = this.getClass().getResourceAsStream("/README");
-                        conf = new File(directory + File.separator +"README");
-                        if (readmeIsThere)
-                            writeFile = false;
-                        break;
-                    case 3:
-                        defaultStream = this.getClass().getResourceAsStream("/config.yml");
-                        conf = new File(directory + File.separator +"config.yml.EXAMPLE");
-                        if (exampleIsThere)
-                            writeFile = false;
-                        break;
-                    }
-                    
-                    if (writeFile) {
-                        directory.mkdir();
-                        conf.createNewFile();
-                        
-                        OutputStream confStream = new FileOutputStream(conf);
-                        
-                        byte buf[] = new byte[1024];
-                        int len;
-                        
-                        while ((len = defaultStream.read(buf)) > 0) {
-                            confStream.write(buf, 0, len);
-                        }
-                        
-                        defaultStream.close();
-                        confStream.close();
-                    }
-                    
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }    
-
-            }
-            
-        } else {
-            
-            items.load();
-            for (String n : items.getKeys()) {
-                items.getDouble(n + ".value", 10);
-                items.getDouble(n + ".minValue", MINVALUE.doubleValue());
-                items.getDouble(n + ".maxValue", MAXVALUE.doubleValue());
-                items.getDouble(n + ".changeRate", CHANGERATE.doubleValue());
-                MaterialData mat = new MaterialData(items.getInt(n + ".number", 0));
-                items.getString(n + ".data", Byte.toString(mat.getData()));
-                items.getDouble(n + ".spread", SPREAD.doubleValue());
-            }
-            
-            items.save();
-        }
-        
-        this.setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
-        this.setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
+        plugin.setupDatabase();
+        plugin.setupFiles();
+        plugin.setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
+        plugin.setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
         
         
         /* Old Register stuff
@@ -210,15 +109,158 @@ public class DynamicMarket extends JavaPlugin {
         this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
     
+    /**
+     * Check for DynaMark files. Distribute them if needed.
+     * Also, check for the old way of storing commodity data, dealing with that as necessary.
+     */
+    private void setupFiles() {
+
+        boolean licenseIsThere = false;
+        boolean readmeIsThere = false;
+
+        
+        if (directory.exists()) {
+            for (String f : directory.list()) {
+                if (f.equalsIgnoreCase("config.yml"))
+                    switchToDatabase();
+                if (f.equalsIgnoreCase("config.yml.example"))
+                    switchToDatabase();
+                if (f.equalsIgnoreCase("LICENSE"))
+                    licenseIsThere = true;
+                if (f.equalsIgnoreCase("README"))
+                    readmeIsThere = true;
+            }
+        }
+        
+        
+        if (!licenseIsThere | !readmeIsThere) {
+            //distribute the license and readme
+            for (int x = 0; x <= 1; x++) {
+                boolean writeFile = true;
+                
+                try {
+                    InputStream defaultStream = null;
+                    File conf = null;
+                    
+                    switch (x) {
+                    case 0:
+                        defaultStream = this.getClass().getResourceAsStream("/LICENSE");
+                        conf = new File(directory + File.separator +"LICENSE");
+                        if (licenseIsThere)
+                            writeFile = false;
+                        break;
+                    case 1:
+                        defaultStream = this.getClass().getResourceAsStream("/README");
+                        conf = new File(directory + File.separator +"README");
+                        if (readmeIsThere)
+                            writeFile = false;
+                        break;
+                    }
+                    
+                    if (writeFile) {
+                        directory.mkdir();
+                        conf.createNewFile();
+                        
+                        OutputStream confStream = new FileOutputStream(conf);
+                        
+                        byte buf[] = new byte[1024];
+                        int len;
+                        
+                        while ((len = defaultStream.read(buf)) > 0) {
+                            confStream.write(buf, 0, len);
+                        }
+                        
+                        defaultStream.close();
+                        confStream.close();
+                    }
+                    
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     * use this in the case that we need to update from the old way of storing data in config.yml
+     */
     private void switchToDatabase() {
         // TODO Auto-generated method stub
-        /*
-         * load old config file
-         * populate the database with existing values
-         * mv config.yml to config.yml.bak
-         * rm config.yml.example
-         */
         
+        logger.info("[" + plugin.getDescription().getName() + "] Converting flatfile to database...");
+        
+        //load old config file
+        items = plugin.getConfiguration();
+        
+        // populate the database with existing values
+        logger.info("[" + plugin.getDescription().getName() + "] Populating database ...");
+        for (String item : items.getKeys()) {
+            
+            Commodities commodity = plugin.getDatabase().find(Commodities.class).where().ieq("number", items.getString(item + ".number")).findUnique();
+            
+            if (commodity == null) {
+                
+                commodity = new Commodities();
+                
+                for (String key : items.getKeys(item)) {
+                    
+                    String value = items.getString(item + "." + key);
+
+                    if (key.equalsIgnoreCase("value"))
+                        commodity.setValue(BigDecimal(value));
+                    if (key.equalsIgnoreCase("number"))
+                        commodity.setNumber(Integer.valueOf(value));
+                    if (key.equalsIgnoreCase("minValue"))
+                        commodity.setMinValue(BigDecimal(value));
+                    if (key.equalsIgnoreCase("maxValue"))
+                        commodity.setMaxValue(BigDecimal(value));
+                    if (key.equalsIgnoreCase("changeRate"))
+                        commodity.setChangeRate(BigDecimal(value));
+                    if (key.equalsIgnoreCase("data"))
+                        commodity.setData(Integer.valueOf(value));
+                    if (key.equalsIgnoreCase("spread"))
+                        commodity.setSpread(BigDecimal(value));
+                }
+            } else {
+                logger.info("Duplicate commodity \"number\" found, that can't be good. You may want to restore the config.yml backup, then check the file for commodities with the same \"number\", correct the issue, and then restart your server to try again.");
+            }
+            
+            plugin.getDatabase().save(commodity);
+            commodity = null;
+        }
+        
+        // mv config.yml to config.yml.bak
+        logger.info("[" + plugin.getDescription().getName() + "] backing up config.yml...");
+        
+        File configFlatFile = new File("config.yml");
+        File backupName = new File("config.yml.bak");
+        
+        while (!configFlatFile.renameTo(backupName)) {
+            
+            logger.info("[" + plugin.getDescription().getName() + "] backup name taken, trying something random...");
+            
+            backupName = new File("config.yml." + Math.random() + ".bak");
+        }
+        
+        // rm config.yml.example
+        
+        logger.info("[" + plugin.getDescription().getName() + "] Successfully converter flatfile to database");
+
+    }
+    
+    /**
+     * Take a string, change it to a double, then to a BigDecimal
+     * @param value
+     * @return BigDecimal value of the given string
+     */
+    private BigDecimal BigDecimal(String value) {
+        
+        BigDecimal bd = BigDecimal.valueOf(Double.valueOf(value));
+        return bd;
     }
 
     /**
