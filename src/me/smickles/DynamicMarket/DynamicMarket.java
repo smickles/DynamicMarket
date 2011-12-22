@@ -86,32 +86,8 @@ public class DynamicMarket extends JavaPlugin {
         setupFiles();
         setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
         setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
-        
-        
-        /* Old Register stuff
-         *  keeping this here because we may want to do something similar to ensure that vault 
-         *  starts up properly since I suspect I had to do this b/c of bukkit, not register
-         *  // setup economy
-         
-        PluginManager pm = this.getServer().getPluginManager();
-        Plugin register = pm.getPlugin("Register");
-        
-        if (register != null && register.isEnabled()) {
-            Methods.setMethod(pm);
-            if (Methods.getMethod() != null) {
-                logger.info("[" + pdfFile.getName() + "] Economy plugin found.");
-            } else {
-                pm.disablePlugin(this);
-                return;
-            }
-        } else {
-            pm.enablePlugin(register);
-            pm.disablePlugin(this);
-            pm.enablePlugin(this);
-            return;
-        }*/
-        
-        this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
+
+        logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
     
     private void checkEbean() {
