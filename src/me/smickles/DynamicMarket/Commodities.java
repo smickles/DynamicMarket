@@ -1,11 +1,10 @@
 package me.smickles.DynamicMarket;
 
-import java.math.BigDecimal;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.avaje.ebean.validation.NotEmpty;
 import com.avaje.ebean.validation.NotNull;
 
 @Entity()
@@ -14,22 +13,23 @@ public class Commodities {
     
     @Id
     private int id;
-    @NotNull
+    @NotEmpty
     private String name;
     @NotNull
-    private BigDecimal value;
+    private double value;
     @NotNull
     private int number;
     @NotNull
-    private BigDecimal maxValue;
+    private double maxValue;
     @NotNull 
-    private BigDecimal minValue;
+    private double minValue;
     @NotNull
-    private BigDecimal changeRate;
+    private double changeRate;
     @NotNull
     private int data;
     @NotNull
-    private BigDecimal spread;
+    private double spread;
+    
     public int getId() {
         return id;
     }
@@ -42,10 +42,10 @@ public class Commodities {
     public void setName(String name) {
         this.name = name;
     }
-    public BigDecimal getValue() {
+    public double getValue() {
         return value;
     }
-    public void setValue(BigDecimal value) {
+    public void setValue(double value) {
         this.value = value;
     }
     public int getNumber() {
@@ -54,22 +54,22 @@ public class Commodities {
     public void setNumber(int number) {
         this.number = number;
     }
-    public BigDecimal getMaxValue() {
+    public double getMaxValue() {
         return maxValue;
     }
-    public void setMaxValue(BigDecimal maxValue) {
+    public void setMaxValue(double maxValue) {
         this.maxValue = maxValue;
     }
-    public BigDecimal getMinValue() {
+    public double getMinValue() {
         return minValue;
     }
-    public void setMinValue(BigDecimal minValue) {
+    public void setMinValue(double minValue) {
         this.minValue = minValue;
     }
-    public BigDecimal getChangeRate() {
+    public double getChangeRate() {
         return changeRate;
     }
-    public void setChangeRate(BigDecimal changeRate) {
+    public void setChangeRate(double changeRate) {
         this.changeRate = changeRate;
     }
     public int getData() {
@@ -78,13 +78,10 @@ public class Commodities {
     public void setData(int data) {
         this.data = data;
     }
-    public BigDecimal getSpread() {
+    public double getSpread() {
         return spread;
     }
-    public void setSpread(BigDecimal spread) {
+    public void setSpread(double spread) {
         this.spread = spread;
     }
-    
-    
-
 }

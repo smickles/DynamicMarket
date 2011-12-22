@@ -69,18 +69,6 @@ public class DynamicMarket extends JavaPlugin {
     public static Economy economy = null;
     
     @Override
-    public void onLoad() {
-        
-        File ep = new File(this.getDataFolder() + File.separator + ".." + File.separator + ".." + File.separator + "ebean.properties");
-        try {
-            ep.createNewFile();
-        } catch (IOException e) {
-            
-            logger.warning("failed to create ebean.properties");
-        }
-    }
-    
-    @Override
     public void onDisable() {
         
         this.logger.info(pdfFile.getName() + " disabled");
@@ -88,13 +76,16 @@ public class DynamicMarket extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        pdfFile = plugin.getDescription();
-        directory = plugin.getDataFolder();
         
-        plugin.setupDatabase();
-        plugin.setupFiles();
-        plugin.setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
-        plugin.setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
+        plugin = this;
+        directory = plugin.getDataFolder();
+        pdfFile = plugin.getDescription();
+
+        checkEbean();
+        setupDatabase();
+        setupFiles();
+        setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
+        setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
         
         
         /* Old Register stuff
@@ -123,6 +114,22 @@ public class DynamicMarket extends JavaPlugin {
         this.logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
     
+    private void checkEbean() {
+
+        File ep = new File(directory + File.separator + ".." + File.separator + ".." + File.separator + "ebean.properties");
+
+        try {
+            if (!ep.exists()) {
+
+                ep.createNewFile();
+                logger.info("[" + pdfFile.getName() + "] Had to create ebean.properties. It may be a good idea to restart your server now.");
+            }
+        } catch (IOException e) {
+            
+            logger.warning("failed to create ebean.properties");
+        }
+    }
+
     /**
      * Check for DynaMark files. Distribute them if needed.
      * Also, check for the old way of storing commodity data, dealing with that as necessary.
@@ -136,8 +143,6 @@ public class DynamicMarket extends JavaPlugin {
         if (directory.exists()) {
             for (String f : directory.list()) {
                 if (f.equalsIgnoreCase("config.yml"))
-                    switchToDatabase();
-                if (f.equalsIgnoreCase("config.yml.example"))
                     switchToDatabase();
                 if (f.equalsIgnoreCase("LICENSE"))
                     licenseIsThere = true;
@@ -204,7 +209,7 @@ public class DynamicMarket extends JavaPlugin {
      */
     private void switchToDatabase() {
 
-        logger.info("[" + plugin.getDescription().getName() + "] Converting flatfile to database...");
+        logger.info("[" + pdfFile.getName() + "] Converting flatfile to database...");
         
         //load old config file
         items = plugin.getConfiguration();
@@ -213,33 +218,35 @@ public class DynamicMarket extends JavaPlugin {
         logger.info("[" + plugin.getDescription().getName() + "] Populating database ...");
         for (String item : items.getKeys()) {
             
-            Commodities commodity = plugin.getDatabase().find(Commodities.class).where().ieq("number", items.getString(item + ".number")).findUnique();
-            
+            Commodities commodity = plugin.getDatabase().find(Commodities.class).where().ieq("name", item).ieq("number", items.getString(item + ".number")).findUnique();
+
             if (commodity == null) {
                 
                 commodity = new Commodities();
+                commodity.setName(item);
                 
                 for (String key : items.getKeys(item)) {
                     
                     String value = items.getString(item + "." + key);
-
+                    
                     if (key.equalsIgnoreCase("value"))
-                        commodity.setValue(BigDecimal(value));
+                        commodity.setValue(Double.valueOf(value));
                     if (key.equalsIgnoreCase("number"))
                         commodity.setNumber(Integer.valueOf(value));
                     if (key.equalsIgnoreCase("minValue"))
-                        commodity.setMinValue(BigDecimal(value));
+                        commodity.setMinValue(Double.valueOf(value));
                     if (key.equalsIgnoreCase("maxValue"))
-                        commodity.setMaxValue(BigDecimal(value));
+                        commodity.setMaxValue(Double.valueOf(value));
                     if (key.equalsIgnoreCase("changeRate"))
-                        commodity.setChangeRate(BigDecimal(value));
+                        commodity.setChangeRate(Double.valueOf(value));
                     if (key.equalsIgnoreCase("data"))
                         commodity.setData(Integer.valueOf(value));
                     if (key.equalsIgnoreCase("spread"))
-                        commodity.setSpread(BigDecimal(value));
+                        commodity.setSpread(Double.valueOf(value));
                 }
             } else {
-                logger.warning("[" + plugin.getDescription().getName() + "] Duplicate commodity \"number\" found, that can't be good. You may want to restore the config.yml backup, then check the file for commodities with the same \"number\", correct the issue, and then restart your server to try again.");
+                logger.warning("[" + pdfFile.getName() + "] Duplicate commodity found, that can't be good. You may want to restore the config.yml backup, delete Dynamark.db (or equivilant), then check the file for commodities with the same \"number\", correct the issue, and then restart your server to try again.");
+                continue;
             }
             
             plugin.getDatabase().save(commodity);
@@ -249,18 +256,13 @@ public class DynamicMarket extends JavaPlugin {
         // mv config.yml to config.yml.bak
         logger.info("[" + plugin.getDescription().getName() + "] backing up config.yml...");
         
-        File configFlatFile = new File("config.yml");
-        File backupName = new File("config.yml.bak");
+        File configFlatFile = new File(directory + File.separator + "config.yml");
+        File backupName = new File(directory + File.separator + "config.yml.bak");
         
-        while (!configFlatFile.renameTo(backupName)) {
-            
-            logger.info("[" + plugin.getDescription().getName() + "] backup name taken, trying something random...");
-            
-            backupName = new File("config.yml." + Math.random() + ".bak");
-        }
+        configFlatFile.renameTo(backupName);
         
-        //  TODO rm config.yml.example
-        File toDelete = new File("config.yml.EXAMPLE");
+        //  rm config.yml.example
+        File toDelete = new File(directory + File.separator + "config.yml.EXAMPLE");
         
         toDelete.delete();
         
@@ -268,17 +270,6 @@ public class DynamicMarket extends JavaPlugin {
 
     }
     
-    /**
-     * Take a string, change it to a double, then to a BigDecimal
-     * @param value
-     * @return BigDecimal value of the given string
-     */
-    private BigDecimal BigDecimal(String value) {
-        
-        BigDecimal bd = BigDecimal.valueOf(Double.valueOf(value));
-        return bd;
-    }
-
     /**
      * Basically taken from http://pastebin.com/8YrDUqcV
      */
@@ -467,7 +458,7 @@ public class DynamicMarket extends JavaPlugin {
      * @return
      */
     private boolean marketHelp(CommandSender sender) {
-        // TODO Auto-generated method stub
+        //TODO '/market ? <command>' and '/<command> ?' as well as '/market <command> ?' -just for good measure-
         sender.sendMessage(ChatColor.GRAY + "-----------------------------------------------------");
         sender.sendMessage(ChatColor.GREEN + "DyanaMark v " + this.getDescription().getVersion().toString());
         sender.sendMessage("An easy way to buy and sell your stuff");
