@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -445,51 +446,51 @@ public class DynamicMarket extends JavaPlugin {
         return true;
     }
 
-    public boolean marketTop(CommandSender sender) {
-        // We received '/market top'
-        items.load();// load the item list
-        // make  'arrays', a name, a price 
-        List<String> names = items.getKeys();
-        String board[][] = new String[names.size()][2];
-        for(int x = 0; x < names.size(); x++) {
-            BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".maxValue", MAXVALUE.doubleValue()));
-            BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+    public boolean marketTop(CommandSender sender) {// We received '/market top'
+        
+        // gather the list of commodities
+        List<Commodities> commodities = plugin.getDatabase()
+                .find(Commodities.class)
+                .findList();
+        
+        // sort 'em and return only the top 10
+        List<Commodities> top10 = plugin.getDatabase()
+                .filter(Commodities.class)
+                .sort("value desc")
+                .maxRows(10)
+                .filter(commodities);
+        
+        //TODO calculate elasticity
+        List<Integer> elasticities = new LinkedList<Integer>();
+        
+        for (int index = 0; index < top10.size(); index++) {
             
-            // names
-            board[x][1] = names.get(x);
-            // prices, but we want max prices if the value is above maxValue
-            if (value.compareTo(maxValue) == 1) {
-                BigDecimal elasticity;
-                BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
+            Commodities c = top10.get(index);
+            double value = c.getValue();
+            double changeRate = c.getChangeRate();
+            double maxValue = c.getMaxValue();
+            if (value > maxValue) {
                 
-                // determine how many changeRate above the max it is
-                elasticity = value.subtract(maxValue).divide(changeRate).setScale(0, RoundingMode.UP);
+                double newValue = value - maxValue;
+                double elasticity = (newValue / changeRate);
+                int el =(int) Math.round(elasticity);
                 
-                board[x][0] = maxValue.toString() + " [" + elasticity + "]";
+                elasticities.add(index, el);
+                c.setValue(newValue);
             } else {
-                board[x][0] = value.toString() + " [0]";                            
+                elasticities.add(index, 0);
             }
         }
-        //sort 'em
-        Arrays.sort(board, new Comparator<String[]>() {
 
-            @Override
-            public int compare(String[] entry1, String[] entry2) {
-                final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
-                final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
-                return value2.compareTo(value1);
-            }
-
-            
-        });
         // Send them to the player
-        for(int x = 0; x < 10; x++) {
+        for(int x = 0; x < top10.size(); x++) {
             int rank = x + 1;
-            BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
-            String elasticity = board[x][0].split(" ")[1];
+            //TBD BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
+            //TBD String elasticity = board[x][0].split(" ")[1];
             
-            sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
+            sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + top10.get(x).getName() + " " + ChatColor.GRAY + top10.get(x).getValue() + " " + ChatColor.DARK_GREEN + elasticities.get(x));
         }
+        
         return true;
     }
 
