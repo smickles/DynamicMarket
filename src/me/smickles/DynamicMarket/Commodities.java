@@ -13,6 +13,15 @@ public class Commodities {
     
     @Id
     private int id;
+    @Override
+    public String toString() {
+        return "Commodities [getId()=" + getId() + ", getName()=" + getName()
+                + ", getValue()=" + getValue() + ", getNumber()=" + getNumber()
+                + ", getMaxValue()=" + getMaxValue() + ", getMinValue()="
+                + getMinValue() + ", getChangeRate()=" + getChangeRate()
+                + ", getData()=" + getData() + ", getSpread()=" + getSpread()
+                + "]";
+    }
     @NotEmpty
     private String name;
     @NotNull
