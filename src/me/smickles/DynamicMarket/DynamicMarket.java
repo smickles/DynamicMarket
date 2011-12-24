@@ -736,27 +736,20 @@ public class DynamicMarket extends JavaPlugin {
     }
 
     public boolean sellAll(Player player) {
-        items.load();
-        List<String> names = items.getKeys();
-        int[] id = new int[names.size()];
-        BigDecimal[] value = new BigDecimal[names.size()];
-        Byte[] byteData = new Byte[names.size()];
-        BigDecimal sale = BigDecimal.ZERO.setScale(2);
-              
-        // make a 'list' of all sellable items with their id's and values
-        for (int x = 0; x < names.size(); x++) {
-            id[x] = items.getInt(names.get(x) + ".number", 0);
-            value[x] = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", 0)).setScale(2, RoundingMode.HALF_UP);
-            byteData[x] = Byte.valueOf(items.getString(names.get(x) + ".data", "0"));
-        }
         
-        // run thru each slot and sell any sellable items
+        // make a list of all commodities
+        List<Commodities> commodities =
+                plugin.getDatabase().find(Commodities.class).findList();
+                
+        // run thru each slot in the player's inventory for commodities
         int index = 0;
-        // we do it this way incase a user has an expanded inventory via another plugin
-        for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
+        BigDecimal sale = BigDecimal.ZERO.setScale(2);
+        
+        for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
             ItemStack slot = player.getInventory().getItem(index);
             int slotId = slot.getTypeId();
-            BigDecimal slotAmount = new BigDecimal(slot.getAmount()).setScale(0, RoundingMode.HALF_UP);
+            BigDecimal slotAmount = new BigDecimal(slot.getAmount()).
+                    setScale(0, RoundingMode.HALF_UP);
             
             Byte slotByteData = Byte.valueOf("0");
             try {
@@ -765,21 +758,25 @@ public class DynamicMarket extends JavaPlugin {
                 slotByteData = Byte.valueOf("0");
             }
             
-            for (int x = 0; x < names.size(); x++) {
-                if ((id[x] == slotId) && (byteData[x].compareTo(slotByteData) == 0)) {
-                    // perform sale of this slot
-                    Invoice thisSale = generateInvoice(0, names.get(x), slotAmount.intValue());
-                    // rack up our total
-                    sale = sale.add(thisSale.getTotal());
+            for (int x = 0; x < commodities.size(); x++) {
+                
+                if ((commodities.get(x).getId() == slotId) && 
+                        (Byte.valueOf(String.valueOf(commodities.get(x).getData())).
+                                compareTo(slotByteData) == 0)) {
+                    
+                    Invoice thisSale = generateInvoice(0,// perform sale of this slot
+                            commodities.get(x),
+                            slotAmount.intValue());
+                    sale = sale.add(thisSale.getTotal());// rack up our total
+                    
                     // save the new value
-                    items.setProperty(names.get(x) + ".value", thisSale.getValue());
-                    items.save();
-                    // remove the item(s)
-                    player.getInventory().clear(index);
-                    // "pay the man"
-                    //TBD MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-                    //TBD cash.add(thisSale.getTotal().doubleValue());
-                    economy.depositPlayer(player.getName(), thisSale.getTotal().doubleValue());
+                    commodities.get(x).setValue(thisSale.getValue());
+                    plugin.getDatabase().save(commodities.get(x));
+                    
+                    player.getInventory().clear(index);// remove the item(s)
+                    economy.depositPlayer(player.getName(),// "pay the man"
+                            thisSale.getTotal().doubleValue());
+                    
                     // give nice output
                     player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
                     break;
@@ -788,7 +785,7 @@ public class DynamicMarket extends JavaPlugin {
             index++;
         }
         
-        // give a nice total collumn
+        // give a nice total column
         if (sale == BigDecimal.ZERO.setScale(2))
             player.sendMessage("Nothing to Sell");
         player.sendMessage(ChatColor.GREEN + "--------------------------------");
