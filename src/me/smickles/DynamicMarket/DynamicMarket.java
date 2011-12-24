@@ -553,7 +553,7 @@ public class DynamicMarket extends JavaPlugin {
     public boolean buy (Player player, String item, int amount) {
         
         // Be sure we have a positive amount
-        if (amount <= 0) {
+        if (amount <= 1) {
             player.sendMessage(ChatColor.RED + "Invalid amount.");
             player.sendMessage("No negative numbers or zero, please.");
             return false;
