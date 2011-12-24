@@ -476,7 +476,7 @@ public class DynamicMarket extends JavaPlugin {
                 int el =(int) Math.round(elasticity);
                 
                 elasticities.add(index, el);
-                c.setValue(newValue);
+                c.setValue(maxValue);
             } else {
                 elasticities.add(index, 0);
             }
@@ -495,52 +495,51 @@ public class DynamicMarket extends JavaPlugin {
     }
 
     public boolean marketBottom(CommandSender sender) {
-
-        // load the item list
-        items.load();
-        // make  'arrays', a name, a price 
-        List<String> names = items.getKeys();
-        String board[][] = new String[names.size()][2];
-        for(int x = 0; x < names.size(); x++) {
-            BigDecimal minValue = BigDecimal.valueOf(items.getDouble(names.get(x) + ".minValue", MINVALUE.doubleValue()));
-            BigDecimal value = BigDecimal.valueOf(items.getDouble(names.get(x) + ".value", -200000000));
+        
+        // gather the list of commodities
+        List<Commodities> commodities = plugin.getDatabase()
+                .find(Commodities.class)
+                .findList();
+        
+        // sort 'em and return only the top 10
+        List<Commodities> top10 = plugin.getDatabase()
+                .filter(Commodities.class)
+                .sort("value asc")
+                .maxRows(10)
+                .filter(commodities);
+        
+        //TODO calculate elasticity
+        List<Integer> elasticities = new LinkedList<Integer>();
+        
+        for (int index = 0; index < top10.size(); index++) {
             
-            // names
-            board[x][1] = names.get(x);
-            // prices, but we want min prices if the value is above maxValue
-            if (value.compareTo(minValue) == -1) {
-                BigDecimal elasticity;
-                BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(names.get(x) + ".changeRate", CHANGERATE.doubleValue()));
+            Commodities c = top10.get(index);
+            double value = c.getValue();
+            double changeRate = c.getChangeRate();
+            double minValue = c.getMinValue();
+            if (value < minValue) {
                 
-                // determine how many changeRate below the min it is
-                elasticity = value.subtract(minValue).abs().divide(changeRate).setScale(0, RoundingMode.DOWN);
+                double newValue = Math.abs(value - minValue);
+                double elasticity = (newValue / changeRate);
+                int el =(int) Math.round(elasticity);
                 
-                board[x][0] = minValue.toString() + " [" + elasticity + "]";
+                elasticities.add(index, el);
+                c.setValue(minValue);
             } else {
-                board[x][0] = value.toString() + " [0]";                            
+                elasticities.add(index, 0);
             }
         }
-        //sort 'em
-        Arrays.sort(board, new Comparator<String[]>() {
 
-            @Override
-            public int compare(String[] entry1, String[] entry2) {
-                final BigDecimal value1 = BigDecimal.valueOf(Double.valueOf(entry1[0].split(" ")[0]));
-                final BigDecimal value2 = BigDecimal.valueOf(Double.valueOf(entry2[0].split(" ")[0]));
-                return value1.compareTo(value2);
-            }
-
-            
-        });
         // Send them to the player
-        for(int x = 0; x < 10; x++) {
+        for(int x = 0; x < top10.size(); x++) {
             int rank = x + 1;
-            BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
-            String elasticity = board[x][0].split(" ")[1];
-                                                            
-            sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + board[x][1] + " " + ChatColor.GRAY + value + " " + ChatColor.DARK_GREEN + elasticity);
+            //TBD BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
+            //TBD String elasticity = board[x][0].split(" ")[1];
+            
+            sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + top10.get(x).getName() + " " + ChatColor.GRAY + top10.get(x).getValue() + " " + ChatColor.DARK_GREEN + elasticities.get(x));
         }
-        return true;  
+        
+        return true;
     }
 
     /**
