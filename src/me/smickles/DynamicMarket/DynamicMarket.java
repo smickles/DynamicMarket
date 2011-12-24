@@ -793,26 +793,25 @@ public class DynamicMarket extends JavaPlugin {
     }
 
     public BigDecimal price(String item) {
-        // Load the item list
-        items.load();
-        // get the price of the given item, if it's an invalid item set our variable to -2000000000 (an unlikely number to receive 'naturally')
-        BigDecimal price = BigDecimal.valueOf(items.getDouble(item + ".value", -2000000000));
-        BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
-        BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
         
-        if (price.intValue() != -2000000000) {
-            // We received an argument which resolved to an item on our list.
-            // The price could register as a negative or below minValue
-            // in this case we should return minValue as the price.
-            if (price.compareTo(minValue) == -1) {
-                price = minValue;
-            } else if (price.compareTo(maxValue) == 1) {
-                price = maxValue;
-            }
-            
-            return price;
-        }
-        return BigDecimal.ZERO;
+        // retrieve the commodity in question
+        Commodities commodity = plugin.getDatabase().find(Commodities.class).
+                where().
+                ieq("name", item).
+                findUnique();
+        
+        if (commodity == null)
+            return null;
+        
+        double price = commodity.getValue();
+        double minValue = commodity.getMinValue();
+        double maxValue = commodity.getMaxValue();
+        
+        if (price > maxValue)
+            return BigDecimal.valueOf(maxValue).setScale(2);
+        if (price < minValue)
+            return BigDecimal.valueOf(minValue).setScale(2);
+        return BigDecimal.valueOf(price);
     }
     
     public void price (CommandSender sender, String item, int amt) {
