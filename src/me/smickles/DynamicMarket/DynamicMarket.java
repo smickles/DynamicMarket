@@ -47,15 +47,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.config.Configuration;
 
-
-@SuppressWarnings("deprecation")
 public class DynamicMarket extends JavaPlugin {
 
     public static DynamicMarket plugin;
     public final Logger logger = Logger.getLogger("Minecraft");
-    public Configuration items;
+    @SuppressWarnings("deprecation")
+    public org.bukkit.util.config.Configuration items;
     public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2);
     public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
     public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
@@ -184,6 +182,7 @@ public class DynamicMarket extends JavaPlugin {
     /**
      * use this in the case that we need to update from the old way of storing data in config.yml
      */
+    @SuppressWarnings("deprecation")
     private void switchToDatabase() {
 
         logger.info("[" + pdfFile.getName() + "] Converting flatfile to database...");
