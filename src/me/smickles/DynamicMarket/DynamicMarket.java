@@ -777,7 +777,7 @@ public class DynamicMarket extends JavaPlugin {
                             thisSale.getTotal().doubleValue());
                     
                     // give nice output
-                    player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + names.get(x) + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
+                    player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + commodities.get(x).getName() + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
                     break;
                 }
             }
