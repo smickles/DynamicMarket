@@ -569,7 +569,7 @@ public class DynamicMarket extends JavaPlugin {
         if (commodity == null) {
             player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
             player.sendMessage("Be sure you typed the correct name");
-            return true;
+            return false;
         }
         
         // determine what it will cost
@@ -629,94 +629,108 @@ public class DynamicMarket extends JavaPlugin {
     public boolean sell (Player player, String item, int amount) {
         
         // Be sure we have a positive amount
-        if (amount <= ) {
+        if (amount <  1) {
             player.sendMessage(ChatColor.RED + "Invalid amount.");
-            player.sendMessage("No negative numbers, please.");
+            player.sendMessage("No negative numbers or zero, please.");
             return false;
         }
-        items.load();
-        int id = items.getInt(item + ".number", 0);
         
-        // a value of 0 would indicate that we did not find an item with that name
-        if(id != 0) {
-            Byte byteData = Byte.valueOf(items.getString(item + ".data", "0"));
+        // retrieve the commodity in question
+        Commodities commodity = plugin.getDatabase().find(Commodities.class)
+            .where()
+            .ieq("name", item)
+            .findUnique();
+        
+        if (commodity == null) {
+            player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
+            player.sendMessage("Be sure you typed the correct name");
+            return false;
+        }
+        
+        // determine what it will pay
+        Invoice invoice = generateInvoice(0, commodity, amount);
+        
+        // If the player has enough of the item, perform the transaction.
+        int id = commodity.getId();
+        Byte byteData = Byte.valueOf(String.valueOf(commodity.getData()));
+        
+        ItemStack its = new ItemStack(
+                id,
+                amount,
+                (short) 0,
+                byteData);
+        
+        if (player.getInventory().contains(id)) {
             
-            // determine what it will pay 
-            Invoice invoice = generateInvoice(0, item, amount);
-            //TBD MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-            // If the player has enough of the item, perform the transaction.
-            ItemStack its = new ItemStack(id, amount, (short) 0, byteData);
+            // Figure out how much is left over
+            int left = getAmountInInventory(player, its) - amount;
             
-            if (player.getInventory().contains(id)) {
-                BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", 0));
-                
-                // Figure out how much is left over.
-                int left = getAmountInInventory(player, its) - amount;
-                if (left < 0) { // this indicates the correct id, but wrong bytedata value
-                    // give nice output even if they gave a bad number.
-                    player.sendMessage(ChatColor.RED + "You don't have enough " + item);
-                    player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
-                    player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
-                    return false;
-                }
-                    
-                // Take out all of the item
-                int x = 0;
-                // we do it this way incase a user has an expanded inventory via another plugin
-                for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
-                    ItemStack slot = player.getInventory().getItem(x);
-                    Byte slotData = Byte.valueOf("0");
-                    try {
-                        slotData = slot.getData().getData();
-                    } catch (NullPointerException e) {
-                        
-                    }
-                    
-                    if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
-                        player.getInventory().clear(x);
-                    }
-                    x++;
-                }
-    
-                // put back what was left over
-                if(left > 0) {
-                    ItemStack itsLeft = its;
-                    itsLeft.setAmount(left);
-                    player.getInventory().addItem(itsLeft);
-                }
-                items.setProperty(item + ".value", invoice.getValue());
-                // record the change in value
-                items.save();
-                
-                // get the new price of the item
-                BigDecimal value = price(item);
-                
-                // give some nice output
-                BigDecimal sale = invoice.getTotal().add(spread);
-                
-                player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
-                //TBD cash.add(invoice.getTotal().doubleValue());
-                economy.depositPlayer(player.getName(), invoice.getTotal().doubleValue());
-                player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
-                player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
-                player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + invoice.getTotal());
-
-                player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
-                player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
-                return true;
-            }else{
-                // give nice output even if they gave a bad number.
+            if (left < 0) {// this indicates the correct id, but the wrong bytedata value
+                // give nice output even if they gave a bad name.
                 player.sendMessage(ChatColor.RED + "You don't have enough " + item);
                 player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
                 player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
                 return false;
             }
-        }else{
-            player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
-            player.sendMessage("Be sure you typed the correct name");
+            
+            // Take out all of the item
+            int x = 0;
+            
+            for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
+                
+                ItemStack slot = player.getInventory().getItem(x);
+                Byte slotData = Byte.valueOf("0");
+                
+                try {
+                    slotData = slot.getData().getData();
+                } catch (NullPointerException e) {
+                    
+                }
+                
+                if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
+                    player.getInventory().clear(x);
+                }
+                x++;
+            }
+
+            // put back what was left over
+            if(left > 0) {
+                ItemStack itsLeft = its;
+                itsLeft.setAmount(left);
+                player.getInventory().addItem(itsLeft);
+            }
+            
+            // record the change in value
+            commodity.setValue(invoice.getValue());
+            plugin.getDatabase().save(commodity);
+            
+            // use BigDecimal to format value for output
+            BigDecimal value = BigDecimal.valueOf(commodity.getValue()).
+                    setScale(2, RoundingMode.HALF_UP);
+            BigDecimal spread = BigDecimal.valueOf(commodity.getSpread());
+            
+            // give some nice output
+            BigDecimal sale = invoice.getTotal().add(spread);
+            
+            player.sendMessage(ChatColor.GREEN + "--------------------------------");
+            player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
+            
+            // deposit the money
+            economy.depositPlayer(player.getName(), invoice.getTotal().doubleValue());
+            
+            player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
+            player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
+            player.sendMessage(ChatColor.GREEN + "--------------------------------");
+            player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + invoice.getTotal());
+            player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
+            player.sendMessage(ChatColor.GREEN + "--------------------------------");
+            player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
+            return true;
+        } else {// give nice output even if they gave a bad number.
+            
+            player.sendMessage(ChatColor.RED + "You don't have enough " + item);
+            player.sendMessage(ChatColor.GREEN + "In Inventory: " + ChatColor.WHITE + getAmountInInventory(player, its));
+            player.sendMessage(ChatColor.GREEN + "Attempted Amount: " + ChatColor.WHITE + amount);
             return false;
         }
     }
