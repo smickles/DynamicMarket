@@ -40,7 +40,7 @@ public class Invoice {
      * Get the current proposed value of the item in question 
      * @return current proposed value of the item
      */
-    public BigDecimal getValue() {
+    public double getValue() {
         return value;
     }
     

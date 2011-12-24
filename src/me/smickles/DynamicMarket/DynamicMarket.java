@@ -553,61 +553,68 @@ public class DynamicMarket extends JavaPlugin {
     public boolean buy (Player player, String item, int amount) {
         
         // Be sure we have a positive amount
-        if (amount < 0) {
+        if (amount <= 0) {
             player.sendMessage(ChatColor.RED + "Invalid amount.");
-            player.sendMessage("No negative numbers, please.");
+            player.sendMessage("No negative numbers or zero, please.");
             return false;
         }
-        items.load();
-        int id = items.getInt(item + ".number", 0);
-        // a value of 0 would indicate that we did not find an item with that name
-        if(id != 0) {
-            // determine what it will cost 
-            Invoice invoice = generateInvoice(1, item, amount);
-            //(to be deleted TBD) MethodAccount cash = Methods.getMethod().getAccount(player.getName());
-          
-            //(TBD)if (cash.hasEnough(invoice.getTotal().doubleValue())) {
-            if (economy.has(player.getName(), invoice.getTotal().doubleValue())) {
-                Byte byteData = Byte.valueOf(items.getString(item + ".data", "0"));
-                
-                // give 'em the items and drop any extra
-                HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
-                for (int a : overflow.keySet()) {
-                    player.getWorld().dropItem(player.getLocation(), overflow.get(a));
-                }
-                
-                items.setProperty(item + ".value", invoice.getValue());
-                items.save();
-                
-                // get the new price of the item
-                BigDecimal value = price(item);
-                
-                // Give some nice output.
-                player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
-                // Subtract the invoice (this is an efficient place to do this)
-                //TBD cash.subtract(invoice.getTotal().doubleValue());
-                economy.withdrawPlayer(player.getName(), invoice.getTotal().doubleValue());
-    
-                player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
-                player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
-                player.sendMessage(ChatColor.GREEN + "--------------------------------");
-                player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
-                return true;
-            } else {
-                // Otherwise, give nice output anyway ;)
-                // The idea here is to show how much more money is needed.
-                BigDecimal difference = BigDecimal.valueOf(economy.getBalance(player.getName()) - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
-                player.sendMessage(ChatColor.RED + "You don't have enough money");
-                player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
-                player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
-                player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
-                return false;
-            }
-        }else{
+        
+        // retrieve the commodity in question
+        Commodities commodity = plugin.getDatabase().find(Commodities.class)
+            .where()
+            .ieq("name", item)
+            .findUnique();
+        
+        // check that we found something
+        if (commodity == null) {
             player.sendMessage(ChatColor.RED + "Not allowed to buy that item.");
             player.sendMessage("Be sure you typed the correct name");
-            return false;
+            return true;
+        }
+        
+        // determine what it will cost
+        Invoice invoice = generateInvoice(1, commodity, amount);
+        
+        // check the player's wallet
+        if (economy.has(player.getName(), invoice.getTotal().doubleValue())) {
+            
+            // give 'em the items and drop any extra
+            Byte byteData = Byte.valueOf(String.valueOf(commodity.getData()));
+            int id = commodity.getId();
+            
+            HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
+            for (int a : overflow.keySet()) {
+                player.getWorld().dropItem(player.getLocation(), overflow.get(a));
+            }
+            
+            // save the new value
+            commodity.setValue(invoice.getValue());
+            plugin.getDatabase().save(commodity);
+            
+            // use BigDecimal to format value for output
+            BigDecimal value = BigDecimal.valueOf(commodity.getValue()).setScale(2, RoundingMode.HALF_UP);
+            
+            // Give some nice output.
+            player.sendMessage(ChatColor.GREEN + "--------------------------------");
+            player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
+            // Subtract the invoice (this is an efficient place to do this)
+            //TBD cash.subtract(invoice.getTotal().doubleValue());
+            economy.withdrawPlayer(player.getName(), invoice.getTotal().doubleValue());
+
+            player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+            player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
+            player.sendMessage(ChatColor.GREEN + "--------------------------------");
+            player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
+            return true;
+        }  else {// Otherwise, give nice output anyway ;)
+           
+            // The idea here is to show how much more money is needed.
+            BigDecimal difference = BigDecimal.valueOf(economy.getBalance(player.getName()) - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
+            player.sendMessage(ChatColor.RED + "You don't have enough money");
+            player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
+            player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+            player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
+            return true;
         }
     }
 
@@ -839,27 +846,27 @@ public class DynamicMarket extends JavaPlugin {
     /**
      * Determine the cost of a given number of an item and calculate a new value for the item accordingly.
      * @param oper 1 for buying, 0 for selling.
-     * @param item the item in question
+     * @param commodity the commodity in question
      * @param amount the desired amount of the item in question
      * @return the total cost and the calculated new value as an Invoice
      */
-    public Invoice generateInvoice(int oper, String item, int amount) {
+    public Invoice generateInvoice(int oper, Commodities commodity, int amount) {
         items.load();
         
         // get the initial value of the item, 0 for not found
         Invoice inv = new Invoice(BigDecimal.valueOf(0),BigDecimal.valueOf(0));
-        inv.value = BigDecimal.valueOf(items.getDouble(item + ".value", 0));
+        inv.value = BigDecimal.valueOf(items.getDouble(commodity + ".value", 0));
         
         // get the spread so we can do one initial decrement of the value if we are selling
-        BigDecimal spread = BigDecimal.valueOf(items.getDouble(item + ".spread", SPREAD.doubleValue()));
+        BigDecimal spread = BigDecimal.valueOf(items.getDouble(commodity + ".spread", SPREAD.doubleValue()));
         
         // determine the total cost
         inv.total = BigDecimal.valueOf(0);
         
         for(int x = 1; x <= amount; x++) {
-            BigDecimal minValue = BigDecimal.valueOf(items.getDouble(item + ".minValue", MINVALUE.doubleValue()));
-            BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(item + ".maxValue", MAXVALUE.doubleValue()));
-            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(item + ".changeRate", CHANGERATE.doubleValue()));
+            BigDecimal minValue = BigDecimal.valueOf(items.getDouble(commodity + ".minValue", MINVALUE.doubleValue()));
+            BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(commodity + ".maxValue", MAXVALUE.doubleValue()));
+            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(commodity + ".changeRate", CHANGERATE.doubleValue()));
 
             // work the spread on the first one.
             if ((oper == 0) && (x == 1)) {
