@@ -54,10 +54,10 @@ public class Invoice {
     
     /**
      * Add an amount to the total of the invoice
-     * @param addend the amount to be added to the total.
+     * @param d the amount to be added to the total.
      */
-    public void addTotal(BigDecimal addend) {
-        total = total.add(addend);
+    public void addTotal(double d) {
+        total = total.add(d);
     }
     
     /**

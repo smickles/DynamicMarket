@@ -52,8 +52,6 @@ public class DynamicMarket extends JavaPlugin {
 
     public static DynamicMarket plugin;
     public final Logger logger = Logger.getLogger("Minecraft");
-    @SuppressWarnings("deprecation")
-    public org.bukkit.util.config.Configuration items;
     public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2);
     public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
     public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
@@ -188,7 +186,7 @@ public class DynamicMarket extends JavaPlugin {
         logger.info("[" + pdfFile.getName() + "] Converting flatfile to database...");
         
         //load old config file
-        items = plugin.getConfiguration();
+        org.bukkit.util.config.Configuration items = plugin.getConfiguration();
         
         // populate the database with existing values
         logger.info("[" + plugin.getDescription().getName() + "] Populating database ...");
@@ -887,22 +885,21 @@ public class DynamicMarket extends JavaPlugin {
      * @return the total cost and the calculated new value as an Invoice
      */
     public Invoice generateInvoice(int oper, Commodities commodity, int amount) {
-        items.load();
         
         // get the initial value of the item, 0 for not found
         Invoice inv = new Invoice(BigDecimal.valueOf(0),BigDecimal.valueOf(0));
-        inv.value = BigDecimal.valueOf(items.getDouble(commodity + ".value", 0));
+        inv.value = BigDecimal.valueOf(commodity.getValue());
         
         // get the spread so we can do one initial decrement of the value if we are selling
-        BigDecimal spread = BigDecimal.valueOf(items.getDouble(commodity + ".spread", SPREAD.doubleValue()));
+        BigDecimal spread = BigDecimal.valueOf(commodity.getSpread());
         
         // determine the total cost
-        inv.total = BigDecimal.valueOf(0);
+        inv.total = BigDecimal.ZERO;
         
         for(int x = 1; x <= amount; x++) {
-            BigDecimal minValue = BigDecimal.valueOf(items.getDouble(commodity + ".minValue", MINVALUE.doubleValue()));
-            BigDecimal maxValue = BigDecimal.valueOf(items.getDouble(commodity + ".maxValue", MAXVALUE.doubleValue()));
-            BigDecimal changeRate = BigDecimal.valueOf(items.getDouble(commodity + ".changeRate", CHANGERATE.doubleValue()));
+            BigDecimal minValue = BigDecimal.valueOf(commodity.getMinValue());
+            BigDecimal maxValue = BigDecimal.valueOf(commodity.getMaxValue());
+            BigDecimal changeRate = BigDecimal.valueOf(commodity.getChangeRate());
 
             // work the spread on the first one.
             if ((oper == 0) && (x == 1)) {
@@ -912,16 +909,16 @@ public class DynamicMarket extends JavaPlugin {
             }
             
             // check the current value
-            if((inv.getValue().compareTo(minValue) == 1) | (inv.getValue().compareTo(minValue) == 0)) {// current value is @ or above minValue
+            if (inv.getValue() >= minValue.doubleValue()) {// current value is @ or above minValue
                 // be sure value is not above maxValue
-                if (inv.getValue().compareTo(maxValue) == -1) {// current value is "just right"
+                if (inv.getValue() < maxValue.doubleValue()) {// current value is "just right"
                     inv.addTotal(inv.getValue());// add current value to total
                 } else {// current value is above the max
-                    inv.addTotal(maxValue); // add maxValue to total
+                    inv.addTotal(maxValue.doubleValue()); // add maxValue to total
                 }
             } else {// current value is below the minimum
                 
-                inv.addTotal(minValue);// add the minimum to total
+                inv.addTotal(minValue.doubleValue());// add the minimum to total
                 
                 if ((oper == 0) && (x == 1)) {
                     inv.subtractTotal(spread);// subtract the spread if we're selling and this is the first run
