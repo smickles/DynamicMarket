@@ -384,13 +384,7 @@ public class DynamicMarket extends JavaPlugin {
         // '/market bottom' should do the dame for the least expensive items.
         } else if(command.equalsIgnoreCase("market")) {
             
-            if (permission.has(sender, "dynamark.market")) {
-                return market(sender, args);
-            } else {
-                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
-                return true;
-            }
-            
+                return market(sender, args);            
         }
         return false;
     }
@@ -407,19 +401,56 @@ public class DynamicMarket extends JavaPlugin {
         if(args.length == 1) {
             if(args[0].equalsIgnoreCase("top")) {
                 
-                return marketTop(sender);
+                if (sender.hasPermission("DynaMark.market.top"))
+                    return marketTop(sender);
+                
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return false;
             } else if (args[0].equalsIgnoreCase("bottom")) {
                 
-                return marketBottom (sender);
+                if (sender.hasPermission("DynaMark.market.bottom"))
+                    return marketBottom (sender);
+                
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return false;
             } else if (args[0].equalsIgnoreCase("list")) {
                 
-                return marketList(sender);
+                if (sender.hasPermission("DynaMark.market.list"))
+                    return marketList(sender);
+                
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return false;
             } else if (args[0].equalsIgnoreCase("help") | args[0].equalsIgnoreCase("?")) {
                 
                 return marketHelp(sender);
+            } else if (args[0].equalsIgnoreCase("add")) {
+                
+                if (sender.hasPermission("DynaMark.market.add") && sender instanceof Player)
+                    return marketAdd(sender, args);
+                
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return false;                
+            } else if (args[0].equalsIgnoreCase("remove")) {
+                
+                if (sender.hasPermission("DynaMark.market.remove") && sender instanceof Player)
+                    return marketRemove(sender, args);
+                
+                sender.sendMessage(ChatColor.RED + "You need permission to use this command");
+                return false;
+
             }
         }
         sender.sendMessage("Invalid number of arguments");
+        return false;
+    }
+
+    private boolean marketRemove(CommandSender sender, String[] args) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    private boolean marketAdd(CommandSender sender, String[] args) {
+        // TODO Auto-generated method stub
         return false;
     }
 
