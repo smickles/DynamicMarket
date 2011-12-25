@@ -485,8 +485,6 @@ public class DynamicMarket extends JavaPlugin {
         // Send them to the player
         for(int x = 0; x < top10.size(); x++) {
             int rank = x + 1;
-            //TBD BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
-            //TBD String elasticity = board[x][0].split(" ")[1];
             
             sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + top10.get(x).getName() + " " + ChatColor.GRAY + top10.get(x).getValue() + " " + ChatColor.DARK_GREEN + elasticities.get(x));
         }
@@ -533,8 +531,6 @@ public class DynamicMarket extends JavaPlugin {
         // Send them to the player
         for(int x = 0; x < top10.size(); x++) {
             int rank = x + 1;
-            //TBD BigDecimal value = BigDecimal.valueOf(Double.parseDouble(board[x][0].split(" ")[0])).setScale(2, RoundingMode.HALF_UP);
-            //TBD String elasticity = board[x][0].split(" ")[1];
             
             sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + top10.get(x).getName() + " " + ChatColor.GRAY + top10.get(x).getValue() + " " + ChatColor.DARK_GREEN + elasticities.get(x));
         }
@@ -608,7 +604,6 @@ public class DynamicMarket extends JavaPlugin {
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
             player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             // Subtract the invoice (this is an efficient place to do this)
-            //TBD cash.subtract(invoice.getTotal().doubleValue());
             economy.withdrawPlayer(player.getName(), invoice.getTotal());
 
             player.sendMessage(
