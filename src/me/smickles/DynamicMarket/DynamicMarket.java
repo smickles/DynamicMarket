@@ -27,8 +27,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -578,7 +576,7 @@ public class DynamicMarket extends JavaPlugin {
         Invoice invoice = generateInvoice(1, commodity, amount);
         
         // check the player's wallet
-        if (economy.has(player.getName(), invoice.getTotal().doubleValue())) {
+        if (economy.has(player.getName(), invoice.getTotal())) {
             
             // give 'em the items and drop any extra
             Byte byteData = Byte.valueOf(String.valueOf(commodity.getData()));
@@ -601,7 +599,7 @@ public class DynamicMarket extends JavaPlugin {
             player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             // Subtract the invoice (this is an efficient place to do this)
             //TBD cash.subtract(invoice.getTotal().doubleValue());
-            economy.withdrawPlayer(player.getName(), invoice.getTotal().doubleValue());
+            economy.withdrawPlayer(player.getName(), invoice.getTotal());
 
             player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
             player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
@@ -611,7 +609,7 @@ public class DynamicMarket extends JavaPlugin {
         }  else {// Otherwise, give nice output anyway ;)
            
             // The idea here is to show how much more money is needed.
-            BigDecimal difference = BigDecimal.valueOf(economy.getBalance(player.getName()) - invoice.getTotal().doubleValue()).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal difference = BigDecimal.valueOf(economy.getBalance(player.getName()) - invoice.getTotal()).setScale(2, RoundingMode.HALF_UP);
             player.sendMessage(ChatColor.RED + "You don't have enough money");
             player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
@@ -712,13 +710,13 @@ public class DynamicMarket extends JavaPlugin {
             BigDecimal spread = BigDecimal.valueOf(commodity.getSpread());
             
             // give some nice output
-            BigDecimal sale = invoice.getTotal().add(spread);
+            BigDecimal sale = BigDecimal.valueOf((invoice.getTotal() + spread.doubleValue())).setScale(2, RoundingMode.HALF_UP);
             
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
             player.sendMessage(ChatColor.GREEN + "Old Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             
             // deposit the money
-            economy.depositPlayer(player.getName(), invoice.getTotal().doubleValue());
+            economy.depositPlayer(player.getName(), invoice.getTotal());
             
             player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
             player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
@@ -769,7 +767,7 @@ public class DynamicMarket extends JavaPlugin {
                     Invoice thisSale = generateInvoice(0,// perform sale of this slot
                             commodities.get(x),
                             slotAmount.intValue());
-                    sale = sale.add(thisSale.getTotal());// rack up our total
+                    sale = sale.add(BigDecimal.valueOf(thisSale.getTotal()));// rack up our total
                     
                     // save the new value
                     commodities.get(x).setValue(thisSale.getValue());
@@ -777,7 +775,7 @@ public class DynamicMarket extends JavaPlugin {
                     
                     player.getInventory().clear(index);// remove the item(s)
                     economy.depositPlayer(player.getName(),// "pay the man"
-                            thisSale.getTotal().doubleValue());
+                            thisSale.getTotal());
                     
                     // give nice output
                     player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + commodities.get(x).getName() + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
@@ -887,14 +885,14 @@ public class DynamicMarket extends JavaPlugin {
     public Invoice generateInvoice(int oper, Commodities commodity, int amount) {
         
         // get the initial value of the item, 0 for not found
-        Invoice inv = new Invoice(BigDecimal.valueOf(0),BigDecimal.valueOf(0));
-        inv.value = BigDecimal.valueOf(commodity.getValue());
+        Invoice inv = new Invoice(0.0, 0.0);
+        inv.value = commodity.getValue();
         
         // get the spread so we can do one initial decrement of the value if we are selling
         BigDecimal spread = BigDecimal.valueOf(commodity.getSpread());
         
         // determine the total cost
-        inv.total = BigDecimal.ZERO;
+        inv.total = 0.0;
         
         for(int x = 1; x <= amount; x++) {
             BigDecimal minValue = BigDecimal.valueOf(commodity.getMinValue());
@@ -903,9 +901,9 @@ public class DynamicMarket extends JavaPlugin {
 
             // work the spread on the first one.
             if ((oper == 0) && (x == 1)) {
-                inv.subtractValue(spread);
+                inv.subtractValue(spread.doubleValue());
             } else if ((oper == 0) && (x > 1)) { // otherwise, do the usual decriment.
-                inv.subtractValue(changeRate);
+                inv.subtractValue(changeRate.doubleValue());
             }
             
             // check the current value
@@ -921,14 +919,14 @@ public class DynamicMarket extends JavaPlugin {
                 inv.addTotal(minValue.doubleValue());// add the minimum to total
                 
                 if ((oper == 0) && (x == 1)) {
-                    inv.subtractTotal(spread);// subtract the spread if we're selling and this is the first run
+                    inv.subtractTotal(spread.doubleValue());// subtract the spread if we're selling and this is the first run
                 }   
             }
             
             // Change our stored value for the item
             // we don't care about min/maxValue here because we don't want the value to 'bounce' off of them.
             if (oper == 1) {
-                inv.addValue(changeRate);
+                inv.addValue(changeRate.doubleValue());
             }
         }
         return inv;
