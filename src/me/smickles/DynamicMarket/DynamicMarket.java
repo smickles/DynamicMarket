@@ -843,27 +843,36 @@ public class DynamicMarket extends JavaPlugin {
     }
 
     public boolean marketList(CommandSender sender) {
-        items.load();
+        
+        List<Commodities> commodities = plugin.getDatabase().find(Commodities.class)
+                .findList();
+
         String list[] = new String[20];
         list[0] = "";
         int row = 0;
         
-        for (String index : items.getKeys()) {
-            // console is 55 characters wide, 20 tall
+        for (int index = 0; index < commodities.size(); index++) {
             
-            list[row] = list[row] + index + ",  ";
+            // console is 55 characters wide, 20 tall
+            list[row] = list[row] + commodities.get(index).getName() + ",  ";
             
             if (list[row].length() > 55) {
-                int split = list[row].lastIndexOf(" ", 55);
+                
+                int split = list[row].lastIndexOf(" ", 54);
                 
                 list[row] = list[row].substring(0, split);
                 row++;
-                list[row] = index + ",  ";
+                if (row > 18) {
+                    
+                    sender.sendMessage("tell smickles that he needs to actually do something about this");
+                    break;
+                }
+                list[row] = commodities.get(index).getName() + ",  ";
             }
         }
         list[row] = list[row].substring(0, list[row].lastIndexOf(","));
         
-        sender.sendMessage(ChatColor.GREEN + "All items on the market");
+        //sender.sendMessage(ChatColor.GREEN + "All items on the market");
         for (int x = 0; x <= row; x++) {
             sender.sendMessage(ChatColor.WHITE + list[x]);
         }
