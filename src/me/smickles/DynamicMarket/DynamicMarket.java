@@ -836,7 +836,7 @@ public class DynamicMarket extends JavaPlugin {
             return BigDecimal.valueOf(maxValue).setScale(2);
         if (price < minValue)
             return BigDecimal.valueOf(minValue).setScale(2);
-        return BigDecimal.valueOf(price);
+        return BigDecimal.valueOf(price).setScale(2);
     }
     
     public boolean price (CommandSender sender, String item, int amt) {
@@ -857,8 +857,14 @@ public class DynamicMarket extends JavaPlugin {
         Invoice buyPrice = generateInvoice(1, commodity, amt);
         
         // send output
-        sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If sold: " + ChatColor.WHITE + sellPrice.getTotal());
-        sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If bought: " + ChatColor.WHITE + buyPrice.getTotal());
+        sender.sendMessage(
+                ChatColor.GRAY + item +
+                ChatColor.GREEN + " If sold: " + 
+                ChatColor.WHITE + BigDecimal.valueOf(sellPrice.getTotal()).setScale(2));
+        sender.sendMessage(
+                ChatColor.GRAY + item +
+                ChatColor.GREEN + " If bought: " +
+                ChatColor.WHITE + BigDecimal.valueOf(buyPrice.getTotal()).setScale(2));
         return true;
     }
 
