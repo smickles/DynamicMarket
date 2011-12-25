@@ -592,7 +592,17 @@ public class DynamicMarket extends JavaPlugin {
             plugin.getDatabase().save(commodity);
             
             // use BigDecimal to format value for output
-            BigDecimal value = BigDecimal.valueOf(commodity.getValue()).setScale(2, RoundingMode.HALF_UP);
+            double v = commodity.getValue();
+            double max = commodity.getMaxValue();
+            double min = commodity.getMinValue();
+            BigDecimal value;
+            if (v < max && v > min) {
+                value = BigDecimal.valueOf(v).setScale(2, RoundingMode.HALF_UP);
+            } else if (v <= min) {
+                value = BigDecimal.valueOf(min).setScale(2, RoundingMode.HALF_UP);
+            } else {
+                value = BigDecimal.valueOf(max).setScale(2, RoundingMode.HALF_UP);
+            }
             
             // Give some nice output.
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
@@ -705,8 +715,17 @@ public class DynamicMarket extends JavaPlugin {
             plugin.getDatabase().save(commodity);
             
             // use BigDecimal to format value for output
-            BigDecimal value = BigDecimal.valueOf(commodity.getValue()).
-                    setScale(2, RoundingMode.HALF_UP);
+            double v = commodity.getValue();
+            double max = commodity.getMaxValue();
+            double min = commodity.getMinValue();
+            BigDecimal value;
+            if (v < max && v > min) {
+                value = BigDecimal.valueOf(v).setScale(2, RoundingMode.HALF_UP);
+            } else if (v <= min) {
+                value = BigDecimal.valueOf(min).setScale(2, RoundingMode.HALF_UP);
+            } else {
+                value = BigDecimal.valueOf(max).setScale(2, RoundingMode.HALF_UP);
+            }
             BigDecimal spread = BigDecimal.valueOf(commodity.getSpread());
             
             // give some nice output
