@@ -611,7 +611,9 @@ public class DynamicMarket extends JavaPlugin {
             //TBD cash.subtract(invoice.getTotal().doubleValue());
             economy.withdrawPlayer(player.getName(), invoice.getTotal());
 
-            player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+            player.sendMessage(
+                    ChatColor.GREEN + "Cost: " +
+                    ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2));
             player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
             player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
@@ -622,7 +624,9 @@ public class DynamicMarket extends JavaPlugin {
             BigDecimal difference = BigDecimal.valueOf(economy.getBalance(player.getName()) - invoice.getTotal()).setScale(2, RoundingMode.HALF_UP);
             player.sendMessage(ChatColor.RED + "You don't have enough money");
             player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
-            player.sendMessage(ChatColor.GREEN + "Cost: " + ChatColor.WHITE + invoice.getTotal());
+            player.sendMessage(
+                    ChatColor.GREEN + "Cost: " + 
+                    ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2));
             player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
             return true;
         }
@@ -740,7 +744,7 @@ public class DynamicMarket extends JavaPlugin {
             player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
             player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
-            player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + invoice.getTotal());
+            player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2));
             player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
             player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
