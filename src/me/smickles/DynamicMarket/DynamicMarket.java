@@ -797,7 +797,12 @@ public class DynamicMarket extends JavaPlugin {
                             thisSale.getTotal());
                     
                     // give nice output
-                    player.sendMessage(ChatColor.GREEN + "Sold " + ChatColor.WHITE + slotAmount + " " + ChatColor.GRAY + commodities.get(x).getName() + ChatColor.GREEN + " for " + ChatColor.WHITE + thisSale.getTotal());
+                    player.sendMessage(
+                            ChatColor.GREEN + "Sold " + 
+                            ChatColor.WHITE + slotAmount + " " + 
+                            ChatColor.GRAY + commodities.get(x).getName() + 
+                            ChatColor.GREEN + " for " + 
+                            ChatColor.WHITE + BigDecimal.valueOf(thisSale.getTotal()).setScale(2, RoundingMode.HALF_UP));
                     break;
                 }
             }
@@ -808,7 +813,7 @@ public class DynamicMarket extends JavaPlugin {
         if (sale == BigDecimal.ZERO.setScale(2))
             player.sendMessage("Nothing to Sell");
         player.sendMessage(ChatColor.GREEN + "--------------------------------");
-        player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale);
+        player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale.setScale(2, RoundingMode.HALF_UP));
         return true;
     }
 
