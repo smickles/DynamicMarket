@@ -580,7 +580,7 @@ public class DynamicMarket extends JavaPlugin {
             
             // give 'em the items and drop any extra
             Byte byteData = Byte.valueOf(String.valueOf(commodity.getData()));
-            int id = commodity.getId();
+            int id = commodity.getNumber();
             
             HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(new ItemStack(id, amount, (short) 0, byteData));
             for (int a : overflow.keySet()) {
@@ -651,7 +651,7 @@ public class DynamicMarket extends JavaPlugin {
         Invoice invoice = generateInvoice(0, commodity, amount);
         
         // If the player has enough of the item, perform the transaction.
-        int id = commodity.getId();
+        int id = commodity.getNumber();
         Byte byteData = Byte.valueOf(String.valueOf(commodity.getData()));
         
         ItemStack its = new ItemStack(
@@ -760,7 +760,7 @@ public class DynamicMarket extends JavaPlugin {
             
             for (int x = 0; x < commodities.size(); x++) {
                 
-                if ((commodities.get(x).getId() == slotId) && 
+                if ((commodities.get(x).getNumber() == slotId) && 
                         (Byte.valueOf(String.valueOf(commodities.get(x).getData())).
                                 compareTo(slotByteData) == 0)) {
                     
