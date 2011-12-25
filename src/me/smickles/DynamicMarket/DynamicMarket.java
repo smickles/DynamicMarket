@@ -364,7 +364,12 @@ public class DynamicMarket extends JavaPlugin {
             if (args.length == 1){
                 String item = args[0];
                 
-                BigDecimal price = price(item);    
+                BigDecimal price = price(item);
+                
+                if (price == null) {
+                    sender.sendMessage(ChatColor.RED + "Invalid item.");
+                    return false;
+                }
     
                 sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
                 return true;
@@ -373,7 +378,7 @@ public class DynamicMarket extends JavaPlugin {
                 String item = args[0];
                 int amt = Integer.valueOf(args[1]);
                 
-                price(sender, item, amt);
+                return price(sender, item, amt);
             } else {
                 // We received too many or too few arguments.
                 sender.sendMessage("Invalid Arguments");
@@ -814,14 +819,27 @@ public class DynamicMarket extends JavaPlugin {
         return BigDecimal.valueOf(price);
     }
     
-    public void price (CommandSender sender, String item, int amt) {
+    public boolean price (CommandSender sender, String item, int amt) {
+        
+        // retrieve the commodity in question
+        Commodities commodity = plugin.getDatabase().find(Commodities.class).
+                where().
+                ieq("name", item).
+                findUnique();
+        
+        if (commodity == null) {
+            sender.sendMessage(ChatColor.RED + "Invalit commodity name.");
+            return false;
+        }
         
         // get the buy and sell price of the item
-        Invoice sellPrice = generateInvoice(0, item, amt);
-        Invoice buyPrice = generateInvoice(1, item, amt);
+        Invoice sellPrice = generateInvoice(0, commodity, amt);
+        Invoice buyPrice = generateInvoice(1, commodity, amt);
         
+        // send output
         sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If sold: " + ChatColor.WHITE + sellPrice.getTotal());
         sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + " If bought: " + ChatColor.WHITE + buyPrice.getTotal());
+        return true;
     }
 
     public boolean marketList(CommandSender sender) {
