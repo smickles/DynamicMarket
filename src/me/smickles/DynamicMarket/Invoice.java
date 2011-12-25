@@ -19,19 +19,16 @@
 
 package me.smickles.DynamicMarket;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 public class Invoice {
-    public BigDecimal value = BigDecimal.valueOf(0).setScale(2, RoundingMode.HALF_UP);
-    public BigDecimal total = BigDecimal.valueOf(0).setScale(2, RoundingMode.HALF_UP);
+    public double value = 0.0;
+    public double total = 0.0;
     
     /**
      * Create an Invoice for the purchase or sale of an item
      * @param initValue the beginning value of the item 
      * @param initTotal the beginning total of of the Invoice, typically 0
      */
-    public Invoice(BigDecimal initValue, BigDecimal initTotal) {
+    public Invoice(double initValue, double initTotal) {
         value = initValue;
         total = initTotal;
     }
@@ -48,7 +45,7 @@ public class Invoice {
      * Get the current total of the Invoice
      * @return current total of the Invoice
      */
-    public BigDecimal getTotal() {
+    public double getTotal() {
         return total;
     }
     
@@ -57,22 +54,22 @@ public class Invoice {
      * @param d the amount to be added to the total.
      */
     public void addTotal(double d) {
-        total = total.add(d);
+        total += d;
     }
     
     /**
      * subtract an amount from the total of the invoice
      * @param subtrahend the amount to be subtracted from the total.
      */
-    public void subtractTotal(BigDecimal subtrahend) {
-        total = total.subtract(subtrahend);
+    public void subtractTotal(double subtrahend) {
+        total -= subtrahend;
     }   
     
     /**
      * Set the total to a give value.
      * @param newTotal the desired total
      */
-    public void setTotal(BigDecimal newTotal) {
+    public void setTotal(double newTotal) {
         total = newTotal;        
     }
     
@@ -80,16 +77,16 @@ public class Invoice {
      * Add an amount to the proposed value of the item
      * @param addend the amount to be added
      */
-    public void addValue(BigDecimal addend) {
-        value = value.add(addend);
+    public void addValue(double addend) {
+        value += addend;
     }
     
     /**
      * Subtract an amount from the proposed value of the item 
      * @param subtrahend the amount to be subtracted
      */
-    public void subtractValue(BigDecimal subtrahend) {
-        value = value.subtract(subtrahend);
+    public void subtractValue(double subtrahend) {
+        value -= subtrahend;
     }
     
 
