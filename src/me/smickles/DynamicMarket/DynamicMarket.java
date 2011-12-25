@@ -50,9 +50,9 @@ public class DynamicMarket extends JavaPlugin {
 
     public static DynamicMarket plugin;
     public final Logger logger = Logger.getLogger("Minecraft");
-    public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2);
-    public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2);
-    public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2);
+    public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2, RoundingMode.HALF_UP);
+    public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2, RoundingMode.HALF_UP);
+    public static BigDecimal CHANGERATE = BigDecimal.valueOf(.01).setScale(2, RoundingMode.HALF_UP);
     public static BigDecimal SPREAD = CHANGERATE;
     public static File directory;
     PluginDescriptionFile pdfFile;
@@ -613,7 +613,7 @@ public class DynamicMarket extends JavaPlugin {
 
             player.sendMessage(
                     ChatColor.GREEN + "Cost: " +
-                    ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2));
+                    ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
             player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
@@ -626,7 +626,7 @@ public class DynamicMarket extends JavaPlugin {
             player.sendMessage(ChatColor.GREEN + "Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(
                     ChatColor.GREEN + "Cost: " + 
-                    ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2));
+                    ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "Difference: " + ChatColor.RED + difference);
             return true;
         }
@@ -744,7 +744,7 @@ public class DynamicMarket extends JavaPlugin {
             player.sendMessage(ChatColor.GREEN + "Sale: " + ChatColor.WHITE + sale);
             player.sendMessage(ChatColor.GREEN + "Selling Fee: " + ChatColor.WHITE + spread);
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
-            player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2));
+            player.sendMessage(ChatColor.GREEN + "Net Gain: " + ChatColor.WHITE + BigDecimal.valueOf(invoice.getTotal()).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "New Balance: " + ChatColor.WHITE + BigDecimal.valueOf(economy.getBalance(player.getName())).setScale(2, RoundingMode.HALF_UP));
             player.sendMessage(ChatColor.GREEN + "--------------------------------");
             player.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN + " New Price: " + ChatColor.WHITE + value);
@@ -766,7 +766,7 @@ public class DynamicMarket extends JavaPlugin {
                 
         // run thru each slot in the player's inventory for commodities
         int index = 0;
-        BigDecimal sale = BigDecimal.ZERO.setScale(2);
+        BigDecimal sale = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         
         for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
             ItemStack slot = player.getInventory().getItem(index);
@@ -814,7 +814,7 @@ public class DynamicMarket extends JavaPlugin {
         }
         
         // give a nice total column
-        if (sale == BigDecimal.ZERO.setScale(2))
+        if (sale == BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP))
             player.sendMessage("Nothing to Sell");
         player.sendMessage(ChatColor.GREEN + "--------------------------------");
         player.sendMessage(ChatColor.GREEN + "Total Sale: " + ChatColor.WHITE + sale.setScale(2, RoundingMode.HALF_UP));
@@ -837,10 +837,10 @@ public class DynamicMarket extends JavaPlugin {
         double maxValue = commodity.getMaxValue();
         
         if (price > maxValue)
-            return BigDecimal.valueOf(maxValue).setScale(2);
+            return BigDecimal.valueOf(maxValue).setScale(2, RoundingMode.HALF_UP);
         if (price < minValue)
-            return BigDecimal.valueOf(minValue).setScale(2);
-        return BigDecimal.valueOf(price).setScale(2);
+            return BigDecimal.valueOf(minValue).setScale(2, RoundingMode.HALF_UP);
+        return BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_UP);
     }
     
     public boolean price (CommandSender sender, String item, int amt) {
@@ -864,11 +864,11 @@ public class DynamicMarket extends JavaPlugin {
         sender.sendMessage(
                 ChatColor.GRAY + item +
                 ChatColor.GREEN + " If sold: " + 
-                ChatColor.WHITE + BigDecimal.valueOf(sellPrice.getTotal()).setScale(2));
+                ChatColor.WHITE + BigDecimal.valueOf(sellPrice.getTotal()).setScale(2, RoundingMode.HALF_UP));
         sender.sendMessage(
                 ChatColor.GRAY + item +
                 ChatColor.GREEN + " If bought: " +
-                ChatColor.WHITE + BigDecimal.valueOf(buyPrice.getTotal()).setScale(2));
+                ChatColor.WHITE + BigDecimal.valueOf(buyPrice.getTotal()).setScale(2, RoundingMode.HALF_UP));
         return true;
     }
 
