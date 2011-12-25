@@ -238,7 +238,7 @@ public class DynamicMarket extends JavaPlugin {
         
         toDelete.delete();
         
-        logger.info("[" + plugin.getDescription().getName() + "] Successfully converter flatfile to database");
+        logger.info("[" + plugin.getDescription().getName() + "] Successfully converted flatfile to database");
 
     }
     
