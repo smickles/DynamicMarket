@@ -460,7 +460,7 @@ public class DynamicMarket extends JavaPlugin {
                 .maxRows(10)
                 .filter(commodities);
         
-        //TODO calculate elasticity
+        // calculate elasticity
         List<Integer> elasticities = new LinkedList<Integer>();
         
         for (int index = 0; index < top10.size(); index++) {
@@ -506,7 +506,7 @@ public class DynamicMarket extends JavaPlugin {
                 .maxRows(10)
                 .filter(commodities);
         
-        //TODO calculate elasticity
+        // calculate elasticity
         List<Integer> elasticities = new LinkedList<Integer>();
         
         for (int index = 0; index < top10.size(); index++) {
