@@ -12,11 +12,16 @@ public class CommandHelper extends DynamicMarket{
 		super();
 		this.message = message;
 		this.sender = sender;
+		
+		this.sender.sendMessage(this.message);
 	}
 
-	public Object marketAddHelp() {
-		// TODO Auto-generated method stub
-		return null;
+	public void marketAddHelp() {
+
+		sender.sendMessage("market add requires");
+		sender.sendMessage("[number] [data] [name] [value] [minvalue] [maxvalue] [changerate] [spread]");
+		sender.sendMessage("as");
+		sender.sendMessage("<###> <##> <abc> <#.#> <#.#> <#.#> <#.#> <#.#>");
 	}
 
 }
