@@ -451,9 +451,16 @@ public class DynamicMarket extends JavaPlugin {
     private boolean marketRemove(CommandSender sender, String[] args) {
         // TODO Auto-generated method stub
     	
+    	
         return false;
     }
 
+    /** see CommandHelper.marketAdd() for now
+     * 
+     * @param sender
+     * @param args
+     * @return
+     */
     private boolean marketAdd(CommandSender sender, String[] args) {
         
     	String addendNumber = null,
