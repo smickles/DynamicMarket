@@ -13,20 +13,20 @@ public class Commodities {
     
     @Id
     private int id;
-    @NotNull
-    private int number;
-    @NotNull
-    private int data;
     @NotEmpty
     private String name;
     @NotNull
     private double value;
     @NotNull
-    private double minValue;
-    @NotNull 
+    private int number;
+    @NotNull
     private double maxValue;
+    @NotNull 
+    private double minValue;
     @NotNull
     private double changeRate;
+    @NotNull
+    private int data;
     @NotNull
     private double spread;
     
