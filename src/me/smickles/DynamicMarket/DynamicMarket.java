@@ -398,7 +398,7 @@ public class DynamicMarket extends JavaPlugin {
          * The 'simple' market commands are top, bottom, list, and -even a basic- help
          * The complicated command is help. 
          */
-        if(args.length == 1) {
+        if(args.length > 0) {
             if(args[0].equalsIgnoreCase("top")) {
                 
                 if (sender.hasPermission("DynaMark.market.top"))
@@ -658,7 +658,7 @@ public class DynamicMarket extends JavaPlugin {
             
             // save the new value
             commodity.setValue(invoice.getValue());
-            plugin.getDatabase().save(commodity);
+            getDatabase().save(commodity);
             
             // use BigDecimal to format value for output
             double v = commodity.getValue();
