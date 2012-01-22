@@ -474,6 +474,7 @@ public class DynamicMarket extends JavaPlugin {
     		
     		new CommandHelper("Too few arguments", sender)
     				.marketAddHelp();
+    		return false;
     	}
         
     	Commodities commodity = new Commodities();
