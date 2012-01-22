@@ -451,20 +451,36 @@ public class DynamicMarket extends JavaPlugin {
 
     private boolean marketAdd(CommandSender sender, String[] args) {
         
-    	String addendNumber = args[1],
-        		addendData = args[2],
-        		addendName = args[3],
-        		addendValue = args[4],
-        		addendMinValue = args[5],
-        		addendMaxValue = args[6],
-        		addendChangeRate = args[7],
-        		addendSpread = args[8];
+    	String addendNumber = null,
+    			addendData = null,
+    			addendName = null,
+    			addendValue = null,
+    			addendMinValue = null,
+    			addendMaxValue = null,
+    			addendChangeRate = null,
+    			addendSpread = null;
+		try {
+    		
+    		addendNumber = args[1];
+			addendData = args[2];
+			addendName = args[3];
+			addendValue = args[4];
+			addendMinValue = args[5];
+			addendMaxValue = args[6];
+			addendChangeRate = args[7];
+			addendSpread = args[8];
+    		
+    	} catch (ArrayIndexOutOfBoundsException e) {
+    		
+    		new CommandHelper("Too few arguments", sender)
+    				.marketAddHelp();
+    	}
         
     	Commodities commodity = new Commodities();
     	
     	try {
     		
-    		commodity.setNumber(Integer.valueOf(addendNumber));
+			commodity.setNumber(Integer.valueOf(addendNumber));
     		commodity.setData(Integer.valueOf(addendData));
     		commodity.setName(addendName);
     		commodity.setValue(Double.valueOf(addendValue));
@@ -475,10 +491,8 @@ public class DynamicMarket extends JavaPlugin {
     		
     	} catch (NumberFormatException e) {
     		
-    		sender.sendMessage("market add requires");
-    		sender.sendMessage("number data name value minvalue maxvalue changerate spread");
-    		sender.sendMessage("as");
-    		sender.sendMessage("<###> <##> <abc> <#.#> <#.#> <#.#> <#.#> <#.#>");
+    		new CommandHelper("Invalid Arguments", sender)
+    				.marketAddHelp();
     		return false;
     	}
     	
