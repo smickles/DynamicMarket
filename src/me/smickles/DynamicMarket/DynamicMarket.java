@@ -450,6 +450,7 @@ public class DynamicMarket extends JavaPlugin {
 
     private boolean marketRemove(CommandSender sender, String[] args) {
         // TODO Auto-generated method stub
+    	
         return false;
     }
 
@@ -512,6 +513,8 @@ public class DynamicMarket extends JavaPlugin {
 			return false;
 		}
     	
+		sender.sendMessage(commodity.getName() + " successfully added to the database");
+		
         return true;
     }
 
