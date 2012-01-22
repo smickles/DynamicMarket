@@ -1,14 +1,17 @@
 package me.smickles.DynamicMarket;
 
 public class CommodityDBAdder extends DynamicMarket{
+	
+	public DynamicMarket plugin; 
 
-	public CommodityDBAdder() {
-		// TODO Auto-generated constructor stub
+	public CommodityDBAdder(DynamicMarket plugin) {
+		
+		this.plugin = plugin;
 	}
 
 	public void addCommodity(Commodities commodity) throws DuplicateCommodityException {
 		
-    	Commodities check = getDatabase().find(Commodities.class)
+		Commodities check = plugin.getDatabase().find(Commodities.class)
     			.where()
     			.ieq("number", String.valueOf(commodity.getNumber()))
     			.ieq("data", String.valueOf(commodity.getData()))
@@ -17,7 +20,7 @@ public class CommodityDBAdder extends DynamicMarket{
     	if (check != null)
     		throw new DuplicateCommodityException("Commodity is already in the database");
     	
-    	getDatabase().save(commodity);
+    	plugin.getDatabase().save(commodity);
 		
 	}
 

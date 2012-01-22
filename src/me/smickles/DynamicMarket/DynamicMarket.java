@@ -48,7 +48,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class DynamicMarket extends JavaPlugin {
 
-    public static DynamicMarket plugin;
+    public DynamicMarket plugin;
     public final Logger logger = Logger.getLogger("Minecraft");
     public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2, RoundingMode.HALF_UP);
     public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2, RoundingMode.HALF_UP);
@@ -190,7 +190,11 @@ public class DynamicMarket extends JavaPlugin {
         logger.info("[" + plugin.getDescription().getName() + "] Populating database ...");
         for (String item : items.getKeys()) {
             
-            Commodities commodity = plugin.getDatabase().find(Commodities.class).where().ieq("name", item).ieq("number", items.getString(item + ".number")).findUnique();
+            Commodities commodity = plugin.getDatabase().find(Commodities.class)
+            		.where()
+            		.ieq("name", item)
+            		.ieq("number", items.getString(item + ".number"))
+            		.findUnique();
 
             if (commodity == null) {
                 
@@ -496,10 +500,10 @@ public class DynamicMarket extends JavaPlugin {
     				.marketAddHelp();
     		return false;
     	}
-    	
+    	System.out.println(commodity.toString());
 		try {
 			
-			new CommodityDBAdder()
+			new CommodityDBAdder(this)
 					.addCommodity(commodity);
 			
 		} catch (DuplicateCommodityException e) {
