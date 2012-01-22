@@ -450,8 +450,50 @@ public class DynamicMarket extends JavaPlugin {
     }
 
     private boolean marketAdd(CommandSender sender, String[] args) {
-        // TODO Auto-generated method stub
-        return false;
+        
+    	String addendNumber = args[1],
+        		addendData = args[2],
+        		addendName = args[3],
+        		addendValue = args[4],
+        		addendMinValue = args[5],
+        		addendMaxValue = args[6],
+        		addendChangeRate = args[7],
+        		addendSpread = args[8];
+        
+    	Commodities commodity = new Commodities();
+    	
+    	try {
+    		
+    		commodity.setNumber(Integer.valueOf(addendNumber));
+    		commodity.setData(Integer.valueOf(addendData));
+    		commodity.setName(addendName);
+    		commodity.setValue(Double.valueOf(addendValue));
+    		commodity.setMaxValue(Double.valueOf(addendMaxValue));
+    		commodity.setMinValue(Double.valueOf(addendMinValue));
+    		commodity.setChangeRate(Double.valueOf(addendChangeRate));
+    		commodity.setSpread(Double.valueOf(addendSpread));
+    		
+    	} catch (NumberFormatException e) {
+    		
+    		sender.sendMessage("market add requires");
+    		sender.sendMessage("number data name value minvalue maxvalue changerate spread");
+    		sender.sendMessage("as");
+    		sender.sendMessage("<###> <##> <abc> <#.#> <#.#> <#.#> <#.#> <#.#>");
+    		return false;
+    	}
+    	
+		try {
+			
+			new CommodityDBAdder()
+					.addCommodity(commodity);
+			
+		} catch (DuplicateCommodityException e) {
+			
+			sender.sendMessage(e.getMessage());
+			return false;
+		}
+    	
+        return true;
     }
 
     /**
