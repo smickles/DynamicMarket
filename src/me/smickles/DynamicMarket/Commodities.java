@@ -25,7 +25,7 @@ public class Commodities {
     private double minValue;
     @NotNull
     private double changeRate;
-    @NotNull
+	@NotNull
     private int data;
     @NotNull
     private double spread;
@@ -83,5 +83,17 @@ public class Commodities {
     }
     public void setSpread(double spread) {
         this.spread = spread;
+    }
+    @Override
+    public String toString() {
+    	return "id " + id
+    			+ " name " + name
+    			+ " number " + number
+    			+ " data " + data
+    			+ " value " + value
+    			+ " minvalue " + minValue
+    			+ " maxvalue " + maxValue
+    			+ " cangerate " + changeRate
+    			+ " spread " + spread;
     }
 }
