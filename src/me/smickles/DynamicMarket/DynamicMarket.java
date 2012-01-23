@@ -448,11 +448,31 @@ public class DynamicMarket extends JavaPlugin {
         return false;
     }
 
+    /**
+     * Takes the name of a commodity and removes a commodity with that name from the database
+     * 
+     * @param sender
+     * @param args
+     * @return
+     */
     private boolean marketRemove(CommandSender sender, String[] args) {
         // TODO Auto-generated method stub
+    	if (args.length < 2) {
+    		
+    		new CommandHelper("too few arguments", sender)
+    				.marketRemoveHelp();
+    		return false;
+    	}
     	
+    	String name = args[1];
     	
-        return false;
+    	Commodities c = plugin.getDatabase().find(Commodities.class)
+    			.where()
+    			.ieq("name", name)
+    			.findUnique();
+    	
+    	plugin.getDatabase().delete(c);
+    	
     }
 
     /** see CommandHelper.marketAdd() for now
