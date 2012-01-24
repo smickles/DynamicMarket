@@ -24,4 +24,9 @@ public class CommandHelper extends DynamicMarket{
 		sender.sendMessage("<###> <##> <abc> <#.#> <#.#> <#.#> <#.#> <#.#>");
 	}
 
+	public void marketRemoveHelp() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
