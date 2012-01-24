@@ -466,13 +466,18 @@ public class DynamicMarket extends JavaPlugin {
     	
     	String name = args[1];
     	
-    	Commodities c = plugin.getDatabase().find(Commodities.class)
-    			.where()
-    			.ieq("name", name)
-    			.findUnique();
+    	try {
+    		
+    		new CommodityDBRemover(this)
+		    		.removeCommodityByName(name);
+    	} catch (CommodityNotFoundException e) {
+    		
+    		new CommandHelper(e.getMessage(), sender)
+    				.marketRemoveHelp();
+    		return false;
+    	}
     	
-    	plugin.getDatabase().delete(c);
-    	
+    	return true;
     }
 
     /** see CommandHelper.marketAdd() for now
