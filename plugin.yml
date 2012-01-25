@@ -35,4 +35,4 @@ commands:
     usage: Example - /price stone
   market:
     description: used to view market conditions
-    usage: Example - /market <top | bottom>
+    usage: Example - /market <top | bottom | add | remove>
