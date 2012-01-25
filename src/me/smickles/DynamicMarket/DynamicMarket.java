@@ -456,7 +456,7 @@ public class DynamicMarket extends JavaPlugin {
      * @return
      */
     private boolean marketRemove(CommandSender sender, String[] args) {
-        // TODO Auto-generated method stub
+
     	if (args.length < 2) {
     		
     		new CommandHelper("too few arguments", sender)
@@ -477,6 +477,7 @@ public class DynamicMarket extends JavaPlugin {
     		return false;
     	}
     	
+    	sender.sendMessage("successfully removed " + name);
     	return true;
     }
 
