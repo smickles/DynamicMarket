@@ -184,11 +184,11 @@ public class DynamicMarket extends JavaPlugin {
         logger.info("[" + pdfFile.getName() + "] Converting flatfile to database...");
         
         //load old config file
-        org.bukkit.util.config.Configuration items = plugin.getConfiguration();
+        org.bukkit.configuration.Configuration items = plugin.getConfig();
         
         // populate the database with existing values
         logger.info("[" + plugin.getDescription().getName() + "] Populating database ...");
-        for (String item : items.getKeys()) {
+        for (String item : items.getKeys(false)) {
             
             Commodities commodity = plugin.getDatabase().find(Commodities.class)
             		.where()
@@ -201,7 +201,7 @@ public class DynamicMarket extends JavaPlugin {
                 commodity = new Commodities();
                 commodity.setName(item);
                 
-                for (String key : items.getKeys(item)) {
+                for (String key : items.getConfigurationSection(item).getKeys(false)) {
                     
                     String value = items.getString(item + "." + key);
                     
@@ -816,16 +816,18 @@ public class DynamicMarket extends JavaPlugin {
             for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
                 
                 ItemStack slot = player.getInventory().getItem(x);
-                Byte slotData = Byte.valueOf("0");
                 
-                try {
-                    slotData = slot.getData().getData();
-                } catch (NullPointerException e) {
-                    
-                }
+                if (slot != null) {
+                	Byte slotData = Byte.valueOf("0");
                 
-                if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
-                    player.getInventory().clear(x);
+                	try {
+                		slotData = slot.getData().getData();
+                	} catch (NullPointerException e) {
+                    }
+                
+                	if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
+                		player.getInventory().clear(x);
+                	}
                 }
                 x++;
             }
@@ -1102,7 +1104,8 @@ public class DynamicMarket extends JavaPlugin {
         ItemStack slot;
         // we do it this way incase a user has an expanded inventory via another plugin
         for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
-            slot = player.getInventory().getItem(x);
+      		        	
+        	slot = player.getInventory().getItem(x);
         
             if (slot != null) {
                 Byte slotData = Byte.valueOf("0");
@@ -1122,9 +1125,9 @@ public class DynamicMarket extends JavaPlugin {
                 if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(itData) == 0)) {
                     inInventory += slot.getAmount();
                 }
-            } else {
+            } /*else {
                 return 0;
-            }
+            }*/
             x++;
         }
         return inInventory;
