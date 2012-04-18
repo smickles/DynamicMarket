@@ -199,7 +199,41 @@ public class DynamicMarket extends JavaPlugin {
 		// TODO Auto-generated method stub
     	CommodityDBAdder adder = new CommodityDBAdder(plugin);
 
-    	for (int id = 1; id <= 63; id++) {
+    	LinkedList<Integer> unwantedIDs = new LinkedList<Integer>();
+    	unwantedIDs.add(0);//air
+    	unwantedIDs.add(2);//grass topped dirt
+    	unwantedIDs.add(7);//bedrock
+    	unwantedIDs.add(8);//water
+    	unwantedIDs.add(9);//stationary water
+    	unwantedIDs.add(10);//lava
+    	unwantedIDs.add(11);//stationary lava
+    	unwantedIDs.add(14);//gold ore
+    	unwantedIDs.add(15);//iron ore
+    	unwantedIDs.add(16);//coal ore
+    	unwantedIDs.add(19);//sponge
+    	unwantedIDs.add(21);//lapis ore
+    	unwantedIDs.add(26);//bed
+    	unwantedIDs.add(30);//cobweb
+    	unwantedIDs.add(34);//piston extended
+    	unwantedIDs.add(36);//piston moved block
+    	unwantedIDs.add(43);//double slab
+    	unwantedIDs.add(51);//fire
+    	unwantedIDs.add(52);//spawner
+    	unwantedIDs.add(55);//wire
+    	unwantedIDs.add(56);//diamond ore
+    	unwantedIDs.add(59);//seed block
+    	unwantedIDs.add(60);//farmland
+    	unwantedIDs.add(62);//lit furnace
+    	unwantedIDs.add(63);//sign post
+    	
+    	id:for (int id = 0; id <= 63; id++) {
+    		
+    		// check for unwanted blocks
+    		for (int unwantedID : unwantedIDs ) {
+    			if (id == unwantedID)
+    				continue id;
+    		}
+    		
 			Commodity c = new Commodity();
 			c.setChangeRate(CHANGERATE.doubleValue());
 			c.setData(0);
