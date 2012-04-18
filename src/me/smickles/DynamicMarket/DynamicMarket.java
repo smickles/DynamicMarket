@@ -114,7 +114,8 @@ public class DynamicMarket extends JavaPlugin {
         if (directory.exists()) {
             for (String f : directory.list()) {
                 if (f.equalsIgnoreCase("config.yml"))
-                    switchToDatabase();
+                    logger.severe("The old config has been fully depreciated" +
+                    		" by bukkit and is no longer supported by DynaMark.");
                 if (f.equalsIgnoreCase("LICENSE"))
                     licenseIsThere = true;
                 if (f.equalsIgnoreCase("README"))
@@ -175,76 +176,6 @@ public class DynamicMarket extends JavaPlugin {
         }
     }
 
-    /**
-     * use this in the case that we need to update from the old way of storing data in config.yml
-     */
-    @SuppressWarnings("deprecation")
-    private void switchToDatabase() {
-
-        logger.info("[" + pdfFile.getName() + "] Converting flatfile to database...");
-        
-        //load old config file
-        org.bukkit.util.config.Configuration items = plugin.getConfiguration();
-        
-        // populate the database with existing values
-        logger.info("[" + plugin.getDescription().getName() + "] Populating database ...");
-        for (String item : items.getKeys()) {
-            
-            Commodities commodity = plugin.getDatabase().find(Commodities.class)
-            		.where()
-            		.ieq("name", item)
-            		.ieq("number", items.getString(item + ".number"))
-            		.findUnique();
-
-            if (commodity == null) {
-                
-                commodity = new Commodities();
-                commodity.setName(item);
-                
-                for (String key : items.getKeys(item)) {
-                    
-                    String value = items.getString(item + "." + key);
-                    
-                    if (key.equalsIgnoreCase("value"))
-                        commodity.setValue(Double.valueOf(value));
-                    if (key.equalsIgnoreCase("number"))
-                        commodity.setNumber(Integer.valueOf(value));
-                    if (key.equalsIgnoreCase("minValue"))
-                        commodity.setMinValue(Double.valueOf(value));
-                    if (key.equalsIgnoreCase("maxValue"))
-                        commodity.setMaxValue(Double.valueOf(value));
-                    if (key.equalsIgnoreCase("changeRate"))
-                        commodity.setChangeRate(Double.valueOf(value));
-                    if (key.equalsIgnoreCase("data"))
-                        commodity.setData(Integer.valueOf(value));
-                    if (key.equalsIgnoreCase("spread"))
-                        commodity.setSpread(Double.valueOf(value));
-                }
-            } else {
-                logger.warning("[" + pdfFile.getName() + "] Duplicate commodity found, that can't be good. You may want to restore the config.yml backup, delete Dynamark.db (or equivilant), then check the file for commodities with the same \"number\", correct the issue, and then restart your server to try again.");
-                continue;
-            }
-            
-            plugin.getDatabase().save(commodity);
-            commodity = null;
-        }
-        
-        // mv config.yml to config.yml.bak
-        logger.info("[" + plugin.getDescription().getName() + "] backing up config.yml...");
-        
-        File configFlatFile = new File(directory + File.separator + "config.yml");
-        File backupName = new File(directory + File.separator + "config.yml.bak");
-        
-        configFlatFile.renameTo(backupName);
-        
-        //  rm config.yml.example
-        File toDelete = new File(directory + File.separator + "config.yml.EXAMPLE");
-        
-        toDelete.delete();
-        
-        logger.info("[" + plugin.getDescription().getName() + "] Successfully converted flatfile to database");
-
-    }
     
     /**
      * Basically taken from http://pastebin.com/8YrDUqcV
