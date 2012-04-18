@@ -183,20 +183,30 @@ public class DynamicMarket extends JavaPlugin {
     private void setupDatabase() {
         
         try {
-            getDatabase().find(Commodities.class).findRowCount();
+            getDatabase().find(Commodity.class).findRowCount();
         } catch (PersistenceException ex) {
-            System.out.println("Installing database for " + getDescription().getName() + " due to first time usage");
+            System.out.println("Installing database for " +
+            		getDescription().getName() + " due to first time usage");
             installDDL();
+            
+            generateInitialDB();
         }
     }
     
-    /**
+    private void generateInitialDB() {
+		// TODO Auto-generated method stub
+		for (int id = 1; id <= 63; id++) {
+			
+		}
+	}
+
+	/**
      * Basically taken from http://pastebin.com/8YrDUqcV
      */
     @Override
     public List<Class<?>> getDatabaseClasses() {
         List<Class<?>> list = new ArrayList<Class<?>>();
-        list.add(Commodities.class);
+        list.add(Commodity.class);
         return list;
     }
 
@@ -449,7 +459,7 @@ public class DynamicMarket extends JavaPlugin {
     		return false;
     	}
         
-    	Commodities commodity = new Commodities();
+    	Commodity commodity = new Commodity();
     	
     	try {
     		
@@ -511,13 +521,13 @@ public class DynamicMarket extends JavaPlugin {
     public boolean marketTop(CommandSender sender) {// We received '/market top'
         
         // gather the list of commodities
-        List<Commodities> commodities = plugin.getDatabase()
-                .find(Commodities.class)
+        List<Commodity> commodities = plugin.getDatabase()
+                .find(Commodity.class)
                 .findList();
         
         // sort 'em and return only the top 10
-        List<Commodities> top10 = plugin.getDatabase()
-                .filter(Commodities.class)
+        List<Commodity> top10 = plugin.getDatabase()
+                .filter(Commodity.class)
                 .sort("value desc")
                 .maxRows(10)
                 .filter(commodities);
@@ -527,7 +537,7 @@ public class DynamicMarket extends JavaPlugin {
         
         for (int index = 0; index < top10.size(); index++) {
             
-            Commodities c = top10.get(index);
+            Commodity c = top10.get(index);
             double value = c.getValue();
             double changeRate = c.getChangeRate();
             double maxValue = c.getMaxValue();
@@ -557,13 +567,13 @@ public class DynamicMarket extends JavaPlugin {
     public boolean marketBottom(CommandSender sender) {
         
         // gather the list of commodities
-        List<Commodities> commodities = plugin.getDatabase()
-                .find(Commodities.class)
+        List<Commodity> commodities = plugin.getDatabase()
+                .find(Commodity.class)
                 .findList();
         
         // sort 'em and return only the top 10
-        List<Commodities> top10 = plugin.getDatabase()
-                .filter(Commodities.class)
+        List<Commodity> top10 = plugin.getDatabase()
+                .filter(Commodity.class)
                 .sort("value asc")
                 .maxRows(10)
                 .filter(commodities);
@@ -573,7 +583,7 @@ public class DynamicMarket extends JavaPlugin {
         
         for (int index = 0; index < top10.size(); index++) {
             
-            Commodities c = top10.get(index);
+            Commodity c = top10.get(index);
             double value = c.getValue();
             double changeRate = c.getChangeRate();
             double minValue = c.getMinValue();
@@ -618,7 +628,7 @@ public class DynamicMarket extends JavaPlugin {
         }
         
         // retrieve the commodity in question
-        Commodities commodity = plugin.getDatabase().find(Commodities.class)
+        Commodity commodity = plugin.getDatabase().find(Commodity.class)
             .where()
             .ieq("name", item)
             .findUnique();
@@ -707,7 +717,7 @@ public class DynamicMarket extends JavaPlugin {
         }
         
         // retrieve the commodity in question
-        Commodities commodity = plugin.getDatabase().find(Commodities.class)
+        Commodity commodity = plugin.getDatabase().find(Commodity.class)
             .where()
             .ieq("name", item)
             .findUnique();
@@ -818,8 +828,8 @@ public class DynamicMarket extends JavaPlugin {
     public boolean sellAll(Player player) {
         
         // make a list of all commodities
-        List<Commodities> commodities =
-                plugin.getDatabase().find(Commodities.class).findList();
+        List<Commodity> commodities =
+                plugin.getDatabase().find(Commodity.class).findList();
                 
         // run thru each slot in the player's inventory for commodities
         int index = 0;
@@ -881,7 +891,7 @@ public class DynamicMarket extends JavaPlugin {
     public BigDecimal price(String item) {
         
         // retrieve the commodity in question
-        Commodities commodity = plugin.getDatabase().find(Commodities.class).
+        Commodity commodity = plugin.getDatabase().find(Commodity.class).
                 where().
                 ieq("name", item).
                 findUnique();
@@ -903,7 +913,7 @@ public class DynamicMarket extends JavaPlugin {
     public boolean price (CommandSender sender, String item, int amt) {
         
         // retrieve the commodity in question
-        Commodities commodity = plugin.getDatabase().find(Commodities.class).
+        Commodity commodity = plugin.getDatabase().find(Commodity.class).
                 where().
                 ieq("name", item).
                 findUnique();
@@ -931,7 +941,7 @@ public class DynamicMarket extends JavaPlugin {
 
     public boolean marketList(CommandSender sender) {
         
-        List<Commodities> commodities = plugin.getDatabase().find(Commodities.class)
+        List<Commodity> commodities = plugin.getDatabase().find(Commodity.class)
                 .findList();
 
         String list[] = new String[20];
@@ -973,7 +983,7 @@ public class DynamicMarket extends JavaPlugin {
      * @param amount the desired amount of the item in question
      * @return the total cost and the calculated new value as an Invoice
      */
-    public Invoice generateInvoice(int oper, Commodities commodity, int amount) {
+    public Invoice generateInvoice(int oper, Commodity commodity, int amount) {
         
         // get the initial value of the item, 0 for not found
         Invoice inv = new Invoice(0.0, 0.0);
