@@ -857,7 +857,12 @@ public class DynamicMarket extends JavaPlugin {
         
         for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
             ItemStack slot = player.getInventory().getItem(index);
-            int slotId = slot.getTypeId();
+            int slotId;
+			try {
+				slotId = slot.getTypeId();
+			} catch (Exception NullPointerException) {
+				continue;
+			}
             BigDecimal slotAmount = new BigDecimal(slot.getAmount()).
                     setScale(0, RoundingMode.HALF_UP);
             
