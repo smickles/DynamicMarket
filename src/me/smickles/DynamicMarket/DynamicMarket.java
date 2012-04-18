@@ -131,18 +131,18 @@ public class DynamicMarket extends JavaPlugin {
                 
                 try {
                     InputStream defaultStream = null;
-                    File conf = null;
+                    File fileHolder = null;
                     
                     switch (x) {
                     case 0:
                         defaultStream = this.getClass().getResourceAsStream("/LICENSE");
-                        conf = new File(directory + File.separator +"LICENSE");
+                        fileHolder = new File(directory + File.separator +"LICENSE");
                         if (licenseIsThere)
                             writeFile = false;
                         break;
                     case 1:
                         defaultStream = this.getClass().getResourceAsStream("/README");
-                        conf = new File(directory + File.separator +"README");
+                        fileHolder = new File(directory + File.separator +"README");
                         if (readmeIsThere)
                             writeFile = false;
                         break;
@@ -150,9 +150,9 @@ public class DynamicMarket extends JavaPlugin {
                     
                     if (writeFile) {
                         directory.mkdir();
-                        conf.createNewFile();
+                        fileHolder.createNewFile();
                         
-                        OutputStream confStream = new FileOutputStream(conf);
+                        OutputStream confStream = new FileOutputStream(fileHolder);
                         
                         byte buf[] = new byte[1024];
                         int len;
