@@ -38,6 +38,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -48,7 +49,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class DynamicMarket extends JavaPlugin {
 
-    public DynamicMarket plugin;
+    private static final BigDecimal VALUE = BigDecimal.valueOf(10.0);
+	public DynamicMarket plugin;
     public final Logger logger = Logger.getLogger("Minecraft");
     public static BigDecimal MINVALUE = BigDecimal.valueOf(.01).setScale(2, RoundingMode.HALF_UP);
     public static BigDecimal MAXVALUE = BigDecimal.valueOf(10000).setScale(2, RoundingMode.HALF_UP);
@@ -189,14 +191,32 @@ public class DynamicMarket extends JavaPlugin {
             		getDescription().getName() + " due to first time usage");
             installDDL();
             
-            generateInitialDB();
+            initializeDB();
         }
     }
     
-    private void generateInitialDB() {
+    private void initializeDB() {
 		// TODO Auto-generated method stub
-		for (int id = 1; id <= 63; id++) {
+    	CommodityDBAdder adder = new CommodityDBAdder(plugin);
+
+    	for (int id = 1; id <= 63; id++) {
+			Commodity c = new Commodity();
+			c.setChangeRate(CHANGERATE.doubleValue());
+			c.setData(0);
+			c.setMaxValue(MAXVALUE.doubleValue());
+			c.setMinValue(MINVALUE.doubleValue());
+			c.setName(Material.getMaterial(id).toString());
+			c.setNumber(id);
+			c.setSpread(SPREAD.doubleValue());
+			c.setValue(VALUE.doubleValue());
 			
+			try {
+				adder.addCommodity(c);
+			} catch (DuplicateCommodityException e) {
+				logger.info("Tried to add " +
+						c.getName() +
+						" but it was already there");
+			}
 		}
 	}
 
