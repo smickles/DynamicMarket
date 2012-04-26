@@ -1,5 +1,7 @@
 package me.smickles.DynamicMarket;
 
+import info.somethingodd.OddItem.configuration.OddItemAliases;
+
 import org.bukkit.command.CommandSender;
 
 public class CommandHelper extends DynamicMarket{
@@ -15,6 +17,12 @@ public class CommandHelper extends DynamicMarket{
 		
 		this.sender.sendMessage(this.message);
 	}
+	
+	public CommandHelper(CommandSender sender) {
+
+		super();
+		this.sender = sender;
+	}
 
 	public void marketAddHelp() {
 
@@ -25,6 +33,16 @@ public class CommandHelper extends DynamicMarket{
 	}
 
 	public void marketRemoveHelp() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void suggestCommodityName(String item, OddItemAliases items) {
+		sender.sendMessage("did you mean:");
+		sender.sendMessage(items.getSuggestions().findBestWordMatch(item));
+	}
+
+	public void priceHelp() {
 		// TODO Auto-generated method stub
 		
 	}
