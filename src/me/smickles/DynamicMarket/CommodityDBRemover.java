@@ -11,7 +11,7 @@ public class CommodityDBRemover {
 
 	public void removeCommodityByName(String name) throws CommodityNotFoundException {
 		
-    	Commodities c = plugin.getDatabase().find(Commodities.class)
+    	Commodity c = plugin.getDatabase().find(Commodity.class)
     			.where()
     			.ieq("name", name)
     			.findUnique();

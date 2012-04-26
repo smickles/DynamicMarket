@@ -9,9 +9,9 @@ public class CommodityDBAdder extends DynamicMarket{
 		this.plugin = plugin;
 	}
 
-	public void addCommodity(Commodities commodity) throws DuplicateCommodityException {
+	public void addCommodity(Commodity commodity) throws DuplicateCommodityException {
 		
-		Commodities check = plugin.getDatabase().find(Commodities.class)
+		Commodity check = plugin.getDatabase().find(Commodity.class)
     			.where()
     			.ieq("number", String.valueOf(commodity.getNumber()))
     			.ieq("data", String.valueOf(commodity.getData()))
