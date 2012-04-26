@@ -18,21 +18,21 @@
 
 name: DynaMark
 main: me.smickles.DynamicMarket.DynamicMarket
-version: 0.1.1.0
+version: 0.2.0.0
 author: smickles
 softdepend: [Vault]
 database: true
 
 commands:
-  mbuy:
+  buy:
     description: buys some X in the amount of Y from the market
-    usage: Example - /mbuy cobblestone 64
-  msell:
+    usage: Example - /buy cobblestone 64
+  sell:
     description: sells some X in the amount of Y to the market
-    usage: Example - /msell cobblestone 64
-  mprice:
+    usage: Example - /sell cobblestone 64
+  price:
     description: returns the price of a given item
-    usage: Example - /mprice stone
-  mmarket:
+    usage: Example - /price stone
+  market:
     description: used to view market conditions
-    usage: Example - /mmarket <top | bottom | add | remove>
+    usage: Example - /market <top | bottom | add | remove>
