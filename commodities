@@ -1,0 +1,1542 @@
+'0':
+  names:
+  - air
+  - nothing
+  trade: false
+'1':
+  names:
+  - smoothstone
+  - stone
+  - sstone
+  - cookedstone
+  - rock
+  - s
+  trade: true
+'2':
+  names:
+  - grassblock
+  - dirtwithgrass
+  trade: false
+'3':
+  names:
+  - dirt
+  - ground
+  - d
+  trade: true
+'4':
+  names:
+  - cobblestone
+  - cobble
+  - cstone
+  - cs
+  - c
+  trade: true
+'5':
+  data: 4
+  0:
+    - woodenplanks
+    - woodplanks
+    - wp
+    - p
+  1:
+    - pinewoodplanks
+    - pineplanks
+    - sprucewoodplanks
+    - spruceplanks
+  2:
+    - birchwoodplanks
+    - birchplanks
+  3:
+    - junglewoodplanks
+    - jungleplanks
+  trade: true
+'6':
+  data: 4
+  0:
+    - sapplings
+    - sappling
+    - tree
+    - sprout
+  1:
+    - sprucesappling
+    - sprucesprout
+    - pinesappling
+    - pinesprout
+  2:
+    - birchsappling
+    - birchsprout
+  3:
+    - junglesappling
+    - junglesprout
+  trade: true
+'7':
+  names:
+  - bedrock
+  - adminium
+  trade: false
+'8':
+  names:
+  - waterblock
+  - blockofwater
+  - blockwater
+  trade: false
+'9':
+  names:
+  - stationarywater
+  - swater
+  trade: false
+'10':
+  names:
+  - lavablock
+  - blockoflava
+  trade: false
+'11':
+  names:
+  - stationarylava
+  - slava
+  trade: false
+'12':
+  names:
+  - sand
+  - sa
+  - beach
+  trade: true
+'13':
+  names:
+  - gravel
+  - g
+  trade: true
+'14':
+  names:
+  - goldore
+  - goldrock
+  trade: true
+'15':
+  names:
+  - ironore
+  - ironrock
+  trade: true
+'16':
+  names:
+  - coalore
+  - coalrock
+  trade: false
+'17':
+  data: 4
+  0:
+    - wood
+    - w
+  1:
+    - pinewood
+    - pwood
+  2:
+    - birchwood
+    - bwood
+  3:
+    - junglewood
+    - jwood
+  trade: true
+'18':
+  data: 4
+  0:
+    - leaves
+    - leaf
+  1:
+    - pineleaves
+    - spruceleaves
+  2:
+    - birchleaves
+    - bleaves
+  3:
+    - jungleleaves
+    - jleaves
+  trade: true
+'19':
+  names:
+  - sponge
+  - cheese
+  trade: false
+'20':
+  names:
+  - glass
+  - glassblock
+  trade: true
+'21':
+  names:
+  - lapislazuliore
+  - lapisore
+  - lapisrock
+  trade: false
+'22':
+  names:
+  - lapislazuliblock
+  - lapisblock
+  trade: true
+'23':
+  names:
+  - dispenser
+  - shooter
+  trade: true
+'24':
+  data: 3
+  0:
+    - sandstone
+    - sandrock
+  1:
+    - hieroglyphicsandstone
+    - hsandstone
+    - creepersandstone
+    - csandstone
+  2:
+    - smoothsandstone
+    - ssandstone
+  trade: true
+'25':
+  names:
+  - noteblock
+  - note
+  trade: true
+'26':
+  names:
+  - bedblock
+  - bedb
+  trade: false
+'27':
+  names:
+  - poweredrail
+  - prail
+  - goldrail
+  - poweredtrack
+  - ptrack
+  trade: true
+'28':
+  names:
+  - detectorrail
+  - detectortrack
+  - dtrack
+  - drail
+  trade: true
+'29':
+  names:
+  - stickypiston
+  - spiston
+  trade: true
+'30':
+  names:
+  - cobweb
+  - web
+  trade: false
+'31':
+  data: 3
+  0:
+    - fakedeadbush
+    - fakedeadshrub
+  1:
+    - tallgrass
+    - wildgrass
+    - tgrass
+    - wgrass
+  2:
+    - fern
+    - littletree
+  trade: true
+'32':
+  names:
+  - deadbush
+  - tumbleweed
+  trade: true
+'33':
+  names:
+  - piston
+  - pusher
+  trade: true
+'34':
+  names:
+  - pistonextension
+  - pistonex
+  trade: false
+'35':
+  data: 16
+  0:
+    - wool
+    - cloth
+  1:
+    - orangewool
+    - orangecloth
+  2:
+    - magentawool
+    - magentacloth
+  3:
+    - lightbluewool
+    - lightbluecloth
+  4:
+    - yellowwool
+    - yellowcloth
+  5:
+    - limewool
+    - limecloth
+  6:
+    - pinkwool
+    - pinkcloth
+  7:
+    - graywool
+    - graycloth
+  8:
+    - lightgraywool
+    - lightgraycloth
+  9:
+    - cyanwool
+    - cyancloth
+  10:
+    - purplewool
+    - purplecloth
+  11:
+    - bluewool
+    - bluecloth
+  12:
+    - brownwool
+    - brown cloth
+  13:
+    - greenwool
+    - greencloth
+  14:
+    - redwool
+    - redcloth
+  15:
+    - blackwool
+    - blackcloth
+  trade: true
+'36':
+  names:
+  - blockmovedbypiston
+  - empty
+  trade: true
+'37':
+  names:
+  - dandelion
+  - yellowflower
+  - yflower
+  trade: true
+'38':
+  names:
+  - rose
+  - redflower
+  - rflower
+  trade: true
+'39':
+  names:
+  - brownmushroom
+  - bmushroom
+  - brownshroom
+  - bshroom
+  trade: true
+'40':
+  names:
+  - redmushroom
+  - redshroom
+  - rmushroom
+  - rshroom
+  trade: true
+'41':
+  names:
+  - blockofgold
+  - goldblock
+  trade: true
+'42':
+  names:
+  - blockofiron
+  - ironblock
+  trade: true
+'43':
+  names:
+  - doubleslabs
+  - doubleslab
+  trade: false
+'44':
+  data: 6
+  0:
+    - slabs
+    - slab
+    - halfslab
+  1:
+    - sandstoneslab
+    - sstoneslab
+  2:
+    - woodenslab
+    - woodslab
+    - wslab
+  3:
+    - cobblestoneslab
+    - cobbleslab
+    - cslab
+  4:
+    - brickslab
+    - bslab
+  5:
+    - stonebrickslab
+    - sbslab
+  trade: true
+'45':
+  names:
+  - bricks
+  - brickblock
+  trade: true
+'46':
+  names:
+  - tnt
+  - bomb
+  - dynamite
+  trade: true
+'47':
+  names:
+  - bookshelf
+  - books
+  trade: true
+'48':
+  names:
+  - mossstone
+  - mosscobblestone
+  - mosscobble
+  - mcobble 
+  trade: true
+'49':
+  names:
+  - obsidian
+  - lavarock
+  trade: true
+'50':
+  names:
+  - torch
+  - candle
+  trade: true
+'51':
+  names:
+  - fire
+  - flame
+  trade: false
+'52':
+  names:
+  - monsterspawner
+  - spawner
+  trade: false
+'53':
+  names:
+  - woodenstairs
+  - woodstairs
+  trade: true
+'54':
+  names:
+  - chest
+  - box
+  trade: true
+'55':
+  names:
+  - redstonewire
+  - wire
+  trade: false
+'56':
+  names:
+  - diamondore
+  - diamondrock
+  trade: false
+'57':
+  names:
+  - blockofdiamond
+  - diamondblock
+  trade: true
+'58':
+  names:
+  - craftingtable
+  - workbench
+  trade: true
+'59':
+  names:
+  - plantedwheat
+  - growingwheat
+  trade: false
+'60':
+  names:
+  - farmland
+  - tilledland
+  trade: false
+'61':
+  names:
+  - furnace
+  - oven
+  trade: true
+'62':
+  names:
+  - burningfurnace
+  - burningoven
+  trade: false
+'63':
+  names:
+  - signpost
+  - signonpost
+  trade: false
+'64':
+  names:
+  - woodendoorpart
+  - wooddoorpart
+  trade: false
+'65':
+  names:
+  - ladders
+  - ladder
+  trade: true
+'66':
+  names:
+  - rail
+  - track
+  trade: true
+'67':
+  names:
+  - cobblestonestairs
+  - cobblestairs
+  - stonestairs
+  trade: true
+'68':
+  names:
+  - wallsign
+  - signonwall
+  trade: false
+'69':
+  names:
+  - lever
+  - switch
+  trade: true
+'70':
+  names:
+  - stonepressureplate
+  - spressureplate
+  - spressurepad
+  - stonepressurepad
+  trade: true
+'71':
+  names:
+  - irondoorpart
+  - idoorpart
+  trade: false
+'72':
+  names:
+  - woodenpressureplate
+  - woodenpressurepad
+  - woodpressureplate
+  - woodpressurepad
+  - wpressureplate
+  - wpressurepad
+  trade: true
+'73':
+  names:
+  - redstoneore
+  - redstonerock
+  trade: false
+'74':
+  names:
+  - glowingredstoneore
+  - glowingredstonerock
+  trade: false
+'75':
+  names:
+  - redstonetorchoff
+  - rtorchoff
+  trade: false
+'76':
+  names:
+  - redstonetorch
+  - rtorch
+  trade: true
+'77':
+  names:
+  - stonebutton
+  - button
+  trade: true
+'78':
+  names:
+  - snowonground
+  - groundsnow
+  trade: false
+'79':
+  names:
+  - ice
+  - iceblock
+  trade: false
+'80':
+  names:
+  - snowblock
+  - snow
+  trade: true
+'81':
+  names:
+  - cactus
+  - cactusblock
+  trade: true
+'82':
+  names:
+  - clayb
+  - clayblock
+  trade: true
+'83':
+  names:
+  - sugarcaneblock
+  - sugarcaneb
+  trade: false
+'84':
+  names:
+  - jukebox
+  - recordplayer
+  trade: true
+'85':
+  names:
+  - fence
+  - fencepost
+  trade: true
+'86':
+  names:
+  - pumpkin
+  - gourd
+  trade: true
+'87':
+  names:
+  - netherrack
+  - netherblock
+  trade: true
+'88':
+  names:
+  - soulsand
+  - nethersand
+  trade: true
+'89':
+  names:
+  - glowstoneblock
+  - glowstonerock
+  trade: true
+'90':
+  names:
+  - portal
+  - netherportal
+  trade: false
+'91':
+  names:
+  - jackolantern
+  - litpumpkin
+  trade: true
+'92':
+  names:
+  - cakeblock
+  - placedcake
+  trade: false
+'93':
+  names:
+  - repeateroff
+  - redstonerepeateroff
+  trade: false
+'94':
+  names:
+  - redstonerepeateron
+  - repeateron
+  trade: false
+'95':
+  names:
+  - lockedchest
+  - mancochest
+  trade: false
+'96':
+  names:
+  - trapdoor
+  - hatch
+  trade: true
+'97':
+  names:
+  - hiddensilverfish
+  - silverfishblock 
+  trade: false
+'98':
+  data: 4
+  0:
+    - stonebricks
+    - stonebrick
+  1:
+    - mossystonebricks
+    - mossystonebrick
+  2:
+    - crackedstonebricks
+    - crackedstonebrick
+  3:
+    - circlestonebricks
+    - circlestonebrick
+  trade: true
+'99':
+  names:
+  - hugebrownmushroom
+  - brownmushroomblock
+  - bmushroomblock
+  - hugebrownshroom
+  - brownshroomblock
+  - bshroomblock
+  trade: false
+'100':
+  names:
+  - hugeredmushroom
+  - rednmushroomblock
+  - rmushroomblock
+  - hugeredshroom
+  - redshroomblock
+  - rshroomblock
+  trade: false
+'101':
+  names:
+  - ironbars
+  - ironbar
+  trade: true
+'102':
+  names:
+  - glasspane
+  - plateglass
+  - glassplate
+  trade: true
+'103':
+  names:
+  - melonblock
+  - watermelonblock
+  trade: true
+'104':
+  names:
+  - pumpkinstem
+  - pumpkinsprout
+  trade: false
+'105':
+  names:
+  - melonstem
+  - melonsprout
+  trade: false
+'106':
+  names:
+  - vines
+  - kudzu
+  trade: true
+'107':
+  names:
+  - fencegate
+  - gate
+  trade: true
+'108':
+  names:
+  - brickstairs
+  - brickstair
+  trade: true
+'109':
+  names:
+  - stonebrickstairs
+  - stonebrickstair
+  trade: true
+'110':
+  names:
+  - mycelium
+  - mushroomland
+  trade: false
+'111':
+  names:
+  - lilypad
+  - lilyleaf
+  trade: true
+'112':
+  names:
+  - netherbricks
+  - netherbrick
+  trade: true
+'113':
+  names:
+  - netherbrickfence
+  - netherfence
+  trade: true
+'114':
+  names:
+  - netherbrickstairs
+  - netherstair
+  trade: true
+'115':
+  names:
+  - netherwartblock
+  - growingnetherwart
+  trade: false
+'116':
+  names:
+  - enchantmenttable
+  - enchantingtable
+  trade: true
+'117':
+  names:
+  - brewingstandblock
+  - brewryblock
+  trade: false
+'118':
+  names:
+  - cauldronblock
+  - potblock
+  trade: false
+'119':
+  names:
+  - endportal
+  - enderportal
+  trade: false
+'120':
+  names:
+  - endportalframe
+  - endportalblock
+  trade: false
+'121':
+  names:
+  - endstone
+  - enderstone
+  trade: true
+'122':
+  names:
+  - dragonegg
+  - enddragonegg
+  trade: true
+'123':
+  names:
+  - redstonelamp
+  - lantern
+  - lamp
+  trade: true
+'124':
+  names:
+  - redstonelampon
+  - lampon
+  trade: false
+'256':
+  names:
+    - ironshovel
+    - ishovel
+  trade: true
+'257':
+  names:
+    - ironpickaxe
+    - ironpick
+    - ipickaxe
+    - ipick
+  trade: true
+'258':
+  names:
+    - ironaxe
+    - iaxe
+  trade: true
+'259':
+  names:
+    - flintandsteel
+    - lighter
+  trade: true
+'260':
+  names:
+    - redapple
+    - apple
+  trade: true
+'261':
+  names:
+    - bow
+    - longbow
+  trade: true
+'262':
+  names:
+    - arrow
+    - ammo
+  trade: true
+'263':
+  data: 2
+  0:
+    - coal
+    - btitumen
+  1:
+    - charcoal
+    - char 
+  trade: true
+'264':
+  names:
+    - diamond
+    - emerald
+  trade: true
+'265':
+  names:
+    - iron
+    - ironingot
+  trade: true
+'266':
+  names:
+    - gold
+    - goldingot
+  trade: true
+'267':
+  names:
+    - ironsword
+    - isword
+  trade: true
+'268':
+  names:
+    - woodsword
+    - wsword
+  trade: true
+'269':
+  names:
+    - woodshovel
+    - wshovel
+  trade: true
+'270':
+  names:
+    - woodpickaxe
+    - woodpick
+    - wpickaxe
+    - wpick
+  trade: true
+'271':
+  names:
+    - woodaxe
+    - waxe
+  trade: true
+'272':
+  names:
+    - stonesword
+    - ssword
+  trade: true
+'273':
+  names:
+    - stoneshovel
+    - sshovel
+  trade: true
+'274':
+  names:
+    - stonepickaxe
+    - stonepick
+    - spickaxe
+    - spick
+  trade: true
+'275':
+  names:
+    - stoneaxe
+    - saxe
+  trade: true
+'276':
+  names:
+    - diamondsword
+    - dsword
+  trade: true
+'277':
+  names:
+    - diamondshovel
+    - dshovel
+  trade: true
+'278':
+  names:
+    - diamondpickaxe
+    - diamondpick
+    - dpick
+    - dpickaxe
+  trade: true
+'279':
+  names:
+    - diamondaxe
+    - daxe
+  trade: true
+'280':
+  names:
+    - stick
+    - dowel
+  trade: true
+'281':
+  names:
+    - bowl
+    - dish
+  trade: true
+'282':
+  names:
+    - mushroomsoup
+    - soup
+  trade: true
+'283':
+  names:
+    - goldsword
+    - gsword
+  trade: true
+'284':
+  names:
+    - goldshovel
+    - gshovel
+  trade: true
+'285':
+  names:
+    - goldpickaxe
+    - goldpick
+    - gpick
+    - gpickaxe
+  trade: true
+'286':
+  names:
+    - goldaxe
+    - gaxe
+  trade: true
+'287':
+  names:
+    - string
+    - silk
+  trade: true
+'288':
+  names:
+    - feather
+    - fletching
+  trade: true
+'289':
+  names:
+    - gunpowder
+    - sulfer
+  trade: true
+'290':
+  names:
+    - woodhoe
+    - whoe
+  trade: true
+'291':
+  names:
+    - stonehoe
+    - shoe
+  trade: true
+'292':
+  names:
+    - ironhoe
+    - ihoe
+  trade: true
+'293':
+  names:
+    - diamondhoe
+    - dhoe
+  trade: true
+'294':
+  names:
+    - goldhoe
+    - ghoe
+  trade: true
+'295':
+  names:
+    - seeds
+    - sprouts
+  trade: true
+'296':
+  names:
+    - wheat
+    - hay
+  trade: true
+'297':
+  names:
+    - bread
+    - loaf
+  trade: true
+'298':
+  names:
+    - leatherhelmet
+    - lhelmet
+  trade: true
+'299':
+  names:
+    - leatherchestplate
+    - lchestplate
+  trade: true
+'300':
+  names:
+    - leatherleggings
+    - lleggings
+  trade: true
+'301':
+  names:
+    - leatherboots
+    - lboots
+  trade: true
+'306':
+  names:
+    - ironhelmet
+    - ihelmet
+  trade: true
+'307':
+  names:
+    - ironchestplate
+    - ichestplate
+  trade: true
+'308':
+  names:
+    - ironleggings
+    - ileggings
+  trade: true
+'309':
+  names:
+    - ironboots
+    - iboots
+  trade: true
+'310':
+  names:
+    - diamondhelmet
+    - dhelmet
+  trade: true
+'311':
+  names:
+    - diamondchestplate
+    - dchestplate
+  trade: true
+'312':
+  names:
+    - diamondleggings
+    - dleggings
+  trade: true
+'313':
+  names:
+    - diamondboots
+    - dboots
+  trade: true
+'314':
+  names:
+    - goldhelmet
+    - ghelmet
+  trade: true
+'315':
+  names:
+    - goldchestplate
+    - gchestplate
+  trade: true
+'316':
+  names:
+    - goldleggings
+    - gleggings
+  trade: true
+'317':
+  names:
+    - goldboots
+    - gboots
+  trade: true
+'318':
+  names:
+    - flint
+    - slate
+  trade: true
+'319':
+  names:
+    - rawporkchop
+    - uncookedpork
+  trade: true
+'320':
+  names:
+    - cookedporkchop
+    - cookedpork
+  trade: true
+'321':
+  names:
+    - painting
+    - canvas
+  trade: true
+'322':
+  names:
+    - goldapple
+    - goldenapple
+  trade: true
+'323':
+  names:
+    - sign
+    - board
+  trade: true
+'324':
+  names:
+    - wooddoor
+    - wdoor
+  trade: true
+'325':
+  names:
+    - bucket
+    - emptybucket
+  trade: true
+'326':
+  names:
+    - water
+    - waterbucket
+    - bucketofwater
+  trade: true
+'327':
+  names:
+    - lava
+    - lavabucket
+    - bucketoflava
+  trade: true
+'328':
+  names:
+    - minecart
+    - train
+  trade: true
+'329':
+  names:
+    - saddle
+    - pigseat
+  trade: true
+'330':
+  names:
+    - irondoor
+    - idoor
+  trade: true
+'331':
+  names:
+    - redstonedust
+    - redstone
+  trade: true
+'332':
+  names:
+    - snowball
+    - golfball
+  trade: true
+'333':
+  names:
+    - boat
+    - ship
+  trade: true
+'334':
+  names:
+    - leather
+    - skin
+  trade: true
+'335':
+  names:
+    - milk
+    - milkbuckit
+  trade: true
+'336':
+  names:
+    - brick
+    - claybrick
+  trade: true
+'337':
+  names:
+    - clay
+    - mud
+  trade: true
+'338':
+  names:
+    - sugarcane
+    - reed
+  trade: true
+'339':
+  names:
+    - paper
+    - papyrus
+  trade: true
+'340':
+  names:
+    - book
+    - manuscript
+  trade: true
+'341':
+  names:
+    - slimeball
+    - slime
+  trade: true
+'342':
+  names:
+    - minecartwithchest
+    - chestcart
+    - boxcar
+  trade: true
+'343':
+  names:
+    - minecartwithfurnace
+    - furnacecart
+    - engine
+  trade: true
+'344':
+  names:
+    - chickenegg
+    - egg
+  trade: true
+'345':
+  names:
+    - compass
+    - redstonecompass
+  trade: true
+'346':
+  names:
+    - fishingrod
+    - rod
+  trade: true
+'347':
+  names:
+    - clock
+    - sundial
+  trade: true
+'348':
+  names:
+    - glowstonedust
+    - glowdust
+    - glowstone
+  trade: true
+'349':
+  names:
+    - rawfish
+    - fish
+  trade: true
+'350':
+  names:
+    - cookedfish
+    - grilledfish
+  trade: true
+'351':
+  data: 16
+  0:
+    - inksac
+    - blackdye
+  1:
+    - rosered
+    - reddye
+  2:
+    - cactusgreen
+    - greendye
+  3:
+    - cocoabeans
+    - browndye
+  4:
+    - lapislazuli
+    - bluedye
+  5:
+    - purpledye
+    - purple
+  6:
+    - cyandye
+    - cyan
+  7:
+    - lightgraydye
+    - lightgray
+  8:
+    - graydye
+    - gray
+  9:
+    - pinkdye
+    - pink
+  10:
+    - limedye
+    - lime
+  11:
+    - dandelionyellow
+    - yellowdye
+  12:
+    - lightbluedye
+    - lightblue
+  13:
+    - magentadye
+    - magenta
+  14:
+    - orangedye
+    - orange
+  15:
+    - bonemeal
+    - fertilizer
+    - whitedye
+  trade: true
+'352':
+  names:
+    - bone
+    - dogtreat
+  trade: true
+'353':
+  names:
+    - sugar
+    - salt
+  trade: true
+'354':
+  names:
+    - cake
+    - pie
+  trade: true
+'355':
+  names:
+    - bed
+    - cot
+  trade: true
+'356':
+  names:
+    - redstonerepeater
+    - repeater
+  trade: true
+'357':
+  names:
+    - cookie
+    - moonpie
+  trade: true
+'358':
+  names:
+    - map
+    - info
+  trade: true
+'359':
+  names:
+    - sheers
+    - sizzors
+  trade: true
+'360':
+  names:
+    - melonslice
+    - watermelon
+  trade: true
+'361':
+  names:
+    - pumpkinseeds
+    - pseeds
+  trade: true
+'362':
+  names:
+    - melonseeds
+    - watermelonseeds
+    - mseeds
+    - wseeds
+  trade: true
+'363':
+  names:
+    - rawbeef
+    - uncookedbeef
+  trade: true
+'364':
+  names:
+    - steak
+    - cookedbeef
+  trade: true
+'365':
+  names:
+    - rawchicken
+    - uncookedchicken
+  trade: true
+'366':
+  names:
+    - cookedchicken
+    - chickenbreast
+  trade: true
+'367':
+  names:
+    - rottenflesh
+    - flesh
+  trade: true
+'368':
+  names:
+    - enderpearl
+    - pearl
+  trade: true
+'369':
+  names:
+    - blazerod
+    - brod
+  trade: true
+'370':
+  names:
+    - ghasttear
+    - gtear
+  trade: true
+'371':
+  names:
+    - goldnugget
+    - nugget
+  trade: true
+'372':
+  names:
+    - netherwart
+    - nwart
+  trade: true
+'374':
+  names:
+    - glassbottle
+    - bottle
+  trade: true
+'375':
+  names:
+    - spidereye
+    - seye
+  trade: true
+'376':
+  names:
+    - fermentedspidereye
+    - fseye
+  trade: true
+'377':
+  names:
+    - blazepowder
+    - bpowder
+  trade: true
+'378':
+  names:
+    - magmacream
+    - mcream
+  trade: true
+'379':
+  names:
+    - brewingstand
+    - brewry
+  trade: true
+'380':
+  names:
+    - cauldron
+    - pot
+  trade: true
+'381':
+  names:
+    - eyeofender
+    - endereye
+  trade: true
+'382':
+  names:
+    - glisteringmelon
+    - gmelon
+  trade: true
+'385':
+  names:
+    - firecharge
+    - fireball
+  trade: true
+'2256':
+  names:
+    - 13disc
+    - disk13
+  trade: true
+'2257':
+  names:
+    - catdisc
+    - catsong
+  trade: true
+'2258':
+  names:
+    - blocksdisc
+    - blockssong
+  trade: true
+'2259':
+  names:
+    - chirpdisc
+    - chirpsong
+  trade: true
+'2260':
+  names:
+    - fardisc
+    - farsong
+  trade: true
+'2261':
+  names:
+    - malldisc
+    - mallsong
+  trade: true
+'2262':
+  names:
+    - mellohidisc
+    - mellohisong
+  trade: true
+'2263':
+  names:
+    - staldisc
+    - stalsong
+  trade: true
+'2264':
+  names:
+    - straddisc
+    - stradsong
+  trade: true
+'2265':
+  names:
+    - warddisc
+    - wardsong
+  trade: true
+  
