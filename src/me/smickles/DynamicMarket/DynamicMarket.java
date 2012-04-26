@@ -18,6 +18,8 @@
  **/
 package me.smickles.DynamicMarket;
 
+import info.somethingodd.OddItem.configuration.OddItemAliases;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -27,9 +29,11 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.persistence.PersistenceException;
@@ -38,9 +42,9 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -58,6 +62,7 @@ public class DynamicMarket extends JavaPlugin {
     public static BigDecimal SPREAD = CHANGERATE;
     public static File directory;
     PluginDescriptionFile pdfFile;
+	protected OddItemAliases items;
     
     /*
      * Vault Method stuffs
@@ -77,16 +82,78 @@ public class DynamicMarket extends JavaPlugin {
         plugin = this;
         directory = plugin.getDataFolder();
         pdfFile = plugin.getDescription();
-
+        
         checkEbean();
-        setupDatabase();
         setupFiles();
+        if (!loadCommoditiesConfig())
+        	return;
+        setupDatabase();
+        setupAliases();
         setupPermissions(); //Smickles thinks this is what we're supposed to do for permissions via vault
-        setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault
+        setupEconomy(); //Smickles thinks this is what we're supposed to do for economy via vault		
 
         logger.info(pdfFile.getName() + " version " + pdfFile.getVersion() + " enabled");
     }
-    
+
+	private boolean loadCommoditiesConfig() {
+		boolean r = true;
+		try {
+			plugin.getConfig().load(plugin.getDataFolder() + "/commodities");
+		} catch (FileNotFoundException e) {
+			logger.warning("DynaMark failed to find the \"commodities\" file. " +
+					"No commodities will be tradeable.");
+			r = false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			r = false;
+		} catch (InvalidConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			r = false;
+		}
+		
+		return r;
+	}
+
+    private void setupAliases() {
+		Map<String, Object> namesAndAliases = new HashMap<String, Object>();
+        List<Commodity> commodities = plugin.getDatabase().find(Commodity.class)
+        		.findList();
+        
+        for (Commodity c : commodities) {
+        	String name = c.getName();
+        	ArrayList<String> aliases = new ArrayList<String>();
+        	String namesPath = c.getNumber() + ".names";
+
+        	if (plugin.getConfig().contains(namesPath)) {
+				Object config = plugin.getConfig().get(namesPath);
+				addObjectToAliasList(aliases, config);
+			} else {
+				String[] split = c.getName().split(":");
+				String dataPath = split[0] + "." + split[1];
+				if (plugin.getConfig().contains(dataPath)) {
+					Object config = plugin.getConfig().get(dataPath);
+					addObjectToAliasList(aliases, config);
+				}
+			}
+        	aliases.add(name);
+			namesAndAliases.put(name, aliases);
+        }
+        
+		items = new OddItemAliases(namesAndAliases);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addObjectToAliasList(ArrayList<String> aliases, Object config) {
+		if (config instanceof Collection) {
+			aliases.addAll((Collection<String>) config);
+		} else {
+			aliases.add(config.toString());
+		}
+	}
+
+	    
     private void checkEbean() {
 
         File ep = new File(directory + File.separator + ".." + File.separator + ".." + File.separator + "ebean.properties");
@@ -111,6 +178,7 @@ public class DynamicMarket extends JavaPlugin {
 
         boolean licenseIsThere = false;
         boolean readmeIsThere = false;
+        boolean commoditiesIsThere = false;
 
         
         if (directory.exists()) {
@@ -118,6 +186,8 @@ public class DynamicMarket extends JavaPlugin {
                 if (f.equalsIgnoreCase("config.yml"))
                     logger.severe("The old config has been fully depreciated" +
                     		" by bukkit and is no longer supported by DynaMark.");
+                if (f.equalsIgnoreCase("commodities"))
+                	commoditiesIsThere = true;
                 if (f.equalsIgnoreCase("LICENSE"))
                     licenseIsThere = true;
                 if (f.equalsIgnoreCase("README"))
@@ -126,9 +196,9 @@ public class DynamicMarket extends JavaPlugin {
         }
         
         
-        if (!licenseIsThere | !readmeIsThere) {
-            //distribute the license and readme
-            for (int x = 0; x <= 1; x++) {
+        if (!licenseIsThere | !readmeIsThere | !commoditiesIsThere) {
+            //distribute the license and readme and commodities
+            for (int x = 0; x <= 2; x++) {
                 boolean writeFile = true;
                 
                 try {
@@ -138,14 +208,20 @@ public class DynamicMarket extends JavaPlugin {
                     switch (x) {
                     case 0:
                         defaultStream = this.getClass().getResourceAsStream("/LICENSE");
-                        fileHolder = new File(directory + File.separator +"LICENSE");
+                        fileHolder = new File(directory + File.separator + "LICENSE");
                         if (licenseIsThere)
                             writeFile = false;
                         break;
                     case 1:
                         defaultStream = this.getClass().getResourceAsStream("/README");
-                        fileHolder = new File(directory + File.separator +"README");
+                        fileHolder = new File(directory + File.separator + "README");
                         if (readmeIsThere)
+                            writeFile = false;
+                        break;
+                    case 2:
+                        defaultStream = this.getClass().getResourceAsStream("/commodities");
+                        fileHolder = new File(directory + File.separator + "commodities");
+                        if (commoditiesIsThere)
                             writeFile = false;
                         break;
                     }
@@ -181,6 +257,7 @@ public class DynamicMarket extends JavaPlugin {
     
     /**
      * Basically taken from http://pastebin.com/8YrDUqcV
+     * and later modified by smickles
      */
     private void setupDatabase() {
         
@@ -191,67 +268,84 @@ public class DynamicMarket extends JavaPlugin {
             		getDescription().getName() + " due to first time usage");
             installDDL();
             
-            initializeDB();
         }
+        
+        
+        checkDB();
     }
     
-    private void initializeDB() {
+    private void checkDB() {
 		// TODO Auto-generated method stub
     	CommodityDBAdder adder = new CommodityDBAdder(plugin);
 
-    	LinkedList<Integer> unwantedIDs = new LinkedList<Integer>();
-    	unwantedIDs.add(0);//air
-    	unwantedIDs.add(2);//grass topped dirt
-    	unwantedIDs.add(7);//bedrock
-    	unwantedIDs.add(8);//water
-    	unwantedIDs.add(9);//stationary water
-    	unwantedIDs.add(10);//lava
-    	unwantedIDs.add(11);//stationary lava
-    	unwantedIDs.add(14);//gold ore
-    	unwantedIDs.add(15);//iron ore
-    	unwantedIDs.add(16);//coal ore
-    	unwantedIDs.add(19);//sponge
-    	unwantedIDs.add(21);//lapis ore
-    	unwantedIDs.add(26);//bed
-    	unwantedIDs.add(30);//cobweb
-    	unwantedIDs.add(34);//piston extended
-    	unwantedIDs.add(36);//piston moved block
-    	unwantedIDs.add(43);//double slab
-    	unwantedIDs.add(51);//fire
-    	unwantedIDs.add(52);//spawner
-    	unwantedIDs.add(55);//wire
-    	unwantedIDs.add(56);//diamond ore
-    	unwantedIDs.add(59);//seed block
-    	unwantedIDs.add(60);//farmland
-    	unwantedIDs.add(62);//lit furnace
-    	unwantedIDs.add(63);//sign post
-    	
-    	id:for (int id = 0; id <= 63; id++) {
+    	for (Integer id = 0; id <= 2266; id++) {
     		
-    		// check for unwanted blocks
-    		for (int unwantedID : unwantedIDs ) {
-    			if (id == unwantedID)
-    				continue id;
-    		}
+    		if (skipCommodity(id))
+    			continue;
+    		LinkedList<Integer> data = new LinkedList<Integer>();
+    		data.add(0);
     		
-			Commodity c = new Commodity();
-			c.setChangeRate(CHANGERATE.doubleValue());
-			c.setData(0);
-			c.setMaxValue(MAXVALUE.doubleValue());
-			c.setMinValue(MINVALUE.doubleValue());
-			c.setName(Material.getMaterial(id).toString());
-			c.setNumber(id);
-			c.setSpread(SPREAD.doubleValue());
-			c.setValue(VALUE.doubleValue());
+			String path = id + ".data";
+			int numberOfData = 1;
+			if (plugin.getConfig().contains(path))
+				numberOfData = plugin.getConfig().getInt(path);
 			
-			try {
-				adder.addCommodity(c);
-			} catch (DuplicateCommodityException e) {
-				logger.info("Tried to add " +
-						c.getName() +
-						" but it was already there");
+			for (int datum = 0; datum < numberOfData; datum++) {
+				if (plugin.getConfig().contains(id + "." + datum)) {
+					addCommodityWithData(adder, id, datum);
+				} else if (plugin.getConfig().contains(id + ".names")) {
+					addCommodityWithData(adder, id, datum);
+				}
 			}
 		}
+	}
+
+	private Commodity addCommodityWithData(CommodityDBAdder adder, Integer id,
+			int data) {
+		Commodity c = new Commodity();
+		c.setChangeRate(CHANGERATE.doubleValue());
+		c.setData(data);
+		c.setMaxValue(MAXVALUE.doubleValue());
+		c.setMinValue(MINVALUE.doubleValue());
+		c.setName(id + ":" + data);
+		c.setNumber(id);
+		c.setSpread(SPREAD.doubleValue());
+		c.setValue(VALUE.doubleValue());
+		
+		try {
+			adder.addCommodity(c);
+		} catch (DuplicateCommodityException e) {
+			return null;
+		}
+		return c;
+	}
+
+    /** check for unwanted or non configured blocks
+      * delete if existing in DB
+      * else skip
+      **/
+	private boolean skipCommodity(Integer id) {
+		
+		List<Commodity> commodities = plugin.getDatabase().find(Commodity.class)
+				.where()
+				.ieq("number", id.toString())
+				.findList();
+		
+		if (commodities.size() == 1) {
+			Commodity c = commodities.get(0);
+			String path = id + ".trade";
+			boolean hasConfig = plugin.getConfig().contains(path);
+			if (!hasConfig
+					|| (hasConfig && !plugin.getConfig().getBoolean(path))) {
+				if (c == null) {
+					return true;
+				} else {
+					plugin.getDatabase().delete(c);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -299,7 +393,7 @@ public class DynamicMarket extends JavaPlugin {
 
     public boolean readCommand(CommandSender sender, String command, String[] args) {
 
-        if((command.equalsIgnoreCase("mbuy")) && (sender instanceof Player)) {
+        if((command.equalsIgnoreCase("buy")) && (sender instanceof Player)) {
             
             if (!permission.has(sender, "dynamark.buy")) {
                 sender.sendMessage(ChatColor.RED + "You need permission to use this command");
@@ -322,7 +416,7 @@ public class DynamicMarket extends JavaPlugin {
                 return false;
             }
     
-        } else if ((command.equalsIgnoreCase("msell")) && (sender instanceof Player)) {
+        } else if ((command.equalsIgnoreCase("sell")) && (sender instanceof Player)) {
             
             if (!permission.has(sender, "dynamark.sell")) {
                 sender.sendMessage(ChatColor.RED + "You need permission to use this command");
@@ -332,6 +426,8 @@ public class DynamicMarket extends JavaPlugin {
             if (args.length == 1) {
                 if (args[0].equalsIgnoreCase("all")) {
                     return sellAll((Player) sender);
+                } else {
+                	return sell ((Player) sender, args[0]);
                 }
             } else if (args.length == 2) {
                 String item = args[0];
@@ -351,7 +447,7 @@ public class DynamicMarket extends JavaPlugin {
         // Command Example: /price cobblestone
         // should return: cobblestone: .01
 
-        } else if (command.equalsIgnoreCase("mprice")){
+        } else if (command.equalsIgnoreCase("price")){
             
             if (!permission.has(sender, "dynamark.price")) {
                 sender.sendMessage(ChatColor.RED + "You need permission to use this command");
@@ -362,14 +458,32 @@ public class DynamicMarket extends JavaPlugin {
             if (args.length == 1){
                 String item = args[0];
                 
-                BigDecimal price = price(item);
+                BigDecimal price = price(sender, item);
                 
                 if (price == null) {
-                    sender.sendMessage(ChatColor.RED + "Invalid item.");
-                    return false;
+                    new CommandHelper("Invalid item.", sender).priceHelp();
+                    return true;
                 }
-    
-                sender.sendMessage(ChatColor.GRAY + item +ChatColor.GREEN + ": " + ChatColor.WHITE + price);
+                
+                ItemStack itemStack = stringToItemStack(item);
+                if (itemStack == null)
+                	return true;
+                
+				String number = String.valueOf(
+                		itemStack.getTypeId());
+				String data = String.valueOf(
+						itemStack.getData().getData());
+				Commodity commodity = plugin.getDatabase()
+                		.find(Commodity.class)
+                		.where()
+                		.ieq("number", number)
+                		.ieq("data", data)
+                		.findUnique();
+				
+				sender.sendMessage(ChatColor.GRAY + item + ChatColor.GREEN +
+                		": " + ChatColor.WHITE + price +
+                		ChatColor.GRAY + " [" +
+                		calcElasticity(commodity ) + "]");
                 return true;
     
             } else if (args.length == 2) {
@@ -384,7 +498,7 @@ public class DynamicMarket extends JavaPlugin {
             }
         // Example: '/market top' should return the top 5 most expensive items on the market
         // '/market bottom' should do the dame for the least expensive items.
-        } else if(command.equalsIgnoreCase("mmarket")) {
+        } else if(command.equalsIgnoreCase("market")) {
             
                 return market(sender, args);            
         }
@@ -565,10 +679,10 @@ public class DynamicMarket extends JavaPlugin {
         sender.sendMessage(ChatColor.GRAY + "-----------------------------------------------------");
         sender.sendMessage(ChatColor.GREEN + "DyanaMark v " + this.getDescription().getVersion().toString());
         sender.sendMessage("An easy way to buy and sell your stuff");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/mbuy" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to buy some stuff.");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/msell" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to sell some stuff.");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/mprice" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> (amount)" + ChatColor.WHITE + " to check the price of some stuff. (amount optional)");
-        sender.sendMessage("Use \"" + ChatColor.GREEN + "/mmarket" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <top | bottom | list>" + ChatColor.WHITE + " to get some market info.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/buy" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to buy some stuff.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/sell" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> <amount>" + ChatColor.WHITE + " to sell some stuff.");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/price" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <item> (amount)" + ChatColor.WHITE + " to check the price of some stuff. (amount optional)");
+        sender.sendMessage("Use \"" + ChatColor.GREEN + "/market" + ChatColor.WHITE + "\"" + ChatColor.GRAY + " <top | bottom | list>" + ChatColor.WHITE + " to get some market info.");
         return true;
     }
 
@@ -592,31 +706,49 @@ public class DynamicMarket extends JavaPlugin {
         for (int index = 0; index < top10.size(); index++) {
             
             Commodity c = top10.get(index);
-            double value = c.getValue();
-            double changeRate = c.getChangeRate();
-            double maxValue = c.getMaxValue();
-            if (value > maxValue) {
-                
-                double newValue = value - maxValue;
-                double elasticity = (newValue / changeRate);
-                int el =(int) Math.round(elasticity);
-                
-                elasticities.add(index, el);
-                c.setValue(maxValue);
-            } else {
-                elasticities.add(index, 0);
-            }
+            int el = calcElasticity(c);
+            elasticities.add(index, el);
+            
+            if (c.getValue() > c.getMaxValue())
+            	c.setValue(c.getMaxValue());
         }
 
         // Send them to the player
         for(int x = 0; x < top10.size(); x++) {
             int rank = x + 1;
-            
-            sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + top10.get(x).getName() + " " + ChatColor.GRAY + top10.get(x).getValue() + " " + ChatColor.DARK_GREEN + elasticities.get(x));
+            ItemStack itemStack = stringToItemStack(top10.get(x).getName());
+			Object[] aliases = items.getAliases(itemStack).toArray();
+			String name = aliases[aliases.length -1].toString();
+			
+            sender.sendMessage(
+            		ChatColor.GREEN + String.valueOf(rank) + ". " +
+            		ChatColor.WHITE + name + " " +
+    				ChatColor.GRAY + top10.get(x).getValue() + " " +
+            		ChatColor.DARK_GREEN + elasticities.get(x));
         }
         
         return true;
     }
+
+	private int calcElasticity(Commodity c) {
+		double value = c.getValue(),
+				changeRate = c.getChangeRate(),
+				maxValue = c.getMaxValue(),
+				minValue = c.getMinValue();
+		int el;
+		if (value > maxValue) {
+		    double newValue = Math.abs(value - maxValue);
+		    double elasticity = (newValue / changeRate);
+		    el = (int) Math.round(elasticity);
+		} else if (value < minValue) {
+			double newValue = Math.abs(value - minValue);
+            double elasticity = (newValue / changeRate);
+            el = (int) Math.round(elasticity);
+		} else {
+		    el = 0;
+		}
+		return el;
+	}
 
     public boolean marketBottom(CommandSender sender) {
         
@@ -638,27 +770,24 @@ public class DynamicMarket extends JavaPlugin {
         for (int index = 0; index < top10.size(); index++) {
             
             Commodity c = top10.get(index);
-            double value = c.getValue();
-            double changeRate = c.getChangeRate();
-            double minValue = c.getMinValue();
-            if (value < minValue) {
-                
-                double newValue = Math.abs(value - minValue);
-                double elasticity = (newValue / changeRate);
-                int el =(int) Math.round(elasticity);
-                
-                elasticities.add(index, el);
-                c.setValue(minValue);
-            } else {
-                elasticities.add(index, 0);
-            }
+            int el = calcElasticity(c);
+            elasticities.add(index, el);
+            
+            if (c.getValue() < c.getMinValue())
+            	c.setValue(c.getMinValue());
         }
 
         // Send them to the player
         for(int x = 0; x < top10.size(); x++) {
             int rank = x + 1;
-            
-            sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " + ChatColor.WHITE + top10.get(x).getName() + " " + ChatColor.GRAY + top10.get(x).getValue() + " " + ChatColor.DARK_GREEN + elasticities.get(x));
+            ItemStack itemStack = stringToItemStack(top10.get(x).getName());
+			Object[] aliases = items.getAliases(itemStack).toArray();
+			String name = aliases[aliases.length -1].toString();
+			
+			sender.sendMessage(ChatColor.GREEN + String.valueOf(rank) + ". " +
+            		ChatColor.WHITE + name + " " +
+            		ChatColor.GRAY + top10.get(x).getValue() + " " +
+            		ChatColor.DARK_GREEN + elasticities.get(x));
         }
         
         return true;
@@ -681,10 +810,16 @@ public class DynamicMarket extends JavaPlugin {
             return false;
         }
         
+        ItemStack itemStack = stringToItemStack(player, item);
+        
+        if (itemStack == null)
+        	return true;
+        
         // retrieve the commodity in question
-        Commodity commodity = plugin.getDatabase().find(Commodity.class)
+		Commodity commodity = plugin.getDatabase().find(Commodity.class)
             .where()
-            .ieq("name", item)
+            .ieq("number", String.valueOf(itemStack.getTypeId()))
+            .ieq("data", String.valueOf(itemStack.getData().getData()))
             .findUnique();
         
         // check that we found something
@@ -753,6 +888,32 @@ public class DynamicMarket extends JavaPlugin {
         }
     }
 
+	private ItemStack stringToItemStack(CommandSender sender, String item) {
+		ItemStack itemStack = stringToItemStack(item);
+        if (itemStack == null)
+        	new CommandHelper(sender).suggestCommodityName(item, items);
+		return itemStack;
+	}
+
+	private ItemStack stringToItemStack(String item) {
+		ItemStack itemStack;
+        itemStack = items.getItemStack(item);
+        if (itemStack == null)
+            itemStack = items.getItemStack(item.toLowerCase());
+		return itemStack;
+	}
+    
+    public boolean sell (Player player, String item) {
+    	ItemStack itemStack = stringToItemStack(item);
+
+    	if (itemStack == null)
+    		return true;
+    	
+    	int amount = getAmountInInventory(player, itemStack);
+    	
+    	return sell(player, item, amount);
+    }
+    
     /**
      * Sell a specified amount of an item for the player.
      * 
@@ -770,10 +931,17 @@ public class DynamicMarket extends JavaPlugin {
             return false;
         }
         
+        ItemStack itemStack = stringToItemStack(item);
+        
+        if (itemStack == null)
+        	return true;
+        
         // retrieve the commodity in question
+        player.sendMessage(itemStack.getTypeId() + " " + itemStack.getData().getData());
         Commodity commodity = plugin.getDatabase().find(Commodity.class)
             .where()
-            .ieq("name", item)
+            .ieq("number", String.valueOf(itemStack.getTypeId()))
+            .ieq("data", String.valueOf(itemStack.getData().getData()))
             .findUnique();
         
         if (commodity == null) {
@@ -798,7 +966,9 @@ public class DynamicMarket extends JavaPlugin {
         if (player.getInventory().contains(id)) {
             
             // Figure out how much is left over
+        	player.sendMessage(its.getTypeId()+" "+its.getData().getData());
             int left = getAmountInInventory(player, its) - amount;
+            player.sendMessage(String.valueOf(left));
             
             if (left < 0) {// this indicates the correct id, but the wrong bytedata value
                 // give nice output even if they gave a bad name.
@@ -809,23 +979,13 @@ public class DynamicMarket extends JavaPlugin {
             }
             
             // Take out all of the item
-            int x = 0;
-            
-            for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
-                
-                ItemStack slot = player.getInventory().getItem(x);
-                Byte slotData = Byte.valueOf("0");
-                
-                try {
-                    slotData = slot.getData().getData();
-                } catch (NullPointerException e) {
-                    
+            for (ItemStack slot : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
+
+            	if (slot != null &&
+            			slot.getTypeId() == its.getTypeId() &&
+            			slot.getData().getData() == its.getData().getData()) {
+                    player.getInventory().remove(slot);
                 }
-                
-                if ((slot.getTypeId() == id) && (slotData.compareTo(byteData) == 0)) {
-                    player.getInventory().clear(x);
-                }
-                x++;
             }
 
             // put back what was left over
@@ -882,61 +1042,56 @@ public class DynamicMarket extends JavaPlugin {
     public boolean sellAll(Player player) {
         
         // make a list of all commodities
-        List<Commodity> commodities =
-                plugin.getDatabase().find(Commodity.class).findList();
+        List<Commodity> commodities = plugin.getDatabase()
+        		.find(Commodity.class)
+        		.findList();
                 
         // run thru each slot in the player's inventory for commodities
-        int index = 0;
         BigDecimal sale = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         
-        for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
-            ItemStack slot = player.getInventory().getItem(index);
-            int slotId;
-			try {
-				slotId = slot.getTypeId();
-			} catch (Exception NullPointerException) {
-				continue;
-			}
-            BigDecimal slotAmount = new BigDecimal(slot.getAmount()).
-                    setScale(0, RoundingMode.HALF_UP);
+        for (ItemStack slot : player.getInventory().getContents()) {// we do it this way incase a user has an expanded inventory via another plugin
             
-            Byte slotByteData = Byte.valueOf("0");
-            try {
-                slotByteData = slot.getData().getData();
-            } catch (NullPointerException e) {
-                slotByteData = Byte.valueOf("0");
-            }
-            
-            for (int x = 0; x < commodities.size(); x++) {
+
+        	for (Commodity c : commodities) {
                 
-                if ((commodities.get(x).getNumber() == slotId) && 
-                        (Byte.valueOf(String.valueOf(commodities.get(x).getData())).
-                                compareTo(slotByteData) == 0)) {
+                if (slot != null &&
+                		c.getNumber() == slot.getTypeId() && 
+                        c.getData() == Integer.valueOf(slot.getData().getData())) {
                     
-                    Invoice thisSale = generateInvoice(0,// perform sale of this slot
-                            commodities.get(x),
-                            slotAmount.intValue());
+                    int amountInInventory = getAmountInInventory(player, slot);
+					Invoice thisSale = generateInvoice(
+                    		0,// perform sale of this slot
+                            c,
+                            amountInInventory);
                     sale = sale.add(BigDecimal.valueOf(thisSale.getTotal()));// rack up our total
                     
                     // save the new value
-                    commodities.get(x).setValue(thisSale.getValue());
-                    plugin.getDatabase().save(commodities.get(x));
+                    c.setValue(thisSale.getValue());
+                    plugin.getDatabase().save(c);
                     
-                    player.getInventory().clear(index);// remove the item(s)
+                    player.getInventory().remove(slot);// remove the item(s)
                     economy.depositPlayer(player.getName(),// "pay the man"
                             thisSale.getTotal());
                     
                     // give nice output
-                    player.sendMessage(
-                            ChatColor.GREEN + "Sold " + 
-                            ChatColor.WHITE + slotAmount + " " + 
-                            ChatColor.GRAY + commodities.get(x).getName() + 
-                            ChatColor.GREEN + " for " + 
-                            ChatColor.WHITE + BigDecimal.valueOf(thisSale.getTotal()).setScale(2, RoundingMode.HALF_UP));
-                    break;
+                    Object[] aliases = items.getAliases(slot).toArray();
+                    
+					if (amountInInventory > 0) {
+						player.sendMessage(ChatColor.GREEN
+								+ "Sold "
+								+ ChatColor.WHITE
+								+ amountInInventory
+								+ " "
+								+ ChatColor.GRAY
+								+ aliases[aliases.length -1].toString()
+								+ ChatColor.GREEN
+								+ " for "
+								+ ChatColor.WHITE
+								+ BigDecimal.valueOf(thisSale.getTotal())
+										.setScale(2, RoundingMode.HALF_UP));
+					}
                 }
             }
-            index++;
         }
         
         // give a nice total column
@@ -947,13 +1102,21 @@ public class DynamicMarket extends JavaPlugin {
         return true;
     }
 
-    public BigDecimal price(String item) {
+    public BigDecimal price(CommandSender sender, String item) {
         
+        ItemStack itemStack = stringToItemStack(item);
+        
+        if (itemStack == null) {
+        	new CommandHelper(sender).suggestCommodityName(item, items);
+        	return null;
+        }
+    	
         // retrieve the commodity in question
-        Commodity commodity = plugin.getDatabase().find(Commodity.class).
-                where().
-                ieq("name", item).
-                findUnique();
+        Commodity commodity = plugin.getDatabase().find(Commodity.class)
+        		.where()
+                .ieq("number", String.valueOf(itemStack.getTypeId()))
+                .ieq("data", String.valueOf(itemStack.getData().getData()))
+                .findUnique();
         
         if (commodity == null)
             return null;
@@ -971,15 +1134,22 @@ public class DynamicMarket extends JavaPlugin {
     
     public boolean price (CommandSender sender, String item, int amt) {
         
+        ItemStack itemStack = stringToItemStack(item);
+    	
+        if (itemStack == null) {
+        	new CommandHelper(sender).suggestCommodityName(item, items);
+        	return true;
+        }
         // retrieve the commodity in question
-        Commodity commodity = plugin.getDatabase().find(Commodity.class).
-                where().
-                ieq("name", item).
-                findUnique();
+        Commodity commodity = plugin.getDatabase().find(Commodity.class)
+        		.where()
+                .ieq("number", String.valueOf(itemStack.getTypeId()))
+                .ieq("data", String.valueOf(itemStack.getData().getData()))
+                .findUnique();
         
         if (commodity == null) {
-            sender.sendMessage(ChatColor.RED + "Invalit commodity name.");
-            return false;
+            new CommandHelper("Invalid commodity name.", sender).priceHelp();
+            return true;
         }
         
         // get the buy and sell price of the item
@@ -1101,34 +1271,10 @@ public class DynamicMarket extends JavaPlugin {
      */
     public int getAmountInInventory(Player player, ItemStack it) {
         int inInventory = 0;
-        int x = 0;
-        ItemStack slot;
         // we do it this way incase a user has an expanded inventory via another plugin
-        for (@SuppressWarnings("unused") ItemStack stack : player.getInventory().getContents()) {
-            slot = player.getInventory().getItem(x);
-        
-            if (slot != null) {
-                Byte slotData = Byte.valueOf("0");
-                Byte itData = Byte.valueOf("0");
-                
-                try {
-                    slotData = slot.getData().getData();
-                } catch (NullPointerException e) {
-                    
-                }
-                try {
-                    itData = it.getData().getData();
-                } catch (NullPointerException e) {
-                    
-                }
-            
-                if ((slot.getTypeId() == it.getTypeId()) && (slotData.compareTo(itData) == 0)) {
-                    inInventory += slot.getAmount();
-                }
-            } else {
-                return 0;
-            }
-            x++;
+        for (ItemStack slot : player.getInventory().getContents()) {
+            if (slot != null && slot.getTypeId() == it.getTypeId() && slot.getData().getData() == it.getData().getData())
+            	inInventory += slot.getAmount();
         }
         return inInventory;
     }
