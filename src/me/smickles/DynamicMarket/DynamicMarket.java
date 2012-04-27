@@ -393,7 +393,7 @@ public class DynamicMarket extends JavaPlugin {
 
     public boolean readCommand(CommandSender sender, String command, String[] args) {
 
-        if((command.equalsIgnoreCase("buy")) && (sender instanceof Player)) {
+        if((command.equalsIgnoreCase("mbuy")) && (sender instanceof Player)) {
             
             if (!permission.has(sender, "dynamark.buy")) {
                 sender.sendMessage(ChatColor.RED + "You need permission to use this command");
@@ -416,7 +416,7 @@ public class DynamicMarket extends JavaPlugin {
                 return false;
             }
     
-        } else if ((command.equalsIgnoreCase("sell")) && (sender instanceof Player)) {
+        } else if ((command.equalsIgnoreCase("msell")) && (sender instanceof Player)) {
             
             if (!permission.has(sender, "dynamark.sell")) {
                 sender.sendMessage(ChatColor.RED + "You need permission to use this command");
@@ -447,7 +447,7 @@ public class DynamicMarket extends JavaPlugin {
         // Command Example: /price cobblestone
         // should return: cobblestone: .01
 
-        } else if (command.equalsIgnoreCase("price")){
+        } else if (command.equalsIgnoreCase("mprice")){
             
             if (!permission.has(sender, "dynamark.price")) {
                 sender.sendMessage(ChatColor.RED + "You need permission to use this command");
@@ -498,7 +498,7 @@ public class DynamicMarket extends JavaPlugin {
             }
         // Example: '/market top' should return the top 5 most expensive items on the market
         // '/market bottom' should do the dame for the least expensive items.
-        } else if(command.equalsIgnoreCase("market")) {
+        } else if(command.equalsIgnoreCase("mmarket")) {
             
                 return market(sender, args);            
         }
